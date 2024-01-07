@@ -10,6 +10,8 @@
 //go:build windows
 // +build windows
 
+//go:embed opengl32.dll.gz
+
 package main
 
 import (
@@ -17,8 +19,6 @@ import (
 	"os"
 	"syscall"
 )
-
-//go:embed opengl32.dll.gz
 
 // From https://stackoverflow.com/questions/34772012/capturing-panic-in-golang
 var (
