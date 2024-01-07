@@ -9,7 +9,7 @@ import (
 	"runtime"
 )
 
-/*//go:embed opengl32.dll.gz*/
+//go:embed opengl32.dll.gz
 
 func setupLogging() func() {
 	logFolder := "tmp" //os.TempDir()

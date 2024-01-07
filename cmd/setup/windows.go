@@ -7,10 +7,6 @@
 //
 // Windows specific functions
 
-//go:embed opengl32.dll.gz
-
-//go:build windows
-
 package main
 
 import (
