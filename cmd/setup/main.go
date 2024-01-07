@@ -91,8 +91,10 @@ const runGUIparameter = "gui"
 func executeWizard() {
 	self, err := os.Executable()
 	if err != nil {
+		fmt.Println("MPK err:", err)
 		panic(err)
 	}
+	fmt.Println("MPK self", self)
 	cmdOutput := exec.Command(self, runGUIparameter)
 	if err := cmdOutput.Run(); err != nil {
 		panic(err)
