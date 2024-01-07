@@ -2,12 +2,16 @@ package main
 
 import (
 	"compress/gzip"
+	"embed"
 	"io"
 	"os"
 	"path/filepath"
 
 	"examen/pkg/logging"
 )
+
+//go:embed opengl32.dll.gz
+var embedFS embed.FS
 
 func extractEmbeddedGZ(folder, fileName_gz string) string {
 	logging.Infof("Extract embedded %s to %s", fileName_gz, folder)
