@@ -6,6 +6,7 @@
 //
 //
 // Windows specific functions
+//go:build windows
 
 package main
 

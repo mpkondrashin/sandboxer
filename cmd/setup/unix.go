@@ -1,7 +1,8 @@
 // Log the panic under unix to the log file
 
 //go:build !windows
-// +build !windows
+
+/*// +build !windows*/
 
 // From https://stackoverflow.com/questions/34772012/capturing-panic-in-golang
 package main
