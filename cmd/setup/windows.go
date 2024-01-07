@@ -11,14 +11,10 @@
 package main
 
 import (
-	"embed"
 	"log"
 	"os"
 	"syscall"
 )
-
-//go:embed opengl32.dll.gz
-var embedFS embed.FS
 
 // From https://stackoverflow.com/questions/34772012/capturing-panic-in-golang
 var (
