@@ -111,8 +111,8 @@ func executeWizard() {
 	for i := 0; i < 2; i++ {
 		logging.Debugf("Try #%d. Run %s", i, self)
 		cmd := exec.Command(self, runGUIparameter)
-		var errb bytes.Buffer
-		//cmd.Stdout = &outb
+		var errb, outb bytes.Buffer
+		cmd.Stdout = &outb
 		cmd.Stderr = &errb
 		err = cmd.Run()
 		logging.LogError(err)
@@ -124,6 +124,7 @@ func executeWizard() {
 				continue
 			}
 			logging.Errorf("Error: %s", errb.String())
+			logging.Errorf("Output: %s", outb.String())
 			return
 		}
 		break
