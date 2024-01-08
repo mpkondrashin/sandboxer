@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"time"
 )
 
 func setupLogging(logFileName string) func() {
@@ -120,7 +121,9 @@ func executeWizard() {
 			logging.Errorf("exit code: %d", cmd.ProcessState.ExitCode())
 			if cmd.ProcessState.ExitCode() == 1 {
 				logging.Infof("Extracting Open GL")
-				extractOpenGL()
+				cleanup := extractOpenGL()
+				_ = cleanup
+				time.Sleep(5 * time.Second)
 				continue
 			}
 			logging.Errorf("Error: %s", errb.String())
