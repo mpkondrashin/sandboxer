@@ -100,9 +100,8 @@ func executeWizard() {
 	var outb, errb bytes.Buffer
 	cmd.Stdout = &outb
 	cmd.Stderr = &errb
-	if err := cmd.Run(); err != nil {
-		panic(err)
-	}
+	err = cmd.Run()
+	fmt.Println("err", err, "/err")
 	fmt.Println("EXITCODE", cmd.ProcessState.ExitCode(), "EXITCODE")
 	fmt.Println("Stdout", outb.String(), "/Stdout")
 	fmt.Println("Stderr", errb.String(), "/Stderr")
