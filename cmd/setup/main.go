@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"examen/pkg/logging"
 	"fmt"
 	"os"
@@ -10,7 +11,7 @@ import (
 )
 
 func setupLogging() func() {
-	logFolder := "tmp" //os.TempDir()
+	logFolder := "." //os.TempDir()
 
 	/*	errFileName := "examen_stderr.log"
 		errFilePath := filepath.Join(logFolder, errFileName)
@@ -73,10 +74,10 @@ func runWizard() {
 		}
 	}()*/
 	logging.Infof("Setup Start")
-	if IsWindows() {
-		cleanup := extractOpenGL()
-		defer cleanup()
-	}
+	//if IsWindows() {
+	//	cleanup := extractOpenGL()
+	//	defer cleanup()
+	//}
 	capturesFolder := ""
 	if len(os.Args) == 3 && os.Args[1] == "--capture" {
 		capturesFolder = os.Args[2]
@@ -95,18 +96,21 @@ func executeWizard() {
 		panic(err)
 	}
 	fmt.Println("MPK self", self)
-	cmdOutput := exec.Command(self, runGUIparameter)
-	if err := cmdOutput.Run(); err != nil {
+	cmd := exec.Command(self, runGUIparameter)
+	var outb, errb bytes.Buffer
+	cmd.Stdout = &outb
+	cmd.Stderr = &errb
+	if err := cmd.Run(); err != nil {
 		panic(err)
 	}
-	fmt.Println(cmdOutput.ProcessState.ExitCode())
+	fmt.Println("EXITCODE", cmd.ProcessState.ExitCode(), "EXITCODE")
+	fmt.Println("Stdout", outb.String(), "/Stdout")
+	fmt.Println("Stderr", errb.String(), "/Stderr")
 }
 func main() {
 	if len(os.Args) == 2 && os.Args[1] == runGUIparameter {
 		runWizard()
 		return
 	}
-	// Inserted code
 	executeWizard()
-
 }
