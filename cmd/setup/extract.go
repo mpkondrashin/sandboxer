@@ -20,14 +20,20 @@ func extractEmbeddedGZ(folder, fileName_gz string) string {
 		logging.Errorf("Open(\"%s\"): %v", fileName_gz, err)
 		panic(err)
 	}
-	defer file.Close()
+	defer func() {
+		logging.Debugf("Close file")
+		file.Close()
+	}()
 	logging.Debugf("Opened %s", fileName_gz)
 	gzipReader, err := gzip.NewReader(file)
 	if err != nil {
 		logging.Errorf("Open(\"%s\"): %v", fileName_gz, err)
 		panic(err)
 	}
-	defer gzipReader.Close()
+	defer func() {
+		logging.Debugf("Close gzipReader")
+		gzipReader.Close()
+	}()
 	logging.Debugf("Crated gzip reader for %s", fileName_gz)
 	targetFileName := fileName_gz[:len(fileName_gz)-3]
 	logging.Debugf("Target file name %s", targetFileName)
