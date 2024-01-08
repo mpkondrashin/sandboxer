@@ -11,11 +11,12 @@ import (
 )
 
 func setupLogging(logFileName string) func() {
-	logFolder, err := os.Executable()
+	path, err := os.Executable()
 	if err != nil {
 		//logging.Errorf("os.Executable: %v", err)
 		panic(err)
 	}
+	logFolder := filepath.Dir(path)
 	//logFolder := "." //os.TempDir()
 
 	/*	errFileName := "examen_stderr.log"
