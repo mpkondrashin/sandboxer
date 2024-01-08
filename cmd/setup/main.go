@@ -18,7 +18,6 @@ func setupLogging(logFileName string) func() {
 	}
 	logFolder := filepath.Dir(path)
 	//logFolder := "." //os.TempDir()
-
 	/*	errFileName := "examen_stderr.log"
 		errFilePath := filepath.Join(logFolder, errFileName)
 		errFile, err := os.OpenFile(errFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -117,12 +116,13 @@ func executeWizard() {
 		err = cmd.Run()
 		logging.LogError(err)
 		if err != nil {
+			logging.Errorf("exit code: %d", cmd.ProcessState.ExitCode())
 			if cmd.ProcessState.ExitCode() == 1 {
 				logging.Infof("Extracting Open GL")
 				extractOpenGL()
 				continue
 			}
-			logging.Errorf("Error: %v", errb)
+			logging.Errorf("Error: %s", errb.String())
 			return
 		}
 		break
