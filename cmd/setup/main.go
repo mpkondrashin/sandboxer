@@ -8,7 +8,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"time"
 )
 
 func setupLogging(logFileName string) func() {
@@ -108,6 +107,7 @@ func executeWizard() {
 	if err != nil {
 		panic(err)
 	}
+	extractOpenGL()
 	logging.Infof("Path: %s", self)
 	for i := 0; i < 2; i++ {
 		logging.Debugf("Try #%d. Run %s", i, self)
@@ -123,7 +123,6 @@ func executeWizard() {
 				logging.Infof("Extracting Open GL")
 				cleanup := extractOpenGL()
 				_ = cleanup
-				time.Sleep(5 * time.Second)
 				continue
 			}
 			logging.Errorf("Error: %s", errb.String())
