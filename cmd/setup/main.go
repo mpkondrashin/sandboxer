@@ -109,6 +109,7 @@ func executeWizard() {
 	}
 	logging.Infof("Path: %s", self)
 	for i := 0; i < 2; i++ {
+		logging.Debugf("Try #%d. Run %s", i, self)
 		cmd := exec.Command(self, runGUIparameter)
 		var errb bytes.Buffer
 		//cmd.Stdout = &outb
