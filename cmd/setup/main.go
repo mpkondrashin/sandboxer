@@ -10,8 +10,13 @@ import (
 	"runtime"
 )
 
-func setupLogging() func() {
-	logFolder := "." //os.TempDir()
+func setupLogging(logFileName string) func() {
+	logFolder, err := os.Executable()
+	if err != nil {
+		//logging.Errorf("os.Executable: %v", err)
+		panic(err)
+	}
+	//logFolder := "." //os.TempDir()
 
 	/*	errFileName := "examen_stderr.log"
 		errFilePath := filepath.Join(logFolder, errFileName)
@@ -23,8 +28,8 @@ func setupLogging() func() {
 	*/
 	//redirectStderr(errFile)
 
-	installLogFileName := "setup.log"
-	logFilePath := filepath.Join(logFolder, installLogFileName)
+	//installLogFileName := "setup.log"
+	logFilePath := filepath.Join(logFolder, logFileName)
 	//fmt.Println(logFilePath)
 	file, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -65,8 +70,13 @@ func IsWindows() bool {
 	return runtime.GOOS == "windows"
 }
 
+const (
+	examenSetupWizardLog   = "examen_setup_wizard.log"
+	examenExecuteWizardLog = "examen_execute_wizard.log"
+)
+
 func runWizard() {
-	close := setupLogging()
+	close := setupLogging(examenSetupWizardLog)
 	defer close()
 	/*defer func() {
 		if err := recover(); err != nil {
@@ -90,21 +100,37 @@ func runWizard() {
 const runGUIparameter = "gui"
 
 func executeWizard() {
+	close := setupLogging(examenExecuteWizardLog)
+	defer close()
+	logging.Infof("Execute Start")
 	self, err := os.Executable()
 	if err != nil {
-		fmt.Println("MPK err:", err)
 		panic(err)
 	}
-	fmt.Println("MPK self", self)
-	cmd := exec.Command(self, runGUIparameter)
-	var outb, errb bytes.Buffer
-	cmd.Stdout = &outb
-	cmd.Stderr = &errb
-	err = cmd.Run()
-	fmt.Println("err", err, "/err")
-	fmt.Println("EXITCODE", cmd.ProcessState.ExitCode(), "EXITCODE")
-	fmt.Println("Stdout", outb.String(), "/Stdout")
-	fmt.Println("Stderr", errb.String(), "/Stderr")
+	logging.Infof("Path: %s", self)
+	for i := 0; i < 2; i++ {
+		cmd := exec.Command(self, runGUIparameter)
+		var errb bytes.Buffer
+		//cmd.Stdout = &outb
+		cmd.Stderr = &errb
+		err = cmd.Run()
+		logging.LogError(err)
+		if err != nil {
+			if cmd.ProcessState.ExitCode() == 1 {
+				logging.Infof("Extracting Open GL")
+				extractOpenGL()
+				continue
+			}
+			logging.Errorf("Error: %v", errb)
+			return
+		}
+		break
+		//fmt.Println("err", err, "/err")
+		//fmt.Println("EXITCODE", cmd.ProcessState.ExitCode(), "EXITCODE")
+		//fmt.Println("Stdout", outb.String(), "/Stdout")
+		//fmt.Println("Stderr", errb.String(), "/Stderr")
+	}
+	logging.Infof("Execute Stop")
 }
 func main() {
 	if len(os.Args) == 2 && os.Args[1] == runGUIparameter {
