@@ -25,13 +25,13 @@ func setupLogging() func() {
 
 	installLogFileName := "setup.log"
 	logFilePath := filepath.Join(logFolder, installLogFileName)
-	fmt.Println(logFilePath)
+	//fmt.Println(logFilePath)
 	file, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(logFilePath)
-	redirectStderr(file)
+	//redirectStderr(file)
 	logger := logging.NewFileLogger(file)
 	logging.AddLogger(logger)
 	logging.SetLevel(logging.DEBUG)
