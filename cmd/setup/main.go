@@ -107,7 +107,11 @@ func executeWizard() {
 	if err != nil {
 		panic(err)
 	}
-	extractOpenGL()
+	//extractOpenGL()
+	err = os.Rename("_opengl32.dll", "opengl32.dll")
+	if err != nil {
+		panic(err)
+	}
 	logging.Infof("Path: %s", self)
 	for i := 0; i < 2; i++ {
 		logging.Debugf("Try #%d. Run %s", i, self)
@@ -121,8 +125,8 @@ func executeWizard() {
 			logging.Errorf("exit code: %d", cmd.ProcessState.ExitCode())
 			if cmd.ProcessState.ExitCode() == 1 {
 				logging.Infof("Extracting Open GL")
-				cleanup := extractOpenGL()
-				_ = cleanup
+				//cleanup := extractOpenGL()
+				//_ = cleanup
 				continue
 			}
 			logging.Errorf("Error: %s", errb.String())
