@@ -1,11 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"examen/pkg/logging"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 )
@@ -71,34 +69,13 @@ func IsWindows() bool {
 }
 
 const (
-	examenSetupWizardLog   = "examen_setup_wizard.log"
-	examenExecuteWizardLog = "examen_execute_wizard.log"
+	examenSetupWizardLog = "examen_setup_wizard.log"
+
+// examenExecuteWizardLog = "examen_execute_wizard.log"
 )
 
-func runWizard() {
-	close := setupLogging(examenSetupWizardLog)
-	defer close()
-	/*defer func() {
-		if err := recover(); err != nil {
-			logging.Criticalf("panic: %v", err)
-		}
-	}()*/
-	logging.Infof("Setup Start")
-	//if IsWindows() {
-	//	cleanup := extractOpenGL()
-	//	defer cleanup()
-	//}
-	capturesFolder := ""
-	if len(os.Args) == 3 && os.Args[1] == "--capture" {
-		capturesFolder = os.Args[2]
-	}
-	c := NewNSHIControl(capturesFolder)
-	c.Run()
-	logging.Infof("Setup finished")
-}
-
-const runGUIparameter = "gui"
-
+//const runGUIparameter = "gui"
+/*
 func executeWizard() {
 	close := setupLogging(examenExecuteWizardLog)
 	defer close()
@@ -136,11 +113,30 @@ func executeWizard() {
 		//fmt.Println("Stderr", errb.String(), "/Stderr")
 	}
 	logging.Infof("Execute Stop")
-}
+}*/
 func main() {
-	if len(os.Args) == 2 && os.Args[1] == runGUIparameter {
-		runWizard()
-		return
+	//if len(os.Args) == 2 && os.Args[1] == runGUIparameter {
+	close := setupLogging(examenSetupWizardLog)
+	defer close()
+	defer func() {
+		if err := recover(); err != nil {
+			logging.Criticalf("panic: %v", err)
+		}
+	}()
+	logging.Infof("Setup Start")
+	if IsWindows() {
+		cleanup := extractOpenGL()
+		defer cleanup()
 	}
-	executeWizard()
+
+	capturesFolder := ""
+	if len(os.Args) == 3 && os.Args[1] == "--capture" {
+		capturesFolder = os.Args[2]
+	}
+	c := NewNSHIControl(capturesFolder)
+	c.Run()
+	logging.Infof("Setup finished")
+	//return
+	//}
+	//executeWizard()
 }
