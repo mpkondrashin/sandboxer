@@ -34,7 +34,7 @@ func setupLogging(logFileName string) func() {
 		panic(err)
 	}
 	fmt.Println(logFilePath)
-	//redirectStderr(file)
+	redirectStderr(file)
 	logger := logging.NewFileLogger(file)
 	logging.AddLogger(logger)
 	logging.SetLevel(logging.DEBUG)

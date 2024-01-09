@@ -24,7 +24,7 @@ func extractEmbeddedGZ(folder, fileName_gz string) string {
 		logging.Debugf("Close file")
 		file.Close()
 	}()
-	logging.Debugf("Opened %s", fileName_gz)
+	//logging.Debugf("Opened %s", fileName_gz)
 	gzipReader, err := gzip.NewReader(file)
 	if err != nil {
 		logging.Errorf("Open(\"%s\"): %v", fileName_gz, err)
