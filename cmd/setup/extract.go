@@ -34,9 +34,9 @@ func extractEmbeddedGZ(folder, fileName_gz string) string {
 		logging.Debugf("Close gzipReader")
 		gzipReader.Close()
 	}()
-	logging.Debugf("Crated gzip reader for %s", fileName_gz)
+	//logging.Debugf("Crated gzip reader for %s", fileName_gz)
 	targetFileName := fileName_gz[:len(fileName_gz)-3]
-	logging.Debugf("Target file name %s", targetFileName)
+	//logging.Debugf("Target file name %s", targetFileName)
 	targetPath := filepath.Join(folder, targetFileName)
 	logging.Debugf("Target path %s", targetPath)
 	targetFile, err := os.Create(targetPath)
@@ -44,6 +44,10 @@ func extractEmbeddedGZ(folder, fileName_gz string) string {
 		logging.Errorf("Error creating %s: %v", targetPath, err)
 		panic(err)
 	}
+	defer func() {
+		logging.Debugf("Close targetFile")
+		targetFile.Close()
+	}()
 	logging.Debugf("Create %s", targetPath)
 	size, err := io.Copy(targetFile, gzipReader)
 	if err != nil {
