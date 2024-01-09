@@ -50,6 +50,7 @@ const (
 	configFileName = "examen.yaml" // remove - use fyne
 	appID          = "com.github.mpkondrashin.examen"
 	setupWizardLog = "examen_setup_wizard.log"
+	openGLdll_gz   = "opengl32.dll.gz"
 )
 
 func extractOpenGL() func() {
@@ -59,7 +60,10 @@ func extractOpenGL() func() {
 		panic(err)
 	}
 	folder := filepath.Dir(path)
-	filePath := extractEmbeddedGZ(folder, "opengl32.dll.gz")
+	filePath, err := extractEmbeddedGZ(folder, openGLdll_gz)
+	if err != nil {
+		panic(fmt.Errorf("extract %s: %w", openGLdll_gz, err))
+	}
 	return func() {
 		os.Remove(filePath)
 	}
@@ -81,7 +85,7 @@ func main() {
 		}
 	}()
 	logging.Infof("Start")
-	logging.Debugf("OS: %s %s", runtime.GOOS, runtime.GOARCH)
+	logging.Debugf("OS: %s (%s)", runtime.GOOS, runtime.GOARCH)
 	if IsWindows() {
 		cleanup := extractOpenGL()
 		defer func() {
