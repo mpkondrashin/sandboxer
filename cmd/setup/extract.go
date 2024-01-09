@@ -21,7 +21,7 @@ func extractEmbeddedGZ(folder, fileName_gz string) string {
 		panic(err)
 	}
 	defer func() {
-		logging.Debugf("Close file")
+		logging.Debugf("Close embed.FS file")
 		file.Close()
 	}()
 	//logging.Debugf("Opened %s", fileName_gz)
@@ -31,7 +31,7 @@ func extractEmbeddedGZ(folder, fileName_gz string) string {
 		panic(err)
 	}
 	defer func() {
-		logging.Debugf("Close gzipReader")
+		logging.Debugf("Close GZip reader")
 		gzipReader.Close()
 	}()
 	//logging.Debugf("Crated gzip reader for %s", fileName_gz)
@@ -45,7 +45,7 @@ func extractEmbeddedGZ(folder, fileName_gz string) string {
 		panic(err)
 	}
 	defer func() {
-		logging.Debugf("Close targetFile")
+		logging.Debugf("Close %s", targetPath)
 		targetFile.Close()
 	}()
 	logging.Debugf("Create %s", targetPath)

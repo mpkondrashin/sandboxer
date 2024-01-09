@@ -47,8 +47,9 @@ func setupLogging(logFileName string) func() {
 
 const (
 	appName        = "Examen"
-	configFileName = "examen.yaml"
+	configFileName = "examen.yaml" // remove - use fyne
 	appID          = "com.github.mpkondrashin.examen"
+	setupWizardLog = "examen_setup_wizard.log"
 )
 
 func extractOpenGL() func() {
@@ -68,75 +69,32 @@ func IsWindows() bool {
 	return runtime.GOOS == "windows"
 }
 
-const (
-	examenSetupWizardLog = "examen_setup_wizard.log"
-
-// examenExecuteWizardLog = "examen_execute_wizard.log"
-)
-
-//const runGUIparameter = "gui"
-/*
-func executeWizard() {
-	close := setupLogging(examenExecuteWizardLog)
-	defer close()
-	logging.Infof("Execute Start")
-	self, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-	//extractOpenGL()
-	logging.Infof("Path: %s", self)
-	for i := 0; i < 2; i++ {
-		logging.Debugf("Try #%d. Run %s", i, self)
-		cmd := exec.Command(self, runGUIparameter)
-		var errb, outb bytes.Buffer
-		cmd.Stdout = &outb
-		cmd.Stderr = &errb
-		err = cmd.Run()
-		logging.LogError(err)
-		if err != nil {
-			logging.Errorf("exit code: %d", cmd.ProcessState.ExitCode())
-			if cmd.ProcessState.ExitCode() == 1 {
-				logging.Infof("Extracting Open GL")
-				cleanup := extractOpenGL()
-				_ = cleanup
-				continue
-			}
-			logging.Errorf("Error: \"%s\"", errb.String())
-			logging.Errorf("Output: \"%s\"", outb.String())
-			return
-		}
-		break
-		//fmt.Println("err", err, "/err")
-		//fmt.Println("EXITCODE", cmd.ProcessState.ExitCode(), "EXITCODE")
-		//fmt.Println("Stdout", outb.String(), "/Stdout")
-		//fmt.Println("Stderr", errb.String(), "/Stderr")
-	}
-	logging.Infof("Execute Stop")
-}*/
 func main() {
-	//if len(os.Args) == 2 && os.Args[1] == runGUIparameter {
-	close := setupLogging(examenSetupWizardLog)
-	defer close()
+	close := setupLogging(setupWizardLog)
+	defer func() {
+		logging.Debugf("Close log file")
+		close()
+	}()
 	defer func() {
 		if err := recover(); err != nil {
 			logging.Criticalf("panic: %v", err)
 		}
 	}()
-	logging.Infof("Setup Start")
+	logging.Infof("Start")
+	logging.Debugf("OS: %s %s", runtime.GOOS, runtime.GOARCH)
 	if IsWindows() {
 		cleanup := extractOpenGL()
-		defer cleanup()
+		defer func() {
+			logging.Debugf("Remove OpenGL DLL")
+			cleanup()
+		}()
 	}
-
 	capturesFolder := ""
 	if len(os.Args) == 3 && os.Args[1] == "--capture" {
 		capturesFolder = os.Args[2]
 	}
+	logging.Infof("Starting Wizard")
 	c := NewNSHIControl(capturesFolder)
 	c.Run()
 	logging.Infof("Setup finished")
-	//return
-	//}
-	//executeWizard()
 }
