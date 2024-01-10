@@ -18,7 +18,7 @@ func (p *PageFolder) Name() string {
 }
 
 func (p *PageFolder) Content(win fyne.Window, model *Model) fyne.CanvasObject {
-	labelFolder := widget.NewLabel("Installation folder")
+	labelFolder := widget.NewLabel("Installation folder:")
 	p.folderEntry = widget.NewEntry()
 	p.folderEntry.SetText(model.config.Folder)
 	folderButton := widget.NewButton("Choose...", func() {
