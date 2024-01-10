@@ -14,13 +14,13 @@ type PageFolder struct {
 var _ Page = &PageFolder{}
 
 func (p *PageFolder) Name() string {
-	return "Folder"
+	return "Destination"
 }
 
-func (p *PageFolder) Content(win fyne.Window, model *Model) fyne.CanvasObject {
+func (p *PageFolder) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
 	labelFolder := widget.NewLabel("Installation folder:")
 	p.folderEntry = widget.NewEntry()
-	p.folderEntry.SetText(model.config.Folder)
+	p.folderEntry.SetText(installer.config.Folder)
 	folderButton := widget.NewButton("Choose...", func() {
 		folderDialog := dialog.NewFolderOpen(func(uri fyne.ListableURI, err error) {
 			if uri == nil {
@@ -33,7 +33,7 @@ func (p *PageFolder) Content(win fyne.Window, model *Model) fyne.CanvasObject {
 	return container.NewVBox(labelFolder, p.folderEntry, folderButton)
 }
 
-func (p *PageFolder) AquireData(model *Model) error {
-	model.config.Folder = p.folderEntry.Text
+func (p *PageFolder) AquireData(installer *Installer) error {
+	installer.config.Folder = p.folderEntry.Text
 	return nil
 }

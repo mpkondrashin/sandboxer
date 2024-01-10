@@ -7,10 +7,7 @@ import (
 )
 
 type PageOptions struct {
-	//regionList     *widget.Select
-	//accountIDEntry *widget.Entry
 	tokenEntry *widget.Entry
-	//awsRegionList  *widget.Select
 }
 
 var _ Page = &PageOptions{}
@@ -19,13 +16,10 @@ func (p *PageOptions) Name() string {
 	return "Options"
 }
 
-func (p *PageOptions) Content(win fyne.Window, model *Model) fyne.CanvasObject {
+func (p *PageOptions) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
 	labelTop := widget.NewLabel("Please open Vision One console to get all nessesary parameters")
-	//p.accountIDEntry = widget.NewEntry()
-	//p.accountIDEntry.Text = model.config.AccountID
-	//p.accountIDEntry.Validator = ValidateAccountID
 	p.tokenEntry = widget.NewMultiLineEntry()
-	p.tokenEntry.Text = model.config.Token
+	p.tokenEntry.Text = installer.config.Token
 	p.tokenEntry.Wrapping = fyne.TextWrapBreak
 	tokenFormItem := widget.NewFormItem("Token:", p.tokenEntry)
 	tokenFormItem.HintText = "Go to XXXXXXX"
@@ -36,9 +30,7 @@ func (p *PageOptions) Content(win fyne.Window, model *Model) fyne.CanvasObject {
 	return container.NewVBox(labelTop, optionsForm)
 }
 
-func (p *PageOptions) AquireData(model *Model) error {
-	model.config.Token = p.tokenEntry.Text
-	//model.config.AccountID = p.accountIDEntry.Text
-
+func (p *PageOptions) AquireData(installer *Installer) error {
+	installer.config.Token = p.tokenEntry.Text
 	return nil
 }

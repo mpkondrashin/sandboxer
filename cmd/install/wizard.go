@@ -26,21 +26,21 @@ type Wizard struct {
 	current        int
 	app            fyne.App
 	win            fyne.Window
-	model          *Model
+	installer      *Installer
 	capturesFolder string
 }
 
 type Page interface {
 	Name() string
-	Content(win fyne.Window, model *Model) fyne.CanvasObject
-	AquireData(model *Model) error
+	Content(win fyne.Window, installer *Installer) fyne.CanvasObject
+	AquireData(installer *Installer) error
 }
 
 func NewWizard(capturesFolder string) *Wizard {
 	c := &Wizard{
 		app:            app.NewWithID(appID),
 		capturesFolder: capturesFolder,
-		model:          NewModel(appID),
+		installer:      NewInstaller(appID),
 	}
 	c.win = c.app.NewWindow("Examen Install Program")
 	c.win.Resize(fyne.NewSize(600, 400))
@@ -107,7 +107,7 @@ func (c *Wizard) Window(p Page) fyne.CanvasObject {
 		}
 	}
 
-	middle := container.NewPadded(container.NewVBox(layout.NewSpacer(), p.Content(c.win, c.model), layout.NewSpacer()))
+	middle := container.NewPadded(container.NewVBox(layout.NewSpacer(), p.Content(c.win, c.installer), layout.NewSpacer()))
 
 	upper := container.NewBorder(nil, nil, container.NewHBox(left, widget.NewSeparator()), nil, middle)
 	quitButton := widget.NewButtonWithIcon("Quit", theme.CancelIcon(), c.Quit)
@@ -137,7 +137,7 @@ func (c *Wizard) Quit() {
 
 func (c *Wizard) Next() {
 	logging.Debugf("Next from page %d", c.current)
-	err := c.pages[c.current].AquireData(c.model)
+	err := c.pages[c.current].AquireData(c.installer)
 	if err != nil {
 		logging.Errorf("AquireData: %v", err)
 		dialog.ShowError(err, c.win)

@@ -46,7 +46,7 @@ func (p *PageIntro) Name() string {
 	return "Intro"
 }
 
-func (p *PageIntro) Content(win fyne.Window, model *Model) fyne.CanvasObject {
+func (p *PageIntro) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
 	titleLabel := widget.NewLabelWithStyle(appName,
 		fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 
@@ -78,6 +78,6 @@ func (p *PageIntro) Content(win fyne.Window, model *Model) fyne.CanvasObject {
 	)
 }
 
-func (p *PageIntro) AquireData(model *Model) error {
+func (p *PageIntro) AquireData(installer *Installer) error {
 	return nil
 }

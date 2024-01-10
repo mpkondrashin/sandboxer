@@ -17,10 +17,11 @@ func (p *PageInstallation) Name() string {
 	return "Control"
 }
 
-func (p *PageInstallation) GetStatus(model *Model) {
+/*
+func (p *PageInstallation) GetStatus(installer *Installer) {
 }
-
-func (p *PageInstallation) Content(win fyne.Window, model *Model) fyne.CanvasObject {
+*/
+func (p *PageInstallation) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
 	progressBar := widget.NewProgressBar()
 	var copyButton *widget.Button
 	copyButton = widget.NewButton("Copy Files", func() {
@@ -36,6 +37,6 @@ func (p *PageInstallation) Content(win fyne.Window, model *Model) fyne.CanvasObj
 	)
 }
 
-func (p *PageInstallation) AquireData(model *Model) error {
+func (p *PageInstallation) AquireData(installer *Installer) error {
 	return nil
 }

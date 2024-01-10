@@ -22,14 +22,14 @@ func (p *PageDomain) Name() string {
 	return "Domain"
 }
 
-func (p *PageDomain) Content(win fyne.Window, model *Model) fyne.CanvasObject {
+func (p *PageDomain) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
 
 	selectedDomain := ""
 	label := "Choose Vision One Domain:"
-	if model.config.Domain != "" {
-		selectedDomain = model.config.Domain
+	if installer.config.Domain != "" {
+		selectedDomain = installer.config.Domain
 	} else {
-		selectedDomain = vone.DetectVisionOneDomain(context.TODO(), model.config.Token)
+		selectedDomain = vone.DetectVisionOneDomain(context.TODO(), installer.config.Token)
 		if selectedDomain != "" {
 			label = "Detected Vision One Domain:"
 		}
@@ -52,10 +52,10 @@ func (p *PageDomain) Content(win fyne.Window, model *Model) fyne.CanvasObject {
 	return container.NewVBox(labelTop, passwordForm)
 }
 
-func (p *PageDomain) AquireData(model *Model) error {
+func (p *PageDomain) AquireData(installer *Installer) error {
 	if p.visionOneDomains.Selected == "" {
 		return fmt.Errorf("No Domain selected")
 	}
-	model.config.Domain = p.visionOneDomains.Selected
+	installer.config.Domain = p.visionOneDomains.Selected
 	return nil
 }
