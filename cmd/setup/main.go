@@ -1,104 +1,66 @@
 package main
 
 import (
-	"examen/pkg/logging"
-	"fmt"
+	"bytes"
+	"embed"
 	"os"
-	"path/filepath"
+	"os/exec"
 	"runtime"
+
+	"examen/pkg/extract"
+	"examen/pkg/logging"
 )
 
-func setupLogging(logFileName string) func() {
-	path, err := os.Executable()
-	if err != nil {
-		//logging.Errorf("os.Executable: %v", err)
-		panic(err)
-	}
-	logFolder := filepath.Dir(path)
-	//logFolder := "." //os.TempDir()
-	/*	errFileName := "examen_stderr.log"
-		errFilePath := filepath.Join(logFolder, errFileName)
-		errFile, err := os.OpenFile(errFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Fprintf(errFile, "%v Started\n", time.Now())
-	*/
-	//redirectStderr(errFile)
+//go:embed embed/*
+var embedFS embed.FS
 
-	//installLogFileName := "setup.log"
-	logFilePath := filepath.Join(logFolder, logFileName)
-	//fmt.Println(logFilePath)
-	file, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(logFilePath)
-	redirectStderr(file)
-	logger := logging.NewFileLogger(file)
-	logging.AddLogger(logger)
-	logging.SetLevel(logging.DEBUG)
-	return func() {
-		logging.Close()
-		file.Close()
-		//	errFile.Close()
-	}
-}
-
-const (
-	appName        = "Examen"
-	configFileName = "examen.yaml" // remove - use fyne
-	appID          = "com.github.mpkondrashin.examen"
-	setupWizardLog = "examen_setup_wizard.log"
-	openGLdll_gz   = "opengl32.dll.gz"
-)
-
-func extractOpenGL() func() {
-	path, err := os.Executable()
-	if err != nil {
-		logging.Errorf("os.Executable: %v", err)
-		panic(err)
-	}
-	folder := filepath.Dir(path)
-	filePath, err := extractEmbeddedGZ(folder, openGLdll_gz)
-	if err != nil {
-		panic(fmt.Errorf("extract %s: %w", openGLdll_gz, err))
-	}
-	return func() {
-		os.Remove(filePath)
-	}
-}
+const examenExecuteWizardLog = "examen_setup.log"
 
 func IsWindows() bool {
 	return runtime.GOOS == "windows"
 }
 
 func main() {
-	close := setupLogging(setupWizardLog)
-	defer func() {
-		logging.Debugf("Close log file")
-		close()
-	}()
-	defer func() {
-		if err := recover(); err != nil {
-			logging.Criticalf("panic: %v", err)
-		}
-	}()
-	logging.Infof("Start")
-	logging.Debugf("OS: %s (%s)", runtime.GOOS, runtime.GOARCH)
+	close := logging.NewFileLog(logging.InstallLogFolder(), examenExecuteWizardLog)
+	defer close()
+	logging.Infof("Execute Start")
+	self, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	logging.Infof("Path: %s", self)
+	tempFolder := "."
 	if IsWindows() {
-		cleanup := extractOpenGL()
-		defer func() {
-			logging.Debugf("Remove OpenGL DLL")
-			cleanup()
-		}()
+		path, err := extract.FileGZ(embedFS, tempFolder, "opengl32.dll.gz")
+		logging.LogError(err)
+		if err != nil {
+			panic(err)
+		}
+		logging.Debugf("Extracted: %s", path)
+		//defer cleanup()
 	}
-	capturesFolder := ""
-	if len(os.Args) == 3 && os.Args[1] == "--capture" {
-		capturesFolder = os.Args[2]
+	installPath, err := extract.FileGZ(embedFS, tempFolder, "install.exe.gz")
+	logging.LogError(err)
+	if err != nil {
+		panic(err)
 	}
-	logging.Infof("Starting Wizard")
-	c := NewNSHIControl(capturesFolder)
-	c.Run()
+	logging.Debugf("Extracted: %s", installPath)
+
+	cmd := exec.Command(installPath)
+	var errb, outb bytes.Buffer
+	cmd.Stdout = &outb
+	cmd.Stderr = &errb
+	err = cmd.Run()
+	logging.LogError(err)
+	if err != nil {
+		logging.Errorf("exit code: %d", cmd.ProcessState.ExitCode())
+		if cmd.ProcessState.ExitCode() == 1 {
+			logging.Infof("Extracting Open GL")
+		}
+		logging.Errorf("Error: \"%s\"", errb.String())
+		logging.Errorf("Output: \"%s\"", outb.String())
+		// Save to file!!!
+		return
+	}
 	logging.Infof("Setup finished")
 }

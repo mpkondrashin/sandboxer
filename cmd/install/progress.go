@@ -1,39 +1,6 @@
 package main
 
-import (
-	"time"
-
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
-)
-
-type PageControl struct {
-	statusLabel   *widget.Label
-	bypassButton  *widget.Button
-	inspectButton *widget.Button
-}
-
-var _ Page = &PageOptions{}
-
-func (p *PageControl) Name() string {
-	return "Control"
-}
-
-func (p *PageControl) GetStatus(model *Model) {
-}
-
-func (p *PageControl) Content(win fyne.Window, model *Model) fyne.CanvasObject {
-	return container.NewVBox(
-		container.NewHBox(widget.NewLabel("Current State:"), p.statusLabel),
-		p.bypassButton,
-		p.inspectButton,
-	)
-}
-
-func (p *PageControl) AquireData(model *Model) error {
-	return nil
-}
+import "time"
 
 type progress struct {
 	chars string

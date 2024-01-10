@@ -21,23 +21,26 @@ import (
 
 //go:generate fyne bundle --name IconSVGResource --output resource.go   sandbox.svg
 
-type Installer struct {
+type Wizard struct {
 	pages          []Page
 	current        int
 	app            fyne.App
 	win            fyne.Window
-	model          Model
+	model          *Model
 	capturesFolder string
 }
 
-func NewNSHIControl(capturesFolder string) *Installer {
-	c := &Installer{
+type Page interface {
+	Name() string
+	Content(win fyne.Window, model *Model) fyne.CanvasObject
+	AquireData(model *Model) error
+}
+
+func NewWizard(capturesFolder string) *Wizard {
+	c := &Wizard{
 		app:            app.NewWithID(appID),
 		capturesFolder: capturesFolder,
-		model: Model{
-			appName:  appName,
-			fileName: configFileName,
-		},
+		model:          NewModel(appID),
 	}
 	c.win = c.app.NewWindow("Examen Install Program")
 	c.win.Resize(fyne.NewSize(600, 400))
@@ -45,10 +48,10 @@ func NewNSHIControl(capturesFolder string) *Installer {
 	c.win.SetMaster()
 	c.pages = []Page{
 		&PageIntro{},
-		//&PagePassword{},
 		&PageOptions{},
 		&PageDomain{},
-		&PageControl{},
+		&PageFolder{},
+		&PageInstallation{},
 	}
 	prtScr := &desktop.CustomShortcut{KeyName: fyne.KeyI, Modifier: fyne.KeyModifierControl}
 	c.win.Canvas().AddShortcut(prtScr, c.captureWindowContents)
@@ -56,7 +59,7 @@ func NewNSHIControl(capturesFolder string) *Installer {
 	return c
 }
 
-func (c *Installer) captureWindowContents(shortcut fyne.Shortcut) {
+func (c *Wizard) captureWindowContents(shortcut fyne.Shortcut) {
 	if c.capturesFolder == "" {
 		log.Println("--capture is not set")
 		return
@@ -90,7 +93,7 @@ func (c *Installer) captureWindowContents(shortcut fyne.Shortcut) {
 		}
 	}
 */
-func (c *Installer) Window(p Page) fyne.CanvasObject {
+func (c *Wizard) Window(p Page) fyne.CanvasObject {
 	left := container.NewVBox()
 	image := canvas.NewImageFromResource(IconSVGResource)
 	image.SetMinSize(fyne.NewSize(52, 52))
@@ -104,7 +107,7 @@ func (c *Installer) Window(p Page) fyne.CanvasObject {
 		}
 	}
 
-	middle := container.NewPadded(container.NewVBox(layout.NewSpacer(), p.Content(c.win, &c.model), layout.NewSpacer()))
+	middle := container.NewPadded(container.NewVBox(layout.NewSpacer(), p.Content(c.win, c.model), layout.NewSpacer()))
 
 	upper := container.NewBorder(nil, nil, container.NewHBox(left, widget.NewSeparator()), nil, middle)
 	quitButton := widget.NewButtonWithIcon("Quit", theme.CancelIcon(), c.Quit)
@@ -128,13 +131,13 @@ func (c *Installer) Window(p Page) fyne.CanvasObject {
 	return container.NewBorder(nil, container.NewPadded(bottom), nil, nil, upper)
 }
 
-func (c *Installer) Quit() {
+func (c *Wizard) Quit() {
 	c.app.Quit()
 }
 
-func (c *Installer) Next() {
+func (c *Wizard) Next() {
 	logging.Debugf("Next from page %d", c.current)
-	err := c.pages[c.current].AquireData(&c.model)
+	err := c.pages[c.current].AquireData(c.model)
 	if err != nil {
 		logging.Errorf("AquireData: %v", err)
 		dialog.ShowError(err, c.win)
@@ -144,12 +147,12 @@ func (c *Installer) Next() {
 	c.win.SetContent(c.Window(c.pages[c.current]))
 }
 
-func (c *Installer) Prev() {
+func (c *Wizard) Prev() {
 	logging.Debugf("Prev from page %d", c.current)
 	c.current--
 	c.win.SetContent(c.Window(c.pages[c.current]))
 }
 
-func (c *Installer) Run() {
+func (c *Wizard) Run() {
 	c.win.ShowAndRun()
 }
