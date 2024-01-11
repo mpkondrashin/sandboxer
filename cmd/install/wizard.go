@@ -42,6 +42,7 @@ func NewWizard(capturesFolder string) *Wizard {
 		capturesFolder: capturesFolder,
 		installer:      NewInstaller(appID),
 	}
+	_ = c.installer.LoadConfig()
 	c.win = c.app.NewWindow("Examen Install Program")
 	c.win.Resize(fyne.NewSize(600, 400))
 	//c.win.SetFixedSize(true)

@@ -39,29 +39,29 @@ var (
 	ErrUnsupportedOS = errors.New("unsupported OS")
 )
 
-func (c *Configuration) ConfigFileFolder(appID string) (string, error) {
+func ConfigFileFolder(appID string) (string, error) {
 	if runtime.GOOS == "windows" {
-		return c.configFileFolder("USERPROFILE", "AppData\\Local", appID)
+		return configFileFolder("USERPROFILE", "AppData\\Local", appID)
 	}
 	if runtime.GOOS == "linux" {
-		return c.configFileFolder("HOME", ".config", appID)
+		return configFileFolder("HOME", ".config", appID)
 	}
 	if runtime.GOOS == "darwin" {
-		return c.configFileFolder("HOME", "Library/Application Support", appID)
+		return configFileFolder("HOME", "Library/Application Support", appID)
 	}
 	return "", fmt.Errorf("%s: %w", runtime.GOOS, ErrUnsupportedOS)
 }
 
-func (c *Configuration) configFileFolder(profileVariable string, dir string, appID string) (string, error) {
+func configFileFolder(profileVariable string, dir string, appID string) (string, error) {
 	userProfile := os.Getenv(profileVariable)
 	if userProfile == "" {
 		return "", fmt.Errorf("%s: %w", profileVariable, ErrNoUserProfile)
 	}
 	folder := filepath.Join(userProfile, dir, appID)
-	err := os.MkdirAll(folder, 0700)
-	if err != nil {
-		return "", err
-	}
+	//err := os.MkdirAll(folder, 0700)
+	//if err != nil {
+	//return "", err
+	//}
 	return folder, nil
 }
 

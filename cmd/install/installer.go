@@ -1,16 +1,20 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
 	"examen/pkg/config"
+	"examen/pkg/logging"
+	"examen/pkg/script"
 )
 
 type Installer struct {
-	appID    string
-	fileName string
-	config   config.Configuration
+	appID string
+	//fileName string
+	config          config.Configuration
+	uninstallScript *os.File
 	//hash     string
 }
 
@@ -37,7 +41,7 @@ func NewInstaller(appID string) *Installer {
 	}
 */
 func (i *Installer) LoadConfig() error {
-	filePath, err := i.configFilePath()
+	filePath, err := i.ConfigFileFolder()
 	if err != nil {
 		return err
 	}
@@ -48,49 +52,81 @@ func (i *Installer) LoadConfig() error {
 	return nil
 }
 
-/*
-func (m *Model) CalculateHash() string {
-	h := sha1.New()
-	h.Write([]byte(m.config.Token))
-	h.Write([]byte(m.config.Domain))
-	return fmt.Sprintf("%x", h.Sum(nil))
-}
-*/
-
 func (i *Installer) Load() error {
-	filePath, err := i.configFilePath()
+	logging.Debugf("Load config")
+	folder, err := i.ConfigFileFolder()
 	if err != nil {
 		return err
 	}
-
-	if err := i.config.Load(filePath); err != nil {
-		return err
-	}
-	//m.hash = m.CalculateHash()
-	return nil
+	filePath := filepath.Join(folder, configFileName)
+	return i.config.Load(filePath)
 }
 
 func (i *Installer) Save() error {
-	filePath, err := i.configFilePath()
+	logging.Debugf("Save config")
+	folder, err := i.ConfigFileFolder()
 	if err != nil {
 		return err
 	}
+	if err := os.MkdirAll(folder, 0700); err != nil {
+		return err
+	}
+	filePath := filepath.Join(folder, configFileName)
 	if err := i.config.Save(filePath); err != nil {
 		return err
 	}
-	//m.hash = m.CalculateHash()
 	return nil
 }
 
-/*
-	func (m *Model) Changed() bool {
-		return m.hash != m.CalculateHash()
+func (i *Installer) ConfigFileFolder() (string, error) {
+	return config.ConfigFileFolder(i.appID)
+}
+
+type InstallStage func() error
+
+func (i *Installer) Stages() []InstallStage {
+	return []InstallStage{
+		i.StageCreateFolder,
+		i.StageCreateUninstallScript,
+		i.StageCreateConfig,
 	}
-*/
-func (i *Installer) configFilePath() (string, error) {
-	folder, err := i.config.ConfigFileFolder(i.appID)
+}
+
+func (i *Installer) StageCreateConfig() error {
+	logging.Debugf("Install: CreateConfig")
+	folder, err := i.ConfigFileFolder()
 	if err != nil {
-		return "", err
+		return err
 	}
-	return filepath.Join(folder, i.fileName), nil
+	filePath := filepath.Join(folder, configFileName)
+	logging.Debugf("Install: CreateConfig: Save to %s", filePath)
+	return i.config.Save(filePath)
+}
+func (i *Installer) Path(fileName string) string {
+	return filepath.Join(i.config.Folder, fileName)
+}
+
+const uninstallScriptName = "uninstall"
+
+func (i *Installer) StageCreateUninstallScript() error {
+	logging.Debugf("Install: StageCreateUninstallScript")
+	var err error
+	scriptName := uninstallScriptName + script.Get().Extension()
+	i.uninstallScript, err = os.Create(i.Path(scriptName))
+	if err != nil {
+		return err
+	}
+	_, err = fmt.Fprintln(i.uninstallScript, script.Get().Comment("Uninstallation script"))
+	return err
+}
+
+func (i *Installer) StageCreateFolder() error {
+	logging.Debugf("Install: StageCreateFolder %s", i.config.Folder)
+	folder := filepath.Join(i.config.Folder, appName)
+	return os.MkdirAll(folder, 0766)
+}
+
+func (i *Installer) StageExtractExecutable() error {
+	logging.Debugf("Install: StageExtractExecutable")
+	return nil
 }
