@@ -1,6 +1,8 @@
 package main
 
 import (
+	"examen/pkg/logging"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
@@ -13,7 +15,7 @@ type PageInstallation struct {
 var _ Page = &PageInstallation{}
 
 func (p *PageInstallation) Name() string {
-	return "Control"
+	return "Copy Files"
 }
 
 /*
@@ -30,6 +32,7 @@ func (p *PageInstallation) Content(win fyne.Window, installer *Installer) fyne.C
 		for i, stage := range stages {
 			progressBar.SetValue(float64(i) / float64(len(stages)))
 			err := stage()
+			logging.LogError(err)
 			if err != nil {
 				dialog.ShowError(err, win)
 				break
