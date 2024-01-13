@@ -10,6 +10,7 @@ import (
 
 var loggingLevel = INFO
 
+// var name = ""
 var ErrUnknownLogLevel = errors.New("unknow log level")
 
 // SetLevelStr - set logging level using string level representation.
@@ -34,6 +35,13 @@ func SetLevel(level int) {
 	loggingLevel = level
 }
 
+/*
+	func SetName(n string) {
+		rw.Lock()
+		defer rw.Unlock()
+		name = " " + n
+	}
+*/
 type System struct {
 	Time     string
 	Severity string
@@ -46,7 +54,7 @@ var _ LogData = &System{}
 
 func (s *System) String() string {
 	return fmt.Sprintf("%s %s %s %s %s",
-		s.Time, s.Severity, s.Thread, s.Message, s.Path)
+		s.Time /*name,*/, s.Severity, s.Thread, s.Message, s.Path)
 }
 
 // Logging levels.

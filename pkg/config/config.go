@@ -16,6 +16,23 @@ type Configuration struct {
 	Folder string `yaml:"folder"`
 }
 
+func (c *Configuration) LogFolder() string {
+	return filepath.Join(c.Folder, "logs")
+}
+
+func LoadConfiguration(appID string, fileName string) (*Configuration, error) {
+	folder, err := ConfigFileFolder(appID)
+	if err != nil {
+		return nil, err
+	}
+	filePath := filepath.Join(folder, fileName)
+	c := &Configuration{}
+	if err := c.Load(filePath); err != nil {
+		return nil, err
+	}
+	return c, nil
+}
+
 // Save - writes Configuration struct to file as YAML
 func (c *Configuration) Save(fileName string) (err error) {
 	data, err := yaml.Marshal(c)

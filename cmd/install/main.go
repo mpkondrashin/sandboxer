@@ -7,12 +7,7 @@ import (
 	"examen/pkg/logging"
 )
 
-const (
-	appName          = "Examen"
-	configFileName   = "examen.yaml" // remove - use fyne
-	appID            = "com.github.mpkondrashin.examen"
-	installWizardLog = "examen_setup_wizard.log"
-)
+const installWizardLog = "examen_setup_wizard.log"
 
 func IsWindows() bool {
 	return runtime.GOOS == "windows"

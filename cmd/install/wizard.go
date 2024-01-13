@@ -1,6 +1,7 @@
 package main
 
 import (
+	"examen/pkg/globals"
 	"examen/pkg/logging"
 	"fmt"
 	"image/png"
@@ -38,9 +39,9 @@ type Page interface {
 
 func NewWizard(capturesFolder string) *Wizard {
 	c := &Wizard{
-		app:            app.NewWithID(appID),
+		app:            app.NewWithID(globals.AppID),
 		capturesFolder: capturesFolder,
-		installer:      NewInstaller(appID),
+		installer:      NewInstaller(globals.AppID),
 	}
 	_ = c.installer.LoadConfig()
 	c.win = c.app.NewWindow("Examen Install Program")

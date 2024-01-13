@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"examen/pkg/config"
+	"examen/pkg/globals"
 	"examen/pkg/logging"
 	"examen/pkg/script"
 )
@@ -58,7 +59,7 @@ func (i *Installer) Load() error {
 	if err != nil {
 		return err
 	}
-	filePath := filepath.Join(folder, configFileName)
+	filePath := filepath.Join(folder, globals.ConfigFileName)
 	return i.config.Load(filePath)
 }
 
@@ -71,7 +72,7 @@ func (i *Installer) Save() error {
 	if err := os.MkdirAll(folder, 0700); err != nil {
 		return err
 	}
-	filePath := filepath.Join(folder, configFileName)
+	filePath := filepath.Join(folder, globals.ConfigFileName)
 	if err := i.config.Save(filePath); err != nil {
 		return err
 	}
@@ -98,7 +99,7 @@ func (i *Installer) StageCreateConfig() error {
 	if err != nil {
 		return err
 	}
-	filePath := filepath.Join(folder, configFileName)
+	filePath := filepath.Join(folder, globals.ConfigFileName)
 	logging.Debugf("Install: CreateConfig: Save to %s", filePath)
 	return i.config.Save(filePath)
 }
@@ -122,7 +123,7 @@ func (i *Installer) StageCreateUninstallScript() error {
 
 func (i *Installer) StageCreateFolder() error {
 	logging.Debugf("Install: StageCreateFolder %s", i.config.Folder)
-	folder := filepath.Join(i.config.Folder, appName)
+	folder := filepath.Join(i.config.Folder, globals.AppName)
 	return os.MkdirAll(folder, 0766)
 }
 

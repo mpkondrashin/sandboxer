@@ -1,6 +1,7 @@
 package main
 
 import (
+	"examen/pkg/globals"
 	"fmt"
 	"net/url"
 
@@ -47,7 +48,7 @@ func (p *PageIntro) Name() string {
 }
 
 func (p *PageIntro) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
-	titleLabel := widget.NewLabelWithStyle(appName,
+	titleLabel := widget.NewLabelWithStyle(globals.AppName,
 		fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 
 	version := fmt.Sprintf("Version %s", MajorMinorRevision[1:])
