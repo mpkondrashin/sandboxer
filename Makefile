@@ -2,13 +2,13 @@
 
 .PHONY: clean tidy
 
-setup: install.exe
+setup.exe: install.exe
 	go build ./cmd/setup
-install: examen.exe examensvc.exe
+install.exe: examen.exe examensvc.exe
 	go build ./cmd/install
-examen:
+examen.exe:
 	go build ./cmd/examen
-examensvc:
+examensvc.exe:
 	go build ./cmd/examensvc
 
 clean: tidy
