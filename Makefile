@@ -6,10 +6,10 @@ setup.exe: install.exe.gz opengl32.dll.gz
 	go build ./cmd/setup
 
 install.exe.gz: install.exe
-	gzip install.exe
+	gzip -f install.exe
 
 opengl32.dll.gz: resources/opengl32.dll
-	gzip -c resources/opengl32.dll  > opengl32.dll.gz
+	gzip -fc resources/opengl32.dll  > opengl32.dll.gz
 
 install.exe: examen.exe examensvc.exe
 	go build ./cmd/install
