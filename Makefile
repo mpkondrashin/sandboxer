@@ -2,7 +2,7 @@
 
 .PHONY: clean tidy
 
-setup.exe: install.exe.gz opengl32.dll.gz
+setup.exe: cmd/setup/embed/install.exe.gz cmd/setup/embed/opengl32.dll.gz
 	go build ./cmd/setup
 
 cmd/setup/embed/install.exe.gz: install.exe
