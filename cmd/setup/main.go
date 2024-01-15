@@ -11,7 +11,7 @@ import (
 	"examen/pkg/logging"
 )
 
-//go:embed install.exe.gz opengl32.dll.gz
+//go:embed embed/*
 var embedFS embed.FS
 
 const examenExecuteWizardLog = "examen_setup.log"
@@ -31,7 +31,7 @@ func main() {
 	logging.Infof("Path: %s", self)
 	tempFolder := "."
 	if IsWindows() {
-		path, err := extract.FileGZ(embedFS, tempFolder, "opengl32.dll.gz")
+		path, err := extract.FileGZ(embedFS, tempFolder, "embed/opengl32.dll.gz")
 		logging.LogError(err)
 		if err != nil {
 			panic(err)
@@ -39,7 +39,7 @@ func main() {
 		logging.Debugf("Extracted: %s", path)
 		//defer cleanup()
 	}
-	installPath, err := extract.FileGZ(embedFS, tempFolder, "install.exe.gz")
+	installPath, err := extract.FileGZ(embedFS, tempFolder, "embed/install.exe.gz")
 	logging.LogError(err)
 	if err != nil {
 		panic(err)
