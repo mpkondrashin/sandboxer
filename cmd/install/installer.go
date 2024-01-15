@@ -14,7 +14,7 @@ import (
 type Installer struct {
 	appID string
 	//fileName string
-	config          config.Configuration
+	config          *config.Configuration
 	uninstallScript *os.File
 	//hash     string
 }
@@ -22,7 +22,7 @@ type Installer struct {
 func NewInstaller(appID string) *Installer {
 	folder, _ := config.InstallFolder()
 	return &Installer{appID: appID,
-		config: config.Configuration{Folder: folder}}
+		config: config.New(folder)}
 }
 
 /*
@@ -103,6 +103,7 @@ func (i *Installer) StageCreateConfig() error {
 	logging.Debugf("Install: CreateConfig: Save to %s", filePath)
 	return i.config.Save(filePath)
 }
+
 func (i *Installer) Path(fileName string) string {
 	return filepath.Join(i.config.Folder, fileName)
 }
@@ -127,7 +128,14 @@ func (i *Installer) StageCreateFolder() error {
 	return os.MkdirAll(folder, 0766)
 }
 
+func (i *Installer) StageExtractPericulosum() error {
+	logging.Debugf("Install: StageExtractPericulosum")
+	///
+	return nil
+}
+
 func (i *Installer) StageExtractExecutable() error {
 	logging.Debugf("Install: StageExtractExecutable")
+	////
 	return nil
 }

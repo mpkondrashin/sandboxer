@@ -6,14 +6,26 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"time"
 
 	"gopkg.in/yaml.v2"
 )
 
 type Configuration struct {
-	Token  string `yaml:"token"`
-	Domain string `yaml:"aws_region"`
-	Folder string `yaml:"folder"`
+	Token       string        `yaml:"token"`
+	Domain      string        `yaml:"aws_region"`
+	Folder      string        `yaml:"folder"`
+	Ignore      []string      `yaml:"ignore"`
+	Periculosum string        `yaml:"periculosum"`
+	Sleep       time.Duration `yaml:"sleep"`
+}
+
+func New(folder string) *Configuration {
+	return &Configuration{
+		Ignore:      []string{".DS_Store", "Thumbs.db"},
+		Periculosum: "check",
+		Sleep:       5 * time.Second,
+	}
 }
 
 func (c *Configuration) LogFolder() string {
@@ -31,6 +43,14 @@ func LoadConfiguration(appID string, fileName string) (*Configuration, error) {
 		return nil, err
 	}
 	return c, nil
+}
+
+func (c *Configuration) PericulosumPath() (string, error) {
+	path, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(filepath.Dir(path), c.Periculosum), nil
 }
 
 // Save - writes Configuration struct to file as YAML

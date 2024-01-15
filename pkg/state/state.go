@@ -2,7 +2,7 @@ package state
 
 import "errors"
 
-//go:generate enum -package state -type State -names Unknown,Upload,Inspect,Report,Unsupported,Error,NoRisk,LowRisk,MediumRisk,HighRisk,Count
+//go:generate enum -package state -type State -names Unknown,New,Upload,Inspect,Report,Unsupported,Error,NoRisk,LowRisk,MediumRisk,HighRisk,Count
 
 var ErrIDNotFound = errors.New("id not found")
 

@@ -8,9 +8,12 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 
+	"examen/pkg/shm"
 	"examen/pkg/state"
+	"examen/pkg/task"
 )
 
 type tappableIcon struct {
@@ -40,19 +43,25 @@ type Status interface {
 }
 
 func main() {
-
-	s := state.NewMemState()
+	/*s := state.NewMemState()
 	for st := state.StateUnknown; st < state.StateCount; st++ {
 		fileName := fmt.Sprintf("C:\\Documents\\file_%v.docx", st)
 		id := fmt.Sprint(st)
 		s.AddObject(state.NewObject(id, fileName))
 		s.SetState(id, st)
 	}
-	fmt.Println(s.ListObjects())
+	fmt.Println(s.ListObjects())*/
+
 	app := app.New()
 	win := app.NewWindow("Status")
-	list, err := s.ListObjects()
-	_ = err
+
+	reader, err := shm.NewSHMReader(10000)
+	if err != nil {
+		dialog.ShowError(err, win)
+		return
+	}
+	//list, err := s.ListObjects()
+	//_ = err
 	var icons []fyne.Resource
 	for s := state.StateUnknown; s < state.StateCount; s++ {
 		r, err := fyne.LoadResourceFromPath(IconPath(s))
@@ -62,11 +71,17 @@ func main() {
 		icons = append(icons, r)
 	}
 	vbox := container.NewVBox()
-	for _, o := range list {
+	l := task.NewList()
+	err = reader.Read(l)
+	if err != nil {
+		dialog.ShowError(err, win)
+		return
+	}
+	l.Iterate(func(t *task.Task) {
 		//iconLabel := widget.NewLabel(o.State.String())
-		pathLabel := widget.NewLabel(o.Path)
+		pathLabel := widget.NewLabel(t.Path)
 		var icon *tappableIcon
-		icon = newTappableIcon(icons[o.State], func() {
+		icon = newTappableIcon(icons[t.State], func() {
 			go func() {
 				for s := state.StateUnknown; s <= state.StateHighRisk; s++ {
 					icon.SetResource(icons[s])
@@ -76,8 +91,7 @@ func main() {
 		})
 		line := container.NewBorder(nil, nil, container.NewHBox(icon, pathLabel), nil)
 		vbox.Add(line)
-	}
-
+	})
 	border := container.NewBorder(vbox, nil, nil, nil, nil)
 	win.SetContent(border)
 	//win.Resize(fyne.NewSize(600, 400))
