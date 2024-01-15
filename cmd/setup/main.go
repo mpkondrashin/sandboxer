@@ -30,7 +30,11 @@ func main() {
 		panic(err)
 	}
 	logging.Infof("Path: %s", self)
-	tempFolder := "."
+	tempFolder, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	logging.Infof("Temp folder: %s", tempFolder)
 	if IsWindows() {
 		path, err := extract.FileGZ(embedFS, tempFolder, "embed/opengl32.dll.gz")
 		logging.LogError(err)
