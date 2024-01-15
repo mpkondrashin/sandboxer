@@ -11,7 +11,7 @@ import (
 	"examen/pkg/logging"
 )
 
-//go:embed install.exe.gz resource/opengl32.dll.gz
+//go:embed install.exe.gz opengl32.dll.gz
 var embedFS embed.FS
 
 const examenExecuteWizardLog = "examen_setup.log"
