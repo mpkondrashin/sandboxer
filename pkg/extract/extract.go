@@ -30,7 +30,8 @@ func FileGZ(fs fs.FS, folder string, fileName_gz string) (string, error) {
 		logging.Debugf("Close GZip reader")
 		gzipReader.Close()
 	}()
-	targetFileName := filepath.Base(fileName_gz)[:len(fileName_gz)-3]
+	fileName := filepath.Base(fileName_gz)
+	targetFileName := fileName[:len(fileName)-3]
 	targetPath := filepath.Join(folder, targetFileName)
 	logging.Debugf("Target path %s", targetPath)
 	targetFile, err := os.Create(targetPath)
