@@ -2,14 +2,14 @@
 .PHONY: clean tidy
 
 #ifeq ($(PROCESSOR_ARCHITEW6432),AMD64)
-OS="unknown_OS"
+GOOS="unknown_OS"
 MOVE="unknown_move_command"
 EXE=""
 TAR=""
 ZIP=""
 
 ifeq ($(OS),Windows_NT)
-	OS=windows
+	GOOS=windows
 	MOVE=move /Y
 	EXE=.exe
 	TAR="rem"
@@ -23,7 +23,7 @@ define zip
 	powershell Compress-Archive "$(2)" "$(1)"
 endef
 else
-	OS=darwin
+	GOOS=darwin
 	MOVE=mv -f
 	EXE=.app
 	TAR="tag cfv"
@@ -40,7 +40,7 @@ endif
 
 cmd/setup/setup$(EXE): cmd/setup/embed/install.exe.gz cmd/setup/embed/opengl32.dll.gz $(wildcard cmd/setup/*.go)
 	echo "OS = $(OS)" 
-	fyne package --os $(OS) --name setup --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/setup
+	fyne package --os $(GOOS) --name setup --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/setup
 	$(call zip, "setup.zip" , "cmd/setup/setup$(EXE)")
 	#$(MOVE) cmd/setup/setup.exe .
 
