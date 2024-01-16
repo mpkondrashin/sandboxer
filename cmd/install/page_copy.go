@@ -26,7 +26,6 @@ func (p *PageInstallation) Content(win fyne.Window, installer *Installer) fyne.C
 	progressBar := widget.NewProgressBar()
 	var copyButton *widget.Button
 	stages := installer.Stages()
-
 	copyButton = widget.NewButton("Copy Files", func() {
 		copyButton.Disable()
 		for i, stage := range stages {

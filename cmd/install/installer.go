@@ -21,8 +21,10 @@ type Installer struct {
 
 func NewInstaller(appID string) *Installer {
 	//folder, _ := config.InstallFolder()
-	return &Installer{appID: appID,
-		config: config.New()}
+	return &Installer{
+		appID:  appID,
+		config: config.New(),
+	}
 }
 
 /*
@@ -105,7 +107,7 @@ func (i *Installer) StageCreateConfig() error {
 }
 
 func (i *Installer) Path(fileName string) string {
-	return filepath.Join(i.config.Folder, fileName)
+	return filepath.Join(i.config.Folder, globals.AppFolderName, fileName)
 }
 
 const uninstallScriptName = "uninstall"
@@ -123,8 +125,9 @@ func (i *Installer) StageCreateUninstallScript() error {
 }
 
 func (i *Installer) StageCreateFolder() error {
-	logging.Debugf("Install: StageCreateFolder %s", i.config.Folder)
-	folder := filepath.Join(i.config.Folder, globals.AppName)
+	logging.Debugf("Install: StageCreateFolder")
+	folder := filepath.Join(i.config.Folder, globals.AppFolderName)
+	logging.Debugf("Install: Create folder \"%s\"", folder)
 	return os.MkdirAll(folder, 0766)
 }
 
