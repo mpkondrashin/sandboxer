@@ -44,7 +44,6 @@ cmd/setup/setup$(EXE): cmd/setup/embed/install$(EXE).gz cmd/setup/embed/opengl32
 	fyne package --os $(GOOS) --name setup --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/setup
 
 cmd/setup/embed/install$(EXE).gz: cmd/install/install$(EXE)
-	tac cfvgzip -fc cmd/install/install.exe > cmd/setup/embed/install.exe.gz
 	gzip -fc cmd/install/install.exe > cmd/setup/embed/install.exe.gz
 
 cmd/setup/embed/opengl32.dll.gz: resources/opengl32.dll
