@@ -18,7 +18,7 @@ ifeq ($(OS),Windows_NT)
 # $(1) - archive name
 # $(2) - file to put into archive`
 define zip
-	powershell Compress-Archive "$(2)" "$(1)"
+	powershell Compress-Archive  -Force "$(2)" "$(1)"
 endef
 else
 	GOOS=darwin
@@ -36,11 +36,11 @@ endif
 
 
 setup.zip: cmd/setup/setup$(EXE)
-	echo $(wildcard cmd/install/*.go)
+#	echo $(wildcard cmd/install/*.go)
 	$(call zip, "setup.zip" , "cmd/setup/setup$(EXE)")
 
 cmd/setup/setup$(EXE): cmd/setup/embed/install$(EXE).gz cmd/setup/embed/opengl32.dll.gz $(wildcard cmd/setup/*.go)
-	echo $(wildcard cmd/install/*.go)
+#	echo $(wildcard cmd/install/*.go)
 	fyne package --os $(GOOS) --name setup --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/setup
 
 cmd/setup/embed/install$(EXE).gz: cmd/install/install$(EXE)
