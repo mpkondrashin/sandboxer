@@ -20,7 +20,7 @@ type Configuration struct {
 	Sleep       time.Duration `yaml:"sleep"`
 }
 
-func New(folder string) *Configuration {
+func New() *Configuration {
 	return &Configuration{
 		Folder:      InstallFolder(),
 		Ignore:      []string{".DS_Store", "Thumbs.db"},

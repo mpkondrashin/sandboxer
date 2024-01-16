@@ -20,9 +20,9 @@ type Installer struct {
 }
 
 func NewInstaller(appID string) *Installer {
-	folder, _ := config.InstallFolder()
+	//folder, _ := config.InstallFolder()
 	return &Installer{appID: appID,
-		config: config.New(folder)}
+		config: config.New()}
 }
 
 /*
