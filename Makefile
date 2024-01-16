@@ -12,8 +12,8 @@ cmd/setup/embed/opengl32.dll.gz: resources/opengl32.dll
 	gzip -fc resources/opengl32.dll  > cmd/setup/embed/opengl32.dll.gz
 
 install.exe: examen.exe examensvc.exe $(wildcard cmd/install/*.go)
-	fyne package --os windows --name ExamenInstaller --appID in.kondrash.examen --appVersion 0.0.1 --icon resources/examen.png --release --sourceDir ./cmd/install
-	
+	ls resources/examen.png
+	fyne package --os windows --name ExamenInstaller --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/install
 
 examen.exe: $(wildcard cmd/examen/*.go)
 	go build ./cmd/examen
