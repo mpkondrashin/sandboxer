@@ -35,12 +35,13 @@ endef
 endif
 
 
+setup.zip: cmd/setup/setup$(EXE)
+	echo $(wildcard cmd/install/*.go)
+	$(call zip, "setup.zip" , "cmd/setup/setup$(EXE)")
 
 cmd/setup/setup$(EXE): cmd/setup/embed/install.exe.gz cmd/setup/embed/opengl32.dll.gz $(wildcard cmd/setup/*.go)
 	echo $(wildcard cmd/install/*.go)
 	fyne package --os $(GOOS) --name setup --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/setup
-	$(call zip, "setup.zip" , "cmd/setup/setup$(EXE)")
-	#$(MOVE) cmd/setup/setup.exe .
 
 cmd/setup/embed/install$(EXE).gz: cmd/install/install$(EXE)
 	tac cfvgzip -fc cmd/install/install.exe > cmd/setup/embed/install.exe.gz
