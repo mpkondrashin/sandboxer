@@ -49,8 +49,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	logging.Debugf("Extracted: %s", installPath)
-
+	logging.Debugf("Execute: %s", installPath)
 	cmd := exec.Command(installPath)
 	var errb, outb bytes.Buffer
 	cmd.Stdout = &outb
