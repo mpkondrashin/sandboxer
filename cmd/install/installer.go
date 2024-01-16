@@ -91,8 +91,8 @@ type InstallStage func() error
 
 func (i *Installer) Stages() []InstallStage {
 	return []InstallStage{
-		i.StageCreateFolder,
 		i.StageCreateUninstallScript,
+		i.StageCreateFolder,
 		i.StageCreateConfig,
 	}
 }
