@@ -1,16 +1,37 @@
 package script
 
-import "runtime"
+import (
+	"fmt"
+	"os"
+)
 
-type Script interface {
-	Extension() string
-	Comment(text string) string
-	RemoveDir(path string) string
+type Script struct {
+	filePath string
+	lines    []string
+	header   string
 }
 
-func Get() Script {
-	if runtime.GOOS == "windows" {
-		return Windows{}
+func New(filePath, header string) *Script {
+	return &Script{
+		filePath: filePath,
+		header:   header,
 	}
-	return Unix{}
+}
+
+func (s *Script) Save() error {
+	f, err := os.Create(s.filePath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	fmt.Fprintf(f, "%s\n", s.header)
+	for i := len(s.lines) - 1; i >= 0; i-- {
+		fmt.Fprintf(f, "%s\n", s.lines[i])
+	}
+	return nil
+}
+
+func (s *Script) AddLine(line string) error {
+	s.lines = append(s.lines, line)
+	return s.Save()
 }
