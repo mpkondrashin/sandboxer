@@ -22,6 +22,7 @@ type Configuration struct {
 
 func New(folder string) *Configuration {
 	return &Configuration{
+		Folder:      InstallFolder(),
 		Ignore:      []string{".DS_Store", "Thumbs.db"},
 		Periculosum: "check",
 		Sleep:       5 * time.Second,
@@ -102,15 +103,15 @@ func configFileFolder(profileVariable string, dir string, appID string) (string,
 	return folder, nil
 }
 
-func InstallFolder() (string, error) {
+func InstallFolder() string {
 	if runtime.GOOS == "windows" {
-		return os.Getenv("PROGRAMFILES"), nil
+		return os.Getenv("PROGRAMFILES")
 	}
 	if runtime.GOOS == "linux" {
-		return "/usr/local/bin", nil
+		return "/usr/local/bin"
 	}
 	if runtime.GOOS == "darwin" {
-		return "/Applications", nil
+		return "/Applications"
 	}
-	return "", fmt.Errorf("%s: %w", runtime.GOOS, ErrUnsupportedOS)
+	return ""
 }

@@ -15,11 +15,9 @@ ifeq ($(OS),Windows_NT)
 	TAR="rem"
 	ZIP="powershell Compress-Archive
 
+# $(1) - archive name
+# $(2) - file to put into archive`
 define zip
-	# $(1) - archive name
-	# $(2) - file to put into archive`
-	#    $(eval $@_HOSTNAME = $(1))
-	#    $(eval $@_PORT = $(2))
 	powershell Compress-Archive "$(2)" "$(1)"
 endef
 else
@@ -27,9 +25,9 @@ else
 	MOVE=mv -f
 	EXE=.app
 	TAR="tag cfv"
+# $(1) - archive name
+# $(2) - file to put into archive`
 define zip
-	# $(1) - archive name
-	# $(2) - file to put into archive`
 	#    $(eval $@_HOSTNAME = $(1))
 	#    $(eval $@_PORT = $(2))
 	zip $(1) $(2)
@@ -39,7 +37,6 @@ endif
 
 
 cmd/setup/setup$(EXE): cmd/setup/embed/install.exe.gz cmd/setup/embed/opengl32.dll.gz $(wildcard cmd/setup/*.go)
-	echo "OS = $(OS)" 
 	fyne package --os $(GOOS) --name setup --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/setup
 	$(call zip, "setup.zip" , "cmd/setup/setup$(EXE)")
 	#$(MOVE) cmd/setup/setup.exe .
