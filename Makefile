@@ -10,9 +10,9 @@ ZIP=""
 
 ifeq ($(OS),Windows_NT)
 	GOOS=windows
-	MOVE=move /Y
+#	MOVE=move /Y
 	EXE=.exe
-	TAR="rem"
+#	TAR="rem"
 	ZIP="powershell Compress-Archive
 
 # $(1) - archive name
@@ -22,9 +22,9 @@ define zip
 endef
 else
 	GOOS=darwin
-	MOVE=mv -f
+#	MOVE=mv -f
 	EXE=.app
-	TAR="tag cfv"
+#	TAR="tag cfv"
 # $(1) - archive name
 # $(2) - file to put into archive`
 define zip
@@ -33,7 +33,6 @@ define zip
 	zip $(1) $(2)
 endef
 endif
-
 
 setup.zip: cmd/setup/setup$(EXE)
 #	echo $(wildcard cmd/install/*.go)

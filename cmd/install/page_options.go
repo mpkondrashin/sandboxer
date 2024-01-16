@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
@@ -31,6 +33,9 @@ func (p *PageOptions) Content(win fyne.Window, installer *Installer) fyne.Canvas
 }
 
 func (p *PageOptions) AquireData(installer *Installer) error {
+	if p.tokenEntry.Text == "" {
+		return fmt.Errorf("token field is empty")
+	}
 	installer.config.Token = p.tokenEntry.Text
 	return nil
 }
