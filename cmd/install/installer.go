@@ -1,48 +1,34 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"examen/pkg/config"
+	"examen/pkg/extract"
 	"examen/pkg/globals"
 	"examen/pkg/logging"
 	"examen/pkg/script"
 )
 
+//go:embed embed/*
+var embedFS embed.FS
+
 type Installer struct {
-	appID string
-	//fileName string
+	appID           string
 	config          *config.Configuration
 	uninstallScript *script.Script
-	//hash     string
 }
 
 func NewInstaller(appID string) *Installer {
-	//folder, _ := config.InstallFolder()
 	return &Installer{
 		appID:  appID,
 		config: config.New(),
 	}
 }
 
-/*
-	func (m *Model) ConfigExists() (bool, error) {
-		path, err := m.configFilePath()
-		if err != nil {
-			return false, err
-		}
-		_, err = os.Stat(path)
-		if err == nil {
-			return true, nil
-		}
-		if os.IsNotExist(err) {
-			return false, nil
-		}
-		return false, err
-	}
-*/
 func (i *Installer) LoadConfig() error {
 	filePath, err := i.ConfigFileFolder()
 	if err != nil {
@@ -54,18 +40,6 @@ func (i *Installer) LoadConfig() error {
 	}
 	return nil
 }
-
-/*
-func (i *Installer) _Load() error {
-	logging.Debugf("Load config")
-	folder, err := i.ConfigFileFolder()
-	if err != nil {
-		return err
-	}
-	filePath := filepath.Join(folder, globals.ConfigFileName)
-	return i.config.Load(filePath)
-}
-*/
 
 func (i *Installer) SaveConfig() error {
 	logging.Debugf("Save config")
@@ -87,6 +61,14 @@ func (i *Installer) ConfigFileFolder() (string, error) {
 	return config.ConfigFileFolder(i.appID)
 }
 
+func (i *Installer) Path(fileName string) string {
+	return filepath.Join(i.config.Folder, globals.AppFolderName, fileName)
+}
+
+func (i *Installer) InstallFolder() string {
+	return filepath.Join(i.config.Folder, globals.AppFolderName)
+}
+
 type InstallStage func() error
 
 func (i *Installer) Stages() []InstallStage {
@@ -94,11 +76,8 @@ func (i *Installer) Stages() []InstallStage {
 		i.StageCreateUninstallScript,
 		i.StageCreateFolder,
 		i.StageCreateConfig,
+		i.StageExtractExecutable,
 	}
-}
-
-func (i *Installer) Path(fileName string) string {
-	return filepath.Join(i.config.Folder, globals.AppFolderName, fileName)
 }
 
 const uninstallScriptName = "uninstall"
@@ -140,15 +119,31 @@ func (i *Installer) StageCreateConfig() error {
 	return i.uninstallScript.AddLine(script.Get().RemoveDir(filePath))
 }
 
-func (i *Installer) StageExtractPericulosum() error {
-	logging.Debugf("Install: StageExtractPericulosum")
-	///
+func (i *Installer) StageExtractExecutable() error {
+	logging.Debugf("Install: StageExtractExecutable")
+	if IsWindows() {
+		path, err := extract.FileGZ(embedFS, i.InstallFolder(), "embed/opengl32.dll.gz")
+		if err != nil {
+			return err
+		}
+		logging.Debugf("Extracted: %s", path)
+	}
+	examensvcPath, err := extract.FileGZ(embedFS, i.InstallFolder(), "embed/examensvc.exe.gz")
+	if err != nil {
+		return err
+	}
+	logging.Debugf("Extracted: %s", examensvcPath)
+	examenPath, err := extract.FileGZ(embedFS, i.InstallFolder(), "embed/examen.exe.gz")
+	if err != nil {
+		return err
+	}
+	logging.Debugf("Extracted: %s", examenPath)
 	return nil
 }
 
-func (i *Installer) StageExtractExecutable() error {
-	logging.Debugf("Install: StageExtractExecutable")
-	////
+func (i *Installer) StageExtractPericulosum() error {
+	logging.Debugf("Install: StageExtractPericulosum")
+	///
 	return nil
 }
 
@@ -163,3 +158,20 @@ func (i *Installer) StageRightClickExtension() error {
 	////
 	return nil
 }
+
+/*
+	func (m *Model) ConfigExists() (bool, error) {
+		path, err := m.configFilePath()
+		if err != nil {
+			return false, err
+		}
+		_, err = os.Stat(path)
+		if err == nil {
+			return true, nil
+		}
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, err
+	}
+*/

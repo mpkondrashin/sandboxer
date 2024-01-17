@@ -29,7 +29,7 @@ func (p *PageInstallation) Content(win fyne.Window, installer *Installer) fyne.C
 	copyButton = widget.NewButton("Copy Files", func() {
 		copyButton.Disable()
 		for i, stage := range stages {
-			progressBar.SetValue(float64(i) / float64(len(stages)))
+			progressBar.SetValue(float64(i) / float64(len(stages)-1))
 			err := stage()
 			logging.LogError(err)
 			if err != nil {

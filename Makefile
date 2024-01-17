@@ -51,11 +51,20 @@ cmd/setup/embed/opengl32.dll.gz: resources/opengl32.dll
 cmd/install/install.exe: examen.exe examensvc.exe $(wildcard cmd/install/*.go)
 	fyne package --os $(GOOS) --name install --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/install
 
-examen.exe: $(wildcard cmd/examen/*.go)
-	go build ./cmd/examen
+cmd/install/embed/opengl32.dll.gz: resources/opengl32.dll
+	gzip -fc resources/opengl32.dll  > cmd/install/embed/opengl32.dll.gz
 
-examensvc.exe: $(wildcard cmd/examensvc/*.go)
-	go build ./cmd/examensvc
+cmd/install/embed/examensvc.exe.gz: cmd/examensvc/examensvc.exe
+	gzip -fc cmd/examensvc/examensvc.exe  > cmd/install/embed/examensvc.exe.gz
+
+cmd/install/embed/examen.exe.gz: cmd/examen/examen.exe
+	gzip -fc cmd/examen/examen.exe  > cmd/install/embed/examen.exe.gz
+
+cmd/examen/examen.exe: $(wildcard cmd/examen/*.go)
+	fyne package --os $(GOOS) --name examen --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/examen
+
+cmd/examensvc/examensvc.exe: $(wildcard cmd/examensvc/*.go)
+	fyne package --os $(GOOS) --name examensvc --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/examensvc
 
 clean: tidy
 	rm setup.exe
