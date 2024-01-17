@@ -151,3 +151,15 @@ func (i *Installer) StageExtractExecutable() error {
 	////
 	return nil
 }
+
+func (i *Installer) StageRightClickExtension() error {
+	logging.Debugf("Install: StageRightClickExtension")
+	// Computer/HCU/Directory/Background//shell
+	// + New
+	// Examen
+	// New key
+
+	// command=app path %1
+	////
+	return nil
+}

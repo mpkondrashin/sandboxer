@@ -14,5 +14,5 @@ func (Windows) Comment(text string) string {
 }
 
 func (Windows) RemoveDir(path string) string {
-	return fmt.Sprintf("rmdir /S /Q %s", path)
+	return fmt.Sprintf("del /F /S /Q %s", path)
 }
