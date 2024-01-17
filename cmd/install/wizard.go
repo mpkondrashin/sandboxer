@@ -122,7 +122,8 @@ func (c *Wizard) Window(p Page) fyne.CanvasObject {
 	nextButton.IconPlacement = widget.ButtonIconTrailingText
 
 	if c.current == len(c.pages)-1 {
-		nextButton.Disable()
+		nextButton = quitButton
+		//nextButton.IconPlacement = widget.ButtonIconTrailingText
 	}
 
 	buttons := container.NewBorder(nil, nil, quitButton,
