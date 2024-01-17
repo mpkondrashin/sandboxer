@@ -13,7 +13,7 @@ import (
 	"examen/pkg/script"
 )
 
-//go:embed embed/*
+//go:embed embed/*.gz
 var embedFS embed.FS
 
 type Installer struct {
@@ -121,23 +121,23 @@ func (i *Installer) StageCreateConfig() error {
 
 func (i *Installer) StageExtractExecutable() error {
 	logging.Debugf("Install: StageExtractExecutable")
+	toExtract := []string{
+		"embed/examensvc.exe.gz",
+		"embed/examen.exe.gz",
+	}
 	if IsWindows() {
-		path, err := extract.FileGZ(embedFS, i.InstallFolder(), "embed/opengl32.dll.gz")
+		toExtract = append(toExtract, "embed/opengl32.dll.gz")
+	}
+	for _, path := range toExtract {
+		newPath, err := extract.FileGZ(embedFS, i.InstallFolder(), path)
 		if err != nil {
 			return err
 		}
-		logging.Debugf("Extracted: %s", path)
+		logging.Debugf("Extracted: %s", newPath)
+		if err := i.uninstallScript.AddLine(script.Get().RemoveDir(newPath)); err != nil {
+			return err
+		}
 	}
-	examensvcPath, err := extract.FileGZ(embedFS, i.InstallFolder(), "embed/examensvc.exe.gz")
-	if err != nil {
-		return err
-	}
-	logging.Debugf("Extracted: %s", examensvcPath)
-	examenPath, err := extract.FileGZ(embedFS, i.InstallFolder(), "embed/examen.exe.gz")
-	if err != nil {
-		return err
-	}
-	logging.Debugf("Extracted: %s", examenPath)
 	return nil
 }
 
