@@ -35,6 +35,7 @@ require (
 	github.com/james-barrow/golang-ipc v1.2.4 // indirect
 	github.com/josephspurrier/goversioninfo v1.4.0 // indirect
 	github.com/jsummers/gobmp v0.0.0-20151104160322-e2ba15ffa76e // indirect
+	github.com/kardianos/service v1.2.2 // indirect
 	github.com/lucor/goinfo v0.9.0 // indirect
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2 // indirect
 	github.com/mpkondrashin/periculosum/goperic v0.0.0-20230919123049-4e374195a55c // indirect

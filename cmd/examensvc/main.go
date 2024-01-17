@@ -1,165 +1,50 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
-	"time"
-
+	"errors"
 	"examen/pkg/config"
 	"examen/pkg/globals"
 	"examen/pkg/logging"
-	"examen/pkg/state"
-	"examen/pkg/task"
+	"fmt"
+	"log"
+	"os"
 
-	"github.com/mpkondrashin/vone"
+	"github.com/kardianos/service"
 )
 
-type Scan struct {
-	list   *task.List
-	config *config.Configuration
-	vOne   *vone.VOne
-	//check  *goperic.Periculosum
+type ExamenSvc struct {
+	stop    func()
+	service service.Service
 }
 
-func NewScan(config *config.Configuration, vOne *vone.VOne /*, check *goperic.Periculosum*/, list *task.List) *Scan {
-	return &Scan{
-		list:   list,
-		config: config,
-		vOne:   vOne,
-		//check:  check,
-	}
+// NewExamenSvc - create new sevice
+func NewExamenSvc() *ExamenSvc {
+	return &ExamenSvc{}
 }
 
-func (s *Scan) InspecfFolder(folderPath string) {
-	err := filepath.Walk(".",
-		func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			if info.Mode().IsRegular() {
-				s.InspectFile(path)
-			}
-			return nil
-		})
-	logging.LogError(err)
+// Start - start TunnelEffect service
+func (t *ExamenSvc) Start(s service.Service) error {
+	logging.Infof("Start Examen")
+	//tl.Printf("TunnelEffect Start(%v)", s)
+	var err error
+	err = RunService()
+	//tl.Printf("after Run(): stop = %v, err = %v", t.stop, err)
+	return err
 }
 
-func (s *Scan) ShouldIgnore(filePath string) bool {
-	fileName := filepath.Base(filePath)
-	for _, mask := range s.config.Ignore {
-		result, err := filepath.Match(strings.ToLower(mask), strings.ToLower(fileName))
-		logging.LogError(err)
-		if result {
-			logging.Debugf("%s: ignore by mask \"%s\"", filePath, mask)
-			return true
-		}
+// Stop - stop TunnelEffect service
+func (t *ExamenSvc) Stop(s service.Service) error {
+	logging.Infof("Stop Examen Service")
+	if t.stop == nil {
+		return fmt.Errorf("stop is nil")
 	}
-	return false
-}
-
-func (s *Scan) InspectFile(filePath string) {
-	logging.Debugf("InspectFile(%s)", filePath)
-	info, err := os.Lstat(filePath)
-	if err != nil {
-		logging.Errorf("%s", err)
-	}
-	if info.IsDir() {
-		s.InspecfFolder(filePath)
-		return
-	}
-	if !info.Mode().IsRegular() {
-		logging.Errorf("%s: not regular file", filePath)
-	}
-	if s.ShouldIgnore(filePath) {
-		return
-	}
-	t := task.NewTask(filePath)
-	s.list.Add(t)
-	if err := s.Submit(t); err != nil {
-		logging.LogError(err)
-		t.SetError(err.Error())
-		return
-	}
-}
-
-func (s *Scan) Submit(t *task.Task) error {
-	t.SetState(state.StateUpload)
-	f, err := s.vOne.SandboxSubmitFile().SetFilePath(t.Path)
-	if err != nil {
-		return err
-	}
-	response, headers, err := f.Do(context.TODO())
-	_ = headers
-	if err != nil {
-		return err
-	}
-	t.SetID(response.ID)
-	logging.Infof("Accepted: %v", t)
-	if err := s.WaitForResult(t); err != nil {
-		return err
-	}
-	//c.LogQuota(id, headers)
-	if err := s.GetResult(t); err != nil {
-		return err
-	}
+	t.stop()
+	//if service.Interactive() {
+	//	logger.Info("Exit")
+	//	os.Exit(0)
+	//}
 	return nil
 }
-
-func (s *Scan) WaitForResult(t *task.Task) error {
-	t.SetState(state.StateInspect)
-	for {
-		// Should we set temporary state "checking"?
-		status, err := s.vOne.SandboxSubmissionStatus(t.VOneID()).Do(context.TODO())
-		if err != nil {
-			return fmt.Errorf("Check status: %w", err)
-		}
-		logging.Debugf("%s Status: %v", t.VOneID(), status.Status)
-		switch status.Status {
-		case vone.StatusSucceeded:
-			return nil
-		case vone.StatusRunning:
-			//if time.Now().After(endTime) {
-			//	return ErrTimeout
-			//}
-			time.Sleep(s.config.Sleep)
-		case vone.StatusFailed:
-			return fmt.Errorf("%s: %s", status.Error.Code, status.Error.Message)
-		default:
-			return fmt.Errorf("unknown status: %s", status.Status)
-		}
-	}
-}
-
-func (s *Scan) GetResult(t *task.Task) error {
-	results, err := s.vOne.SandboxAnalysisResults(t.VOneID()).Do(context.TODO())
-	if err != nil {
-		return err
-	}
-	detectionName := strings.Join(results.DetectionNames, ", ")
-	threatType := strings.Join(results.ThreatTypes, ", ")
-	logging.Debugf("Type: %s, TrueFileType: %s, RiskLevel: %s, DetectionNames: %s, threatTypes: %s; for task %v",
-		results.Type, results.TrueFileType, results.RiskLevel, detectionName, threatType)
-	switch results.RiskLevel {
-	case vone.RiskLevelHigh:
-		t.SetState(state.StateHighRisk)
-	case vone.RiskLevelMedium:
-		t.SetState(state.StateMediumRisk)
-	case vone.RiskLevelLow:
-		t.SetState(state.StateLowRisk)
-	case vone.RiskLevelNoRisk:
-		t.SetState(state.StateNoRisk)
-	default:
-		err := fmt.Errorf("unknown risk level: %d", results.RiskLevel)
-		logging.LogError(err)
-		t.SetError(err.Error())
-	}
-	return nil
-}
-
-const examenSvcLog = "examen_svc.log"
 
 func main() {
 	config, err := config.LoadConfiguration(globals.AppID, globals.ConfigFileName)
@@ -176,18 +61,59 @@ func main() {
 			logging.Criticalf("panic: %v", err)
 		}
 	}()
-	inbox := make(StringChannel)
-	list := task.NewList()
-	go SubmitDispatch(inbox)
-	//	pericPath, err := config.PericulosumPath()
 
-	//	if err != nil {
-	//	}
-	//	goperic.NewPericulosum()
-	vOne := vone.NewVOne(config.Domain, config.Token)
-	scan := NewScan(config, vOne, list)
-	for {
-		s := <-inbox
-		go scan.InspectFile(s)
+	svcConfig := &service.Config{
+		Name:        "examen",
+		DisplayName: "Examen",
+		Description: "Submit files to Vision One sandbox",
 	}
+	tes := NewExamenSvc()
+	s, err := service.New(tes, svcConfig)
+	//	tl.Printf("service.New(): %v, %v", s, err)
+	if err != nil {
+		log.Fatal(err)
+		//os.Exit(exitcode.ServiceCreate)
+		os.Exit(99)
+	}
+	//tes.service = s
+	//logger, err = s.Logger(nil)
+	//tl.Printf("s.Logger(): %v, %v", logger, err)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if len(os.Args) == 1 {
+		err = s.Run()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(96)
+		}
+		return
+	}
+	if len(os.Args) == 2 {
+		operation := os.Args[1]
+		if operation == "status" {
+			status, err := s.Status()
+			if errors.Is(err, service.ErrNotInstalled) {
+				fmt.Println("unknown")
+				return
+			}
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(87)
+			}
+			statusName := []string{
+				"unknown", "running", "stopped",
+			}
+			fmt.Println(statusName[status])
+			return
+		}
+		err := service.Control(s, operation)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(95)
+		}
+		return
+	}
+	fmt.Printf("%s {status|install|start|restart|stop|uninstall}", os.Args[0])
+	os.Exit(10)
 }

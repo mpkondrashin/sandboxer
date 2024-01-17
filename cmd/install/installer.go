@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"embed"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"examen/pkg/config"
 	"examen/pkg/extract"
@@ -69,6 +72,22 @@ func (i *Installer) InstallFolder() string {
 	return filepath.Join(i.config.Folder, globals.AppFolderName)
 }
 
+func (i *Installer) Run(name string, args ...string) error {
+	logging.Debugf("Run %s %s", name, strings.Join(args, " "))
+	cmd := exec.Command(name, args...) // #nosec
+	var outBuf bytes.Buffer
+	var errBuf bytes.Buffer
+	cmd.Stdout = &outBuf
+	cmd.Stderr = &errBuf
+	err := cmd.Run()
+	stdout := outBuf.String()
+	stderr := errBuf.String()
+	if err != nil {
+		return fmt.Errorf("error %w: %s, %s", err, stderr, stdout)
+	}
+	return nil
+}
+
 type InstallStage func() error
 
 func (i *Installer) Stages() []InstallStage {
@@ -77,6 +96,7 @@ func (i *Installer) Stages() []InstallStage {
 		i.StageCreateFolder,
 		i.StageCreateConfig,
 		i.StageExtractExecutable,
+		i.StageInstallService,
 	}
 }
 
@@ -139,6 +159,14 @@ func (i *Installer) StageExtractExecutable() error {
 		}
 	}
 	return nil
+}
+
+func (i *Installer) StageInstallService() error {
+	err := i.Run(i.Path("examensvc.exe"), "install")
+	if err != nil {
+		return err
+	}
+	return i.uninstallScript.AddLine(script.Get().UninstallService("examen"))
 }
 
 func (i *Installer) StageExtractPericulosum() error {
