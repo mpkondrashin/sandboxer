@@ -93,7 +93,7 @@ type InstallStage func() error
 func (i *Installer) Stages() []InstallStage {
 	return []InstallStage{
 		i.StageCreateUninstallScript,
-		i.StageCreateFolder,
+		i.StageCreateFolders,
 		i.StageCreateConfig,
 		i.StageExtractExecutable,
 		i.StageInstallService,
@@ -110,14 +110,24 @@ func (i *Installer) StageCreateUninstallScript() error {
 	return nil
 }
 
-func (i *Installer) StageCreateFolder() error {
-	logging.Debugf("Install: StageCreateFolder")
-	folder := filepath.Join(i.config.Folder, globals.AppFolderName)
-	logging.Debugf("Install: Create folder \"%s\"", folder)
-	if err := os.MkdirAll(folder, 0766); err != nil {
-		return err
+func (i *Installer) StageCreateFolders() error {
+	logging.Debugf("Install: StageCreateFolders")
+	folders := []string{
+		"",
+		"logs",
 	}
-	return i.uninstallScript.AddLine(script.Get().RemoveDir(folder))
+	for _, f := range folders {
+		folder := filepath.Join(i.config.Folder, globals.AppFolderName, f)
+		logging.Debugf("Install: Create folder \"%s\"", folder)
+		if err := os.MkdirAll(folder, 0766); err != nil {
+			return err
+		}
+		err := i.uninstallScript.AddLine(script.Get().RemoveDir(folder))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (i *Installer) StageCreateConfig() error {
