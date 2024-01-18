@@ -16,3 +16,11 @@ func (Windows) Comment(text string) string {
 func (Windows) RemoveDir(path string) string {
 	return fmt.Sprintf("del /F /S /Q \"%s\"", path)
 }
+
+func (Windows) UninstallService(name string) string {
+	return fmt.Sprintf("sc stop %s", name)
+}
+
+func (Windows) StopService(name string) string {
+	return fmt.Sprintf("sc delete %s", name)
+}
