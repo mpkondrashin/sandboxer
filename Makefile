@@ -67,7 +67,7 @@ cmd/examensvc/examensvc.exe: $(wildcard cmd/examensvc/*.go)
 	fyne package --os $(GOOS) --name examensvc --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/examensvc
 
 clean: tidy
-	rm setup.exe
+	rm -f setup.zip
 
 tidy:
-	rm examen.exe examensvc.exe install.exe 
+	rm -f cmd/examen/examen.exe cmd/examensvc/examensvc.exe cmd/install/install.exe cmd/setup/setup.exe setup.zip
