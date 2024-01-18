@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"examen/pkg/globals"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -30,7 +31,7 @@ func New() *Configuration {
 }
 
 func (c *Configuration) LogFolder() string {
-	return filepath.Join(c.Folder, "logs")
+	return filepath.Join(c.Folder, globals.AppFolderName, "logs")
 }
 
 func LoadConfiguration(appID string, fileName string) (*Configuration, error) {
