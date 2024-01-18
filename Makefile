@@ -70,4 +70,4 @@ clean: tidy
 	rm -f setup.zip
 
 tidy:
-	rm -f cmd/examen/examen.exe cmd/examensvc/examensvc.exe cmd/install/install.exe cmd/setup/setup.exe setup.zip
+	rm -f cmd/examen/examen.exe cmd/examensvc/examensvc.exe cmd/install/install.exe cmd/setup/setup.exe

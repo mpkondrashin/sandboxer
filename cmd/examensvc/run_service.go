@@ -114,7 +114,7 @@ func (s *Scan) WaitForResult(t *task.Task) error {
 		// Should we set temporary state "checking"?
 		status, err := s.vOne.SandboxSubmissionStatus(t.VOneID()).Do(context.TODO())
 		if err != nil {
-			return fmt.Errorf("Check status: %w", err)
+			return fmt.Errorf("check status: %w", err)
 		}
 		logging.Debugf("%s Status: %v", t.VOneID(), status.Status)
 		switch status.Status {
@@ -141,7 +141,7 @@ func (s *Scan) GetResult(t *task.Task) error {
 	detectionName := strings.Join(results.DetectionNames, ", ")
 	threatType := strings.Join(results.ThreatTypes, ", ")
 	logging.Debugf("Type: %s, TrueFileType: %s, RiskLevel: %s, DetectionNames: %s, threatTypes: %s; for task %v",
-		results.Type, results.TrueFileType, results.RiskLevel, detectionName, threatType)
+		results.Type, results.TrueFileType, results.RiskLevel, detectionName, threatType, t)
 	switch results.RiskLevel {
 	case vone.RiskLevelHigh:
 		t.SetState(state.StateHighRisk)

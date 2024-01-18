@@ -24,3 +24,4 @@ func (Windows) UninstallService(name string) string {
 func (Windows) StopService(name string) string {
 	return fmt.Sprintf("sc delete %s", name)
 }
+		

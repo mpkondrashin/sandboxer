@@ -68,6 +68,7 @@ func main() {
 		Description: "Submit files to Vision One sandbox",
 	}
 	tes := NewExamenSvc()
+	//tes.service = svcConfig
 	s, err := service.New(tes, svcConfig)
 	//	tl.Printf("service.New(): %v, %v", s, err)
 	if err != nil {
@@ -75,12 +76,12 @@ func main() {
 		//os.Exit(exitcode.ServiceCreate)
 		os.Exit(99)
 	}
-	//tes.service = s
+	tes.service = s
 	//logger, err = s.Logger(nil)
 	//tl.Printf("s.Logger(): %v, %v", logger, err)
-	if err != nil {
-		log.Fatal(err)
-	}
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 	if len(os.Args) == 1 {
 		err = s.Run()
 		if err != nil {
