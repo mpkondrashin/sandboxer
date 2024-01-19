@@ -8,7 +8,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"syscall"
 
 	"examen/pkg/config"
 	"examen/pkg/extract"
@@ -103,6 +102,7 @@ func (i *Installer) Stages() []InstallStage {
 		{"Uninstall Service", i.StageUninstallService},
 		{"Extract Executables", i.StageExtractExecutable},
 		{"Install Service", i.StageInstallService},
+		{"Start Service", i.StageStartService},
 	}
 }
 
@@ -175,13 +175,10 @@ func (i *Installer) StageStopService() error {
 		return err
 	}
 	if err := s.Stop(); err != nil {
-		logging.Debugf("err: %v, err = %T", err, err)
-
-		errErrno, ok := err.(syscall.Errno)
-		logging.Debugf("errErrno: %d, ok = %v", errErrno, ok)
 		if !strings.Contains(err.Error(), "The service has not been started") {
 			return err
 		}
+		logging.Debugf("Install: %v", err)
 	}
 	return nil
 }
@@ -244,6 +241,17 @@ func (i *Installer) StageInstallService() error {
 		return err
 	}
 	return i.uninstallScript.AddLine(script.Get().UninstallService(globals.SvcName))
+}
+
+func (i *Installer) StageStartService() error {
+	s, err := i.config.Service(nil)
+	if err != nil {
+		return err
+	}
+	if err := s.Start(); err != nil {
+		return err
+	}
+	return i.uninstallScript.AddLine(script.Get().StopService(globals.SvcName))
 }
 
 /*

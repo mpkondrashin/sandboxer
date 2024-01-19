@@ -18,10 +18,9 @@ func (Windows) RemoveDir(path string) string {
 }
 
 func (Windows) UninstallService(name string) string {
-	return fmt.Sprintf("sc stop %s", name)
+	return fmt.Sprintf("sc delete %s", name)
 }
 
 func (Windows) StopService(name string) string {
-	return fmt.Sprintf("sc delete %s", name)
+	return fmt.Sprintf("sc stop %s", name)
 }
-		
