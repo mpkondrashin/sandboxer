@@ -161,10 +161,10 @@ func (s *Scan) GetResult(t *task.Task) error {
 
 const examenSvcLog = "examen_svc.log"
 
-func RunService() error {
+func RunService() (func(), error) {
 	conf, err := config.LoadConfiguration(globals.AppID, globals.ConfigFileName)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	close := logging.NewFileLog(conf.LogFolder(), examenSvcLog)
 	defer func() {
@@ -188,5 +188,5 @@ func RunService() error {
 			go scan.InspectFile(s)
 		}
 	}()
-	return nil
+	return nil, nil
 }
