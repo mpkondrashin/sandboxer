@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/kardianos/service"
 	"gopkg.in/yaml.v2"
 )
 
@@ -71,6 +72,20 @@ func (c *Configuration) Load(fileName string) error {
 		return err
 	}
 	return yaml.Unmarshal(data, c)
+}
+
+func (c *Configuration) Path(fileName string) string {
+	return filepath.Join(c.Folder, globals.AppFolderName, fileName)
+}
+
+func (c *Configuration) Service(i service.Interface) (service.Service, error) {
+	svcConfig := &service.Config{
+		Name:        globals.SvcName,
+		DisplayName: globals.SvcDisplayName,
+		Description: globals.SvcDescription,
+		Executable:  c.Path(globals.SvcFileName),
+	}
+	return service.New(i, svcConfig)
 }
 
 var (

@@ -25,17 +25,18 @@ func (p *PageInstallation) GetStatus(installer *Installer) {
 func (p *PageInstallation) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
 	progressBar := widget.NewProgressBar()
 	var copyButton *widget.Button
-	stages := installer.Stages()
 	copyButton = widget.NewButton("Copy Files", func() {
 		copyButton.Disable()
-		for i, stage := range stages {
-			progressBar.SetValue(float64(i) / float64(len(stages)-1))
-			err := stage()
-			logging.LogError(err)
-			if err != nil {
-				dialog.ShowError(err, win)
-				break
-			}
+		total := float64(len(installer.Stages()) - 1)
+		index := 0
+		err := installer.Install(func(name string) error {
+			progressBar.SetValue(float64(index) / total)
+			index++
+			return nil
+		})
+		logging.LogError(err)
+		if err != nil {
+			dialog.ShowError(err, win)
 		}
 	})
 	return container.NewVBox(

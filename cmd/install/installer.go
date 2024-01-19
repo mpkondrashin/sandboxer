@@ -88,16 +88,33 @@ func (i *Installer) Run(name string, args ...string) error {
 	return nil
 }
 
-type InstallStage func() error
+type InstallStage struct {
+	Name string
+	Run  func() error
+}
 
 func (i *Installer) Stages() []InstallStage {
 	return []InstallStage{
-		i.StageCreateUninstallScript,
-		i.StageCreateFolders,
-		i.StageCreateConfig,
-		i.StageExtractExecutable,
-		i.StageInstallService,
+		{"Uninstall Script", i.StageCreateUninstallScript},
+		{"Create Folders", i.StageCreateFolders},
+		{"Generate Config", i.StageCreateConfig},
+		{"Stop Service", i.StageStopService},
+		{"Uninstall Service", i.StageUninstallService},
+		{"Extract Executables", i.StageExtractExecutable},
+		{"Install Service", i.StageInstallService},
 	}
+}
+
+func (i *Installer) Install(callback func(name string) error) error {
+	for _, stage := range i.Stages() {
+		if err := callback(stage.Name); err != nil {
+			return err
+		}
+		if err := stage.Run(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 const uninstallScriptName = "uninstall"
@@ -149,6 +166,24 @@ func (i *Installer) StageCreateConfig() error {
 	return i.uninstallScript.AddLine(script.Get().RemoveDir(filePath))
 }
 
+func (i *Installer) StageStopService() error {
+	logging.Debugf("Install: StopService")
+	s, err := i.config.Service(nil)
+	if err != nil {
+		return err
+	}
+	return s.Stop()
+}
+
+func (i *Installer) StageUninstallService() error {
+	logging.Debugf("Install: UninstallService")
+	s, err := i.config.Service(nil)
+	if err != nil {
+		return err
+	}
+	return s.Uninstall()
+}
+
 func (i *Installer) StageExtractExecutable() error {
 	logging.Debugf("Install: StageExtractExecutable")
 	toExtract := []string{
@@ -171,14 +206,6 @@ func (i *Installer) StageExtractExecutable() error {
 	return nil
 }
 
-func (i *Installer) StageInstallService() error {
-	err := i.Run(i.Path("examensvc.exe"), "install")
-	if err != nil {
-		return err
-	}
-	return i.uninstallScript.AddLine(script.Get().UninstallService("examen"))
-}
-
 func (i *Installer) StageExtractPericulosum() error {
 	logging.Debugf("Install: StageExtractPericulosum")
 	///
@@ -195,6 +222,17 @@ func (i *Installer) StageRightClickExtension() error {
 	// command=app path %1
 	////
 	return nil
+}
+
+func (i *Installer) StageInstallService() error {
+	s, err := i.config.Service(nil)
+	if err != nil {
+		return err
+	}
+	if err := s.Install(); err != nil {
+		return err
+	}
+	return i.uninstallScript.AddLine(script.Get().UninstallService(globals.SvcName))
 }
 
 /*
