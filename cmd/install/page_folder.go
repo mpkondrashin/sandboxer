@@ -21,7 +21,7 @@ func (p *PageFolder) Content(win fyne.Window, installer *Installer) fyne.CanvasO
 	labelFolder := widget.NewLabel("Installation folder:")
 	p.folderEntry = widget.NewEntry()
 	p.folderEntry.SetText(installer.config.Folder)
-	folderButton := widget.NewButton("Choose...", func() {
+	folderButton := widget.NewButton("Change...", func() {
 		folderDialog := dialog.NewFolderOpen(func(uri fyne.ListableURI, err error) {
 			if uri == nil {
 				return
