@@ -107,6 +107,7 @@ func (i *Installer) Stages() []InstallStage {
 
 func (i *Installer) Install(callback func(name string) error) error {
 	for _, stage := range i.Stages() {
+		logging.Debugf("Install Stage %s", stage.Name)
 		if err := callback(stage.Name); err != nil {
 			return err
 		}
@@ -172,7 +173,13 @@ func (i *Installer) StageStopService() error {
 	if err != nil {
 		return err
 	}
-	return s.Stop()
+	if err := s.Stop(); err != nil {
+		logging.Debugf("err: %v, err = %T", err, err)
+		if !strings.Contains(err.Error(), "The service has not been started") {
+			return err
+		}
+	}
+	return nil
 }
 
 func (i *Installer) StageUninstallService() error {
