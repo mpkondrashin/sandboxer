@@ -1,6 +1,7 @@
 package main
 
 import (
+	"examen/pkg/logging"
 	"fmt"
 
 	"fyne.io/fyne/v2"
@@ -22,6 +23,7 @@ func (p *PageOptions) Name() string {
 func (p *PageOptions) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
 	err := installer.LoadConfig()
 	if err != nil {
+		logging.Errorf("LoadConfig: %v", err)
 		dialog.ShowError(err, win)
 	}
 	labelTop := widget.NewLabel("Please open Vision One console to get all nessesary parameters")
