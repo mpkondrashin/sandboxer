@@ -15,6 +15,8 @@ import (
 	"examen/pkg/globals"
 	"examen/pkg/logging"
 	"examen/pkg/script"
+
+	"github.com/kardianos/service"
 )
 
 //go:embed embed/*.gz
@@ -191,6 +193,27 @@ func (i *Installer) StageStopService() error {
 	return nil
 }
 
+func (i *Installer) StageWaitServiceToStop() error {
+	logging.Debugf("Install: WaitServiceToStop")
+	s, err := i.config.Service(nil)
+	if err != nil {
+		return err
+	}
+	sleepDuration := 500 * time.Millisecond
+	tries := 10
+	for i := 0; i < tries; i++ {
+		status, err := s.Status()
+		if err != nil {
+			return err
+		}
+		logging.Debugf("Install: Service Status: %v", status)
+		if status == service.StatusUnknown || status == service.StatusStopped {
+			return nil
+		}
+		time.Sleep(sleepDuration)
+	}
+	return fmt.Errorf("service %s did not stop within %v", globals.SvcName, sleepDuration*time.Duration(tries))
+}
 func (i *Installer) StageUninstallService() error {
 	logging.Debugf("Install: UninstallService")
 	s, err := i.config.Service(nil)
