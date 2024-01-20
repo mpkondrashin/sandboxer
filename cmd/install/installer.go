@@ -175,7 +175,7 @@ func (i *Installer) StageStopService() error {
 		return err
 	}
 	if err := s.Stop(); err != nil {
-		logging.Errorf("Install: %v", err)
+		logging.Debugf("Install: StopService: %v", err)
 		if strings.Contains(err.Error(), "The service has not been started") {
 			return nil
 		}
