@@ -10,6 +10,8 @@ import (
 )
 
 type PageInstallation struct {
+	progressBar *widget.ProgressBar
+	statusLabel *widget.Label
 }
 
 var _ Page = &PageInstallation{}
@@ -23,29 +25,34 @@ func (p *PageInstallation) GetStatus(installer *Installer) {
 }
 */
 func (p *PageInstallation) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
-	progressBar := widget.NewProgressBar()
-	statusLabel := widget.NewLabel("")
-	var copyButton *widget.Button
-	copyButton = widget.NewButton("Copy Files", func() {
-		copyButton.Disable()
-		total := float64(len(installer.Stages()) - 1)
-		index := 0
-		err := installer.Install(func(name string) error {
-			progressBar.SetValue(float64(index) / total)
-			statusLabel.SetText(name)
-			index++
-			return nil
-		})
-		logging.LogError(err)
-		if err != nil {
-			dialog.ShowError(err, win)
-		}
-	})
+	p.progressBar = widget.NewProgressBar()
+	p.statusLabel = widget.NewLabel("")
+	//	var copyButton *widget.Button
+	//copyButton = widget.NewButton("Copy Files",
+	//func() {
+	//	copyButton.Disable()
+
+	//})
 	return container.NewVBox(
-		progressBar,
-		statusLabel,
-		copyButton,
+		p.progressBar,
+		p.statusLabel,
+		//copyButton,
 	)
+}
+
+func (p *PageInstallation) Run(win fyne.Window, installer *Installer) {
+	total := float64(len(installer.Stages()) - 1)
+	index := 0
+	err := installer.Install(func(name string) error {
+		p.progressBar.SetValue(float64(index) / total)
+		p.statusLabel.SetText(name)
+		index++
+		return nil
+	})
+	logging.LogError(err)
+	if err != nil {
+		dialog.ShowError(err, win)
+	}
 }
 
 func (p *PageInstallation) AquireData(installer *Installer) error {

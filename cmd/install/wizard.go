@@ -34,6 +34,7 @@ type Wizard struct {
 type Page interface {
 	Name() string
 	Content(win fyne.Window, installer *Installer) fyne.CanvasObject
+	Run(win fyne.Window, installer *Installer)
 	AquireData(installer *Installer) error
 }
 
@@ -43,6 +44,7 @@ func NewWizard(capturesFolder string) *Wizard {
 		capturesFolder: capturesFolder,
 		installer:      NewInstaller(globals.AppID),
 	}
+	c.app.Lifecycle()
 	_ = c.installer.LoadConfig()
 	c.win = c.app.NewWindow("Examen Install Program")
 	c.win.Resize(fyne.NewSize(600, 400))
@@ -112,6 +114,18 @@ func (c *Wizard) Window(p Page) fyne.CanvasObject {
 	middle := container.NewPadded(container.NewVBox(layout.NewSpacer(), p.Content(c.win, c.installer), layout.NewSpacer()))
 
 	upper := container.NewBorder(nil, nil, container.NewHBox(left, widget.NewSeparator()), nil, middle)
+
+	quitButton, prevButton, nextButton := c.Buttons()
+
+	buttons := container.NewBorder(nil, nil, quitButton,
+		container.NewHBox(prevButton, nextButton))
+	bottom := container.NewVBox(widget.NewSeparator(), buttons)
+	_ = bottom
+
+	return container.NewBorder(nil, container.NewPadded(bottom), nil, nil, upper)
+}
+
+func (c *Wizard) Buttons() (*widget.Button, *widget.Button, *widget.Button) {
 	quitButton := widget.NewButtonWithIcon("Quit", theme.CancelIcon(), c.Quit)
 	prevButton := widget.NewButtonWithIcon("Back", theme.NavigateBackIcon(), c.Prev)
 	if c.current == 0 {
@@ -124,14 +138,9 @@ func (c *Wizard) Window(p Page) fyne.CanvasObject {
 	if c.current == len(c.pages)-1 {
 		nextButton = quitButton
 		//nextButton.IconPlacement = widget.ButtonIconTrailingText
+		quitButton.Disable()
 	}
-
-	buttons := container.NewBorder(nil, nil, quitButton,
-		container.NewHBox(prevButton, nextButton))
-	bottom := container.NewVBox(widget.NewSeparator(), buttons)
-	_ = bottom
-
-	return container.NewBorder(nil, container.NewPadded(bottom), nil, nil, upper)
+	return quitButton, prevButton, nextButton
 }
 
 func (c *Wizard) Quit() {
@@ -148,12 +157,14 @@ func (c *Wizard) Next() {
 	}
 	c.current++
 	c.win.SetContent(c.Window(c.pages[c.current]))
+	c.pages[c.current].Run(c.win, c.installer)
 }
 
 func (c *Wizard) Prev() {
 	logging.Debugf("Prev from page %d", c.current)
 	c.current--
 	c.win.SetContent(c.Window(c.pages[c.current]))
+	c.pages[c.current].Run(c.win, c.installer)
 }
 
 func (c *Wizard) Run() {

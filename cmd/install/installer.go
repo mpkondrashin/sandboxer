@@ -38,6 +38,7 @@ func (i *Installer) LoadConfig() error {
 		return err
 	}
 	configPath := filepath.Join(configFolder, globals.ConfigFileName)
+	logging.Debugf("Load configuration from %s", configPath)
 	err = i.config.Load(configPath)
 	if err != nil && !os.IsNotExist(err) {
 		return err

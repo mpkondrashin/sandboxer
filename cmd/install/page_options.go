@@ -21,14 +21,8 @@ func (p *PageOptions) Name() string {
 }
 
 func (p *PageOptions) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
-	err := installer.LoadConfig()
-	if err != nil {
-		logging.Errorf("LoadConfig: %v", err)
-		dialog.ShowError(err, win)
-	}
 	labelTop := widget.NewLabel("Please open Vision One console to get all nessesary parameters")
 	p.tokenEntry = widget.NewMultiLineEntry()
-	p.tokenEntry.Text = installer.config.Token
 	p.tokenEntry.Wrapping = fyne.TextWrapBreak
 	tokenFormItem := widget.NewFormItem("Token:", p.tokenEntry)
 	tokenFormItem.HintText = "Go to XXXXXXX"
@@ -36,6 +30,16 @@ func (p *PageOptions) Content(win fyne.Window, installer *Installer) fyne.Canvas
 		tokenFormItem,
 	)
 	return container.NewVBox(labelTop, optionsForm)
+}
+
+func (p *PageOptions) Run(win fyne.Window, installer *Installer) {
+	err := installer.LoadConfig()
+	if err != nil {
+		logging.Errorf("LoadConfig: %v", err)
+		dialog.ShowError(err, win)
+	}
+	p.tokenEntry.SetText(installer.config.Token)
+
 }
 
 func (p *PageOptions) AquireData(installer *Installer) error {

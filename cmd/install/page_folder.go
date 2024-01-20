@@ -30,7 +30,12 @@ func (p *PageFolder) Content(win fyne.Window, installer *Installer) fyne.CanvasO
 		}, win)
 		folderDialog.Show()
 	})
-	return container.NewVBox(labelFolder, p.folderEntry, folderButton)
+	return container.NewVBox(labelFolder,
+		container.NewBorder(nil, nil, nil, folderButton, p.folderEntry)) // p.folderEntry, folderButton)
+}
+
+func (p *PageFolder) Run(win fyne.Window, installer *Installer) {
+
 }
 
 func (p *PageFolder) AquireData(installer *Installer) error {

@@ -86,6 +86,10 @@ func (p *PageIntro) Content(win fyne.Window, installer *Installer) fyne.CanvasOb
 	)
 }
 
+func (p *PageIntro) Run(win fyne.Window, installer *Installer) {
+
+}
+
 func (p *PageIntro) AquireData(installer *Installer) error {
 	return nil
 }
