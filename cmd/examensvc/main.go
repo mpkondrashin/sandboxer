@@ -52,6 +52,7 @@ func main() {
 	}
 	defer file.Close()
 	config, err := config.LoadConfiguration(globals.AppID, globals.ConfigFileName)
+	fmt.Fprintf(file, "load config: %v\n%v", config, err)
 	if err != nil {
 		panic(err)
 	}
