@@ -112,11 +112,8 @@ func (c *Wizard) Window(p Page) fyne.CanvasObject {
 	}
 
 	middle := container.NewPadded(container.NewVBox(layout.NewSpacer(), p.Content(c.win, c.installer), layout.NewSpacer()))
-
 	upper := container.NewBorder(nil, nil, container.NewHBox(left, widget.NewSeparator()), nil, middle)
-
 	quitButton, prevButton, nextButton := c.Buttons()
-
 	buttons := container.NewBorder(nil, nil, quitButton,
 		container.NewHBox(prevButton, nextButton))
 	bottom := container.NewVBox(widget.NewSeparator(), buttons)
@@ -127,6 +124,7 @@ func (c *Wizard) Window(p Page) fyne.CanvasObject {
 
 func (c *Wizard) Buttons() (*widget.Button, *widget.Button, *widget.Button) {
 	quitButton := widget.NewButtonWithIcon("Quit", theme.CancelIcon(), c.Quit)
+
 	prevButton := widget.NewButtonWithIcon("Back", theme.NavigateBackIcon(), c.Prev)
 	if c.current == 0 {
 		prevButton.Disable()
@@ -136,9 +134,9 @@ func (c *Wizard) Buttons() (*widget.Button, *widget.Button, *widget.Button) {
 	nextButton.IconPlacement = widget.ButtonIconTrailingText
 
 	if c.current == len(c.pages)-1 {
-		nextButton = quitButton
+		nextButton.Disable()
 		//nextButton.IconPlacement = widget.ButtonIconTrailingText
-		quitButton.Disable()
+		//quitButton.Disable()
 	}
 	return quitButton, prevButton, nextButton
 }

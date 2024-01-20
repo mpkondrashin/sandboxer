@@ -49,8 +49,10 @@ func (p *PageInstallation) Run(win fyne.Window, installer *Installer) {
 		index++
 		return nil
 	})
-	logging.LogError(err)
+	p.statusLabel.SetText("")
 	if err != nil {
+		p.statusLabel.SetText("Failed")
+		logging.LogError(err)
 		dialog.ShowError(err, win)
 	}
 }
