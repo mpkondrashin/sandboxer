@@ -33,11 +33,12 @@ func NewInstaller(appID string) *Installer {
 }
 
 func (i *Installer) LoadConfig() error {
-	filePath, err := i.ConfigFileFolder()
+	configFolder, err := i.ConfigFileFolder()
 	if err != nil {
 		return err
 	}
-	err = i.config.Load(filePath)
+	configPath := filepath.Join(configFolder, globals.ConfigFileName)
+	err = i.config.Load(configPath)
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}

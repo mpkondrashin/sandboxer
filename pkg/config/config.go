@@ -95,7 +95,7 @@ var (
 
 func ConfigFileFolder(appID string) (string, error) {
 	if runtime.GOOS == "windows" {
-		return configFileFolder("PROGRAMDATA", globals.AppFolderName, "")
+		return configFileFolder("PROGRAMDATA", globals.AppFolderName, "") // XXX appID?
 	}
 	if runtime.GOOS == "linux" {
 		return configFileFolder("HOME", ".config", appID)
