@@ -60,8 +60,15 @@ cmd/install/embed/examensvc.exe.gz: cmd/examensvc/examensvc.exe
 cmd/install/embed/examen.exe.gz: cmd/examen/examen.exe
 	gzip -fc cmd/examen/examen.exe  > cmd/install/embed/examen.exe.gz
 
+cmd/submit/submit.exe: $(wildcard cmd/submit/*.go)
+	fyne package --os $(GOOS) --name examen --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/submit
+
+cmd/submit/submit.exe.gz: cmd/submit/submit.exe
+	gzip -fc cmd/submit/submit.exe  > cmd/submit/submit.exe.gz
+
 cmd/examen/examen.exe: $(wildcard cmd/examen/*.go)
 	fyne package --os $(GOOS) --name examen --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/examen
+
 
 cmd/examensvc/examensvc.exe: $(wildcard cmd/examensvc/*.go)
 	fyne package --os $(GOOS) --name examensvc --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/examensvc
