@@ -36,7 +36,7 @@ func FileGZ(fs fs.FS, folder string, fileName_gz string) (string, error) {
 	logging.Debugf("Target path %s", targetPath)
 	targetFile, err := os.Create(targetPath)
 	if err != nil {
-		return "", fmt.Errorf("error creating %s: %w", targetPath, err)
+		return "", fmt.Errorf("create File: %w", err)
 	}
 	defer func() {
 		logging.Debugf("Close %s", targetPath)
