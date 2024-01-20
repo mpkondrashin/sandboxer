@@ -259,6 +259,9 @@ func (i *Installer) StageStartService() error {
 		return err
 	}
 	if err := s.Start(); err != nil {
+		if IsWindows() {
+			return fmt.Errorf("%v\nCheck Application Log for details", err)
+		}
 		return err
 	}
 	return i.uninstallScript.AddLine(script.Get().StopService(globals.SvcName))
