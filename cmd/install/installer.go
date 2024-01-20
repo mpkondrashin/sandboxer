@@ -193,7 +193,13 @@ func (i *Installer) StageUninstallService() error {
 	if err != nil {
 		return err
 	}
-	return s.Uninstall()
+	if err := s.Uninstall(); err != nil {
+		if strings.Contains(err.Error(), fmt.Sprintf("service %s is not installed", globals.SvcName)) {
+			return nil
+		}
+		return err
+	}
+	return nil
 }
 
 func (i *Installer) StageExtractExecutable() error {
