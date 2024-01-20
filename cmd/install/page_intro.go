@@ -15,6 +15,8 @@ const (
 	IntoText = "Examen provides ability to check files using Vision One sandbox. " +
 		"You will have to provide API Key to use this service."
 
+	NoteText = "Please close all MMC windows before continuing."
+
 	License = `MIT License
 
 Copyright (c) 2024 Michael Kondrashin (mkondrashin@gmail.com)
@@ -57,10 +59,14 @@ func (p *PageIntro) Content(win fyne.Window, installer *Installer) fyne.CanvasOb
 
 	report := widget.NewRichTextFromMarkdown(IntoText)
 	report.Wrapping = fyne.TextWrapWord
-	repoURL, _ := url.Parse("https://github.com/mpkondrashin/examen")
-	repoLink := widget.NewHyperlink("Examen repository on GitHub", repoURL)
 	coneURL, _ := url.Parse("https://portal.xdr.trendmicro.com")
 	coneLink := widget.NewHyperlink("Open Vision One Console", coneURL)
+
+	noteMarkdown := widget.NewRichTextFromMarkdown(NoteText)
+	noteMarkdown.Wrapping = fyne.TextWrapWord
+
+	repoURL, _ := url.Parse("https://github.com/mpkondrashin/examen")
+	repoLink := widget.NewHyperlink("Examen repository on GitHub", repoURL)
 
 	licensePopUp := func() {
 		licenseLabel := widget.NewLabel(License)
@@ -75,6 +81,7 @@ func (p *PageIntro) Content(win fyne.Window, installer *Installer) fyne.CanvasOb
 		versionLabel,
 		report,
 		container.NewHBox(coneLink),
+		noteMarkdown,
 		container.NewHBox(repoLink, licenseButton),
 	)
 }

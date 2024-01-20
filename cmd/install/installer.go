@@ -238,7 +238,7 @@ func (i *Installer) StageInstallService() error {
 		return err
 	}
 	if err := s.Install(); err != nil {
-		return err
+		return fmt.Errorf("%v\nHave youe closed all MMC consoles?", err)
 	}
 	return i.uninstallScript.AddLine(script.Get().UninstallService(globals.SvcName))
 }
