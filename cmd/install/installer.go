@@ -211,6 +211,7 @@ func (i *Installer) StageExtractExecutable() error {
 	toExtract := []string{
 		"embed/examensvc.exe.gz",
 		"embed/examen.exe.gz",
+		"embed/submit.exe.gz",
 	}
 	if IsWindows() {
 		toExtract = append(toExtract, "embed/opengl32.dll.gz")
