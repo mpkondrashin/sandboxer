@@ -134,9 +134,11 @@ func (c *Wizard) Buttons() (*widget.Button, *widget.Button) {
 	nextButton.IconPlacement = widget.ButtonIconTrailingText
 
 	if c.current == len(c.pages)-1 {
-		nextButton.Disable()
+		//Button.Disable()
 		//nextButton.IconPlacement = widget.ButtonIconTrailingText
 		//quitButton.Disable()
+		nextButton = widget.NewButtonWithIcon("Quit", theme.CancelIcon(), c.Quit)
+
 	}
 	return prevButton, nextButton
 }
