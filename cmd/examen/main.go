@@ -92,12 +92,16 @@ func main() {
 		line := container.NewBorder(nil, nil, container.NewHBox(icon, pathLabel), nil)
 		vbox.Add(line)
 	})
-	border := container.NewBorder(vbox, nil, nil, nil, nil)
-	win.SetContent(border)
+	if len(vbox.Objects) == 0 {
+		win.SetContent(widget.NewLabel("No tasks"))
+	} else {
+		border := container.NewBorder(vbox, nil, nil, nil, nil)
+		win.SetContent(border)
+	}
 	//win.Resize(fyne.NewSize(600, 400))
 	win.ShowAndRun()
 }
 
 func IconPath(s state.State) string {
-	return fmt.Sprintf("../../resource/%s.svg", s.String())
+	return fmt.Sprintf("../../resources/%s.svg", s.String())
 }

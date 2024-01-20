@@ -248,6 +248,7 @@ func (i *Installer) StageInstallService() error {
 		return err
 	}
 	if err := s.Install(); err != nil {
+		// https://stackoverflow.com/questions/20561990/how-to-solve-the-specified-service-has-been-marked-for-deletion-error
 		return fmt.Errorf("%v\nHave youe closed all MMC consoles?", err)
 	}
 	return i.uninstallScript.AddLine(script.Get().UninstallService(globals.SvcName))

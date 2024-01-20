@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -19,13 +20,16 @@ func (p *PageOptions) Name() string {
 }
 
 func (p *PageOptions) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
+	err := installer.LoadConfig()
+	if err != nil {
+		dialog.ShowError(err, win)
+	}
 	labelTop := widget.NewLabel("Please open Vision One console to get all nessesary parameters")
 	p.tokenEntry = widget.NewMultiLineEntry()
 	p.tokenEntry.Text = installer.config.Token
 	p.tokenEntry.Wrapping = fyne.TextWrapBreak
 	tokenFormItem := widget.NewFormItem("Token:", p.tokenEntry)
 	tokenFormItem.HintText = "Go to XXXXXXX"
-
 	optionsForm := widget.NewForm(
 		tokenFormItem,
 	)
