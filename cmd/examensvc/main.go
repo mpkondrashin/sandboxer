@@ -24,11 +24,9 @@ func NewExamenSvc() *ExamenSvc {
 // Start - start ExamenSvc service
 func (t *ExamenSvc) Start(s service.Service) error {
 	logging.Infof("Start Examen") // XXXX
-	logger.Info("Start %s", globals.AppName)
-	//tl.Printf("TunnelEffect Start(%v)", s)
+	logger.Infof("Start %s", globals.AppName)
 	var err error
 	t.stop, err = RunService()
-	//tl.Printf("after Run(): stop = %v, err = %v", t.stop, err)
 	return err
 }
 
@@ -80,6 +78,7 @@ func main() {
 	}
 
 	err = s.Run()
+	logging.Debugf("Run() returned: %v", err)
 	if err != nil {
 		logging.Errorf("Run Service Error: %v", err)
 		logging.Criticalf("Run Service Error: %v", err)

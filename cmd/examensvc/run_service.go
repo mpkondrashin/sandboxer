@@ -166,12 +166,12 @@ func RunService() (func(), error) {
 	if err != nil {
 		return nil, err
 	}
-	close := logging.NewFileLog(conf.LogFolder(), examenSvcLog)
+	/*close := logging.NewFileLog(conf.LogFolder(), examenSvcLog)
 	defer func() {
 		logging.Debugf("Close log file")
 		close()
 	}()
-
+	*/
 	inbox := make(StringChannel)
 	list := task.NewList()
 	go SubmitDispatch(inbox)
@@ -185,6 +185,7 @@ func RunService() (func(), error) {
 	go func() {
 		for {
 			s := <-inbox
+			logging.Debugf("Got %s", s)
 			go scan.InspectFile(s)
 		}
 	}()
