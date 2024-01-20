@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"examen/pkg/config"
 	"examen/pkg/extract"
@@ -186,6 +187,7 @@ func (i *Installer) StageStopService() error {
 		}
 		return err
 	}
+	time.Sleep(1 * time.Second)
 	return nil
 }
 
