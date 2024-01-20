@@ -54,6 +54,8 @@ func main() {
 	config, err := config.LoadConfiguration(globals.AppID, globals.ConfigFileName)
 	fmt.Fprintf(file, "load config: %v\n%v", config, err)
 	if err != nil {
+		fmt.Println("STDOUT", err)
+		fmt.Fprintln(os.Stdout, "STDERR", err)
 		panic(err)
 	}
 	fmt.Fprintf(file, "config: %v", config)
