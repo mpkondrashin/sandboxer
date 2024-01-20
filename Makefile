@@ -48,7 +48,7 @@ cmd/setup/embed/install$(EXE).gz: cmd/install/install$(EXE)
 cmd/setup/embed/opengl32.dll.gz: resources/opengl32.dll
 	gzip -fc resources/opengl32.dll  > cmd/setup/embed/opengl32.dll.gz
 
-cmd/install/install.exe: cmd/install/embed/opengl32.dll.gz cmd/install/embed/examen.exe.gz cmd/install/embed/examensvc.exe.gz $(wildcard cmd/install/*.go)
+cmd/install/install.exe: cmd/install/embed/opengl32.dll.gz cmd/install/embed/examen.exe.gz cmd/install/embed/examensvc.exe.gz $(wildcard cmd/install/*.go) $(wildcard pkg/extract/*.go)
 	fyne package --os $(GOOS) --name install --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/install
 
 cmd/install/embed/opengl32.dll.gz: resources/opengl32.dll
