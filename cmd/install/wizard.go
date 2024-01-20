@@ -113,8 +113,8 @@ func (c *Wizard) Window(p Page) fyne.CanvasObject {
 
 	middle := container.NewPadded(container.NewVBox(layout.NewSpacer(), p.Content(c.win, c.installer), layout.NewSpacer()))
 	upper := container.NewBorder(nil, nil, container.NewHBox(left, widget.NewSeparator()), nil, middle)
-	quitButton, prevButton, nextButton := c.Buttons()
-	buttons := container.NewBorder(nil, nil, quitButton,
+	prevButton, nextButton := c.Buttons()
+	buttons := container.NewBorder(nil, nil, nil,
 		container.NewHBox(prevButton, nextButton))
 	bottom := container.NewVBox(widget.NewSeparator(), buttons)
 	_ = bottom
@@ -122,8 +122,8 @@ func (c *Wizard) Window(p Page) fyne.CanvasObject {
 	return container.NewBorder(nil, container.NewPadded(bottom), nil, nil, upper)
 }
 
-func (c *Wizard) Buttons() (*widget.Button, *widget.Button, *widget.Button) {
-	quitButton := widget.NewButtonWithIcon("Quit", theme.CancelIcon(), c.Quit)
+func (c *Wizard) Buttons() (*widget.Button, *widget.Button) {
+	//quitButton := widget.NewButtonWithIcon("Quit", theme.CancelIcon(), c.Quit)
 
 	prevButton := widget.NewButtonWithIcon("Back", theme.NavigateBackIcon(), c.Prev)
 	if c.current == 0 {
@@ -138,7 +138,7 @@ func (c *Wizard) Buttons() (*widget.Button, *widget.Button, *widget.Button) {
 		//nextButton.IconPlacement = widget.ButtonIconTrailingText
 		//quitButton.Disable()
 	}
-	return quitButton, prevButton, nextButton
+	return prevButton, nextButton
 }
 
 func (c *Wizard) Quit() {
