@@ -100,14 +100,15 @@ type InstallStage struct {
 
 func (i *Installer) Stages() []InstallStage {
 	return []InstallStage{
-		{"Uninstall Script", i.StageCreateUninstallScript},
-		{"Create Folders", i.StageCreateFolders},
-		{"Generate Config", i.StageCreateConfig},
-		{"Stop Service", i.StageStopService},
-		{"Uninstall Service", i.StageUninstallService},
-		{"Extract Executables", i.StageExtractExecutable},
-		{"Install Service", i.StageInstallService},
-		{"Start Service", i.StageStartService},
+		{"Uninstall script", i.StageCreateUninstallScript},
+		{"Create folders", i.StageCreateFolders},
+		{"Generate config", i.StageCreateConfig},
+		{"Stop service", i.StageStopService},
+		{"Wait for service to stop", i.StageWaitServiceToStop},
+		{"Uninstall service", i.StageUninstallService},
+		{"Extract executables", i.StageExtractExecutable},
+		{"Install service", i.StageInstallService},
+		{"Start service", i.StageStartService},
 	}
 }
 
