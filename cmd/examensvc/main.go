@@ -45,18 +45,33 @@ func (t *ExamenSvc) Stop(s service.Service) error {
 }
 
 func main() {
+	svcConfig := &service.Config{
+		Name:        globals.SvcName,
+		DisplayName: globals.SvcDisplayName,
+		Description: globals.SvcDescription,
+		//Executable:  c.Path(globals.SvcFileName),
+	}
+	svc, err := service.New(nil, svcConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+	logger, err = svc.Logger(nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 	// Open file for append
 	file, err := os.OpenFile("C:\\log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer file.Close()
+
 	config, err := config.LoadConfiguration(globals.AppID, globals.ConfigFileName)
 	fmt.Fprintf(file, "load config: %v\n%v", config, err)
 	if err != nil {
 		fmt.Println("STDOUT", err)
 		fmt.Fprintln(os.Stdout, "STDERR", err)
-		panic(err)
+		logger.Errorf("Configuration Load: %v", err)
 	}
 	fmt.Fprintf(file, "config: %v", config)
 	close := logging.NewFileLog(config.LogFolder(), examenSvcLog)
