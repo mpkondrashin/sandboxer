@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option go_package = "examen/pkg/grpc/proto";
+
+
+package examen;
+
+service ExamenSvc {
+  rpc Submit (SubmitRequest) returns (SubmitReply) {}
+  rpc Status (StatusRequest) returns (StatusReply) {}
+}
+
+message SubmitRequest {
+  string name = 1;
+}
+
+message SubmitReply {
+  string message = 1;
+}
+
+message StatusRequest {
+  int32 from = 1;
+  int32 count = 2;
+}
+
+message StatusReply {
+  repeated Task tasks = 1;
+}
+
+message Task {
+  int32 status = 1;
+  string path = 2;
+}
