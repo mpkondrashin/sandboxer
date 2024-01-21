@@ -114,7 +114,7 @@ func main() {
 				}
 				desk.SetSystemTrayIcon(r)
 			}))
-		r, err := fyne.LoadResourceFromPath("../../resources/Upload.svg")
+		r, err := fyne.LoadResourceFromPath("../../resources/examen.png")
 		if err != nil {
 			panic(err)
 		}
