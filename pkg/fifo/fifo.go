@@ -5,9 +5,9 @@ import (
 	"os"
 
 	"bitbucket.org/avd/go-ipc/fifo"
-)
 
-const FIFOName = "examen_fifo"
+	"examen/pkg/globals"
+)
 
 type Writer struct {
 	fifo fifo.Fifo
@@ -16,7 +16,7 @@ type Writer struct {
 func NewWriter() (*Writer, error) {
 	w := &Writer{}
 	var err error
-	w.fifo, err = fifo.New(FIFOName, os.O_CREATE|os.O_WRONLY, 0600)
+	w.fifo, err = fifo.New(globals.FIFOName /* os.O_CREATE|*/, os.O_WRONLY|fifo.O_NONBLOCK, 0600)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +34,7 @@ type Reader struct {
 func NewReader() (*Reader, error) {
 	r := &Reader{}
 	var err error
-	r.fifo, err = fifo.New(FIFOName, os.O_CREATE|os.O_RDONLY, 0600)
+	r.fifo, err = fifo.New(globals.FIFOName, os.O_CREATE|os.O_RDONLY, 0600)
 	if err != nil {
 		return nil, err
 	}

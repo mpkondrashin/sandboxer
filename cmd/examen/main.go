@@ -3,15 +3,14 @@ package main
 import (
 	"fmt"
 	"log"
-	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/widget"
 
-	"examen/pkg/shm"
+	"examen/pkg/grpc"
 	"examen/pkg/state"
 	"examen/pkg/task"
 )
@@ -42,64 +41,88 @@ type Status interface {
 	Get(from int, count int)
 }
 
-func main() {
-	/*s := state.NewMemState()
+type StatusWindow struct {
+	win   fyne.Window
+	vbox  *fyne.Container
+	from  int32
+	count int32
+	icons []fyne.Resource
+}
+
+func NewStatusWindow(app fyne.App) *StatusWindow {
+	s := &StatusWindow{
+		win:   app.NewWindow("Status"),
+		from:  0,
+		count: 10,
+	}
 	for st := state.StateUnknown; st < state.StateCount; st++ {
-		fileName := fmt.Sprintf("C:\\Documents\\file_%v.docx", st)
-		id := fmt.Sprint(st)
-		s.AddObject(state.NewObject(id, fileName))
-		s.SetState(id, st)
-	}
-	fmt.Println(s.ListObjects())*/
-
-	app := app.New()
-	win := app.NewWindow("Status")
-
-	reader, err := shm.NewSHMReader(10000)
-	if err != nil {
-		dialog.ShowError(err, win)
-		return
-	}
-	//list, err := s.ListObjects()
-	//_ = err
-	var icons []fyne.Resource
-	for s := state.StateUnknown; s < state.StateCount; s++ {
-		r, err := fyne.LoadResourceFromPath(IconPath(s))
+		r, err := fyne.LoadResourceFromPath(IconPath(st))
 		if err != nil {
 			panic(err)
 		}
-		icons = append(icons, r)
+		s.icons = append(s.icons, r)
 	}
-	vbox := container.NewVBox()
-	l := task.NewList()
-	err = reader.Read(l)
-	if err != nil {
-		dialog.ShowError(err, win)
-		return
-	}
-	l.Iterate(func(t *task.Task) {
-		//iconLabel := widget.NewLabel(o.State.String())
-		pathLabel := widget.NewLabel(t.Path)
-		var icon *tappableIcon
-		icon = newTappableIcon(icons[t.State], func() {
-			go func() {
-				for s := state.StateUnknown; s <= state.StateHighRisk; s++ {
-					icon.SetResource(icons[s])
-					time.Sleep(1 * time.Second)
-				}
-			}()
+	s.vbox = container.NewVBox()
+	s.win.SetCloseIntercept(func() {
+		s.win.Hide()
+	})
+	return s
+}
+
+func (s *StatusWindow) Update() {
+	s.vbox.RemoveAll()
+	err := grpc.Status(s.from, s.count, func(tsk *task.Task) {
+		pathLabel := widget.NewLabel(tsk.Path)
+		//var icon *tappableIcon
+		icon := newTappableIcon(s.icons[tsk.State], func() {
+			// pup up menu
 		})
 		line := container.NewBorder(nil, nil, container.NewHBox(icon, pathLabel), nil)
-		vbox.Add(line)
+		s.vbox.Add(line)
 	})
-	if len(vbox.Objects) == 0 {
-		win.SetContent(widget.NewLabel("No tasks"))
-	} else {
-		border := container.NewBorder(vbox, nil, nil, nil, nil)
-		win.SetContent(border)
+	if err != nil {
+		s.win.SetContent(widget.NewLabel(err.Error()))
+		//dialog.ShowError(err, s.win)
+		return
 	}
-	//win.Resize(fyne.NewSize(600, 400))
-	win.ShowAndRun()
+	if len(s.vbox.Objects) == 0 {
+		s.win.SetContent(widget.NewLabel("No tasks"))
+	} else {
+		border := container.NewBorder(s.vbox, nil, nil, nil, nil)
+		s.win.SetContent(border)
+	}
+}
+func (s *StatusWindow) Show() {
+	s.win.Show()
+}
+func (s *StatusWindow) ShowAndRun() {
+	s.win.ShowAndRun()
+}
+
+func main() {
+	app := app.New()
+	statusWindow := NewStatusWindow(app)
+	if desk, ok := app.(desktop.App); ok {
+		m := fyne.NewMenu("MyApp",
+			fyne.NewMenuItem("Show", func() {
+				statusWindow.Show()
+			}),
+			fyne.NewMenuItem("Change Icon", func() {
+				r, err := fyne.LoadResourceFromPath(IconPath(state.StateLowRisk))
+				if err != nil {
+					panic(err)
+				}
+				desk.SetSystemTrayIcon(r)
+			}))
+		r, err := fyne.LoadResourceFromPath("../../resources/Upload.svg")
+		if err != nil {
+			panic(err)
+		}
+		desk.SetSystemTrayIcon(r)
+		desk.SetSystemTrayMenu(m)
+	}
+	statusWindow.Update()
+	statusWindow.ShowAndRun()
 }
 
 func IconPath(s state.State) string {

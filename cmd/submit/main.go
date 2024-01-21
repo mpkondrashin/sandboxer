@@ -29,7 +29,7 @@ func main() {
 	}()
 	logging.Infof("Submit")
 	if len(os.Args) != 2 {
-		logging.Errorf("Wrong parameters: %s", strings.Join(os.Args, " "))
+		logging.Errorf("Missing or wrong number of parameters: %s", strings.Join(os.Args[1:], " "))
 		return
 	}
 	filePath := os.Args[1]

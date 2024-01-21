@@ -9,4 +9,5 @@ const (
 	SvcName        = "examen"
 	SvcDisplayName = "Examen Sandbox Submission Tool"
 	SvcDescription = "Submit files to Vision One sandbox"
+	FIFOName       = "examen_fifo"
 )
