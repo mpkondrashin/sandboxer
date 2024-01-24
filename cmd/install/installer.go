@@ -28,21 +28,22 @@ type Installer struct {
 	uninstallScript *script.Script
 }
 
-func NewInstaller(appID string) *Installer {
+func NewInstaller(appID string) (*Installer, error) {
+	configFolder, err := config.ConfigFileFolder(appID)
+	if err != nil {
+		return nil, err
+	}
+	configPath := filepath.Join(configFolder, globals.ConfigFileName)
+	logging.Debugf("Configuration path: %s", configPath)
+
 	return &Installer{
 		appID:  appID,
-		config: config.New(),
-	}
+		config: config.New(configPath),
+	}, nil
 }
 
 func (i *Installer) LoadConfig() error {
-	configFolder, err := i.ConfigFileFolder()
-	if err != nil {
-		return err
-	}
-	configPath := filepath.Join(configFolder, globals.ConfigFileName)
-	logging.Debugf("Load configuration from %s", configPath)
-	err = i.config.Load(configPath)
+	err := i.config.Load()
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
@@ -58,8 +59,8 @@ func (i *Installer) SaveConfig() error {
 	if err := os.MkdirAll(folder, 0700); err != nil {
 		return err
 	}
-	filePath := filepath.Join(folder, globals.ConfigFileName)
-	if err := i.config.Save(filePath); err != nil {
+	//filePath := filepath.Join(folder, globals.ConfigFileName)
+	if err := i.config.Save(); err != nil {
 		return err
 	}
 	return nil
@@ -166,12 +167,12 @@ func (i *Installer) StageCreateConfig() error {
 		return fmt.Errorf("os.MkdirAll: %w", err)
 	}
 	i.uninstallScript.AddLine(script.Get().RemoveDir(folder))
-	filePath := filepath.Join(folder, globals.ConfigFileName)
-	logging.Debugf("Install: CreateConfig: Save to %s", filePath)
-	if err := i.config.Save(filePath); err != nil {
+	//filePath := filepath.Join(folder, globals.ConfigFileName)
+	//logging.Debugf("Install: CreateConfig: Save to %s", filePath)
+	if err := i.config.Save(); err != nil {
 		return err
 	}
-	return i.uninstallScript.AddLine(script.Get().RemoveDir(filePath))
+	return i.uninstallScript.AddLine(script.Get().RemoveDir(i.config.GetFilePath()))
 }
 
 func (i *Installer) StageStopService() error {

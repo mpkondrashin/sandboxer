@@ -7,21 +7,23 @@ import (
 	"time"
 )
 
+type ID int64
+
 var (
-	count int64
+	count ID
 )
 
-func TaskNumber() int64 {
-	return atomic.AddInt64(&count, 1)
+func TaskNumber() ID {
+	return (ID)(atomic.AddInt64((*int64)(&count), 1))
 }
 
 type Task struct {
-	Number     int64
+	Number     ID
 	SubmitTime time.Time
 	Path       string
 	State      state.State
 	Message    string
-	vOneID     string
+	SandboxID  string
 }
 
 func NewTask(path string) *Task {
@@ -31,7 +33,7 @@ func NewTask(path string) *Task {
 		Path:       path,
 		State:      state.StateNew,
 		Message:    "",
-		vOneID:     "",
+		SandboxID:  "",
 	}
 }
 
@@ -39,20 +41,20 @@ func (t *Task) SetState(newState state.State) {
 	t.State = newState
 }
 func (t *Task) SetID(id string) {
-	t.vOneID = id
+	t.SandboxID = id
 }
 
 func (t *Task) VOneID() string {
-	return t.vOneID
+	return t.SandboxID
 }
 
 func (t *Task) String() string {
-	return fmt.Sprintf("Task %d; submitted on: %v; state: %v; id: %s; path: %s", t.Number, t.SubmitTime, t.State, t.vOneID, t.Path)
+	return fmt.Sprintf("Task %d; submitted on: %v; state: %v; id: %s; path: %s", t.Number, t.SubmitTime, t.State, t.SandboxID, t.Path)
 }
 
-func (t *Task) SetError(errMessage string) {
+func (t *Task) SetError(err error) {
 	t.State = state.StateError
-	t.Message = errMessage
+	t.Message = err.Error()
 }
 
 func (t *Task) SetMessage(message string) {

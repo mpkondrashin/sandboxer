@@ -18,13 +18,13 @@ import (
 )
 
 type Scan struct {
-	list   *task.List
+	list   *task.TaskList
 	config *config.Configuration
 	vOne   *vone.VOne
 	//check  *goperic.Periculosum
 }
 
-func NewScan(config *config.Configuration, vOne *vone.VOne /*, check *goperic.Periculosum*/, list *task.List) *Scan {
+func NewScan(config *config.Configuration, vOne *vone.VOne /*, check *goperic.Periculosum*/, list *task.TaskList) *Scan {
 	return &Scan{
 		list:   list,
 		config: config,

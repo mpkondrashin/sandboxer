@@ -39,10 +39,14 @@ type Page interface {
 }
 
 func NewWizard(capturesFolder string) *Wizard {
+	installer, err := NewInstaller(globals.AppID)
+	if err != nil {
+		return nil // let it crash
+	}
 	c := &Wizard{
 		app:            app.NewWithID(globals.AppID),
 		capturesFolder: capturesFolder,
-		installer:      NewInstaller(globals.AppID),
+		installer:      installer,
 	}
 	c.app.Lifecycle()
 	_ = c.installer.LoadConfig()

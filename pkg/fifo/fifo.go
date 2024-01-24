@@ -23,6 +23,9 @@ func NewWriter() (*Writer, error) {
 	return w, nil
 }
 
+func (w *Writer) Close() error {
+	return w.fifo.Close()
+}
 func (w *Writer) Write(data any) error {
 	return json.NewEncoder(w.fifo).Encode(data)
 }
@@ -39,6 +42,10 @@ func NewReader() (*Reader, error) {
 		return nil, err
 	}
 	return r, nil
+}
+
+func (r *Reader) Close() error {
+	return r.fifo.Close()
 }
 
 func (w *Reader) Read(data any) error {

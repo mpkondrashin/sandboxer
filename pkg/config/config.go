@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"examen/pkg/globals"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -11,9 +10,12 @@ import (
 
 	"github.com/kardianos/service"
 	"gopkg.in/yaml.v2"
+
+	"examen/pkg/globals"
 )
 
 type Configuration struct {
+	filePath    string
 	Token       string        `yaml:"token"`
 	Domain      string        `yaml:"aws_region"`
 	Folder      string        `yaml:"folder"`
@@ -22,8 +24,9 @@ type Configuration struct {
 	Sleep       time.Duration `yaml:"sleep"`
 }
 
-func New() *Configuration {
+func New(filePath string) *Configuration {
 	return &Configuration{
+		filePath:    filePath,
 		Folder:      InstallFolder(),
 		Ignore:      []string{".DS_Store", "Thumbs.db"},
 		Periculosum: "check",
@@ -31,22 +34,28 @@ func New() *Configuration {
 	}
 }
 
+func (c *Configuration) GetFilePath() string {
+	return c.filePath
+}
+
 func (c *Configuration) LogFolder() string {
 	return filepath.Join(c.Folder, globals.AppFolderName, "logs")
 }
 
-func LoadConfiguration(appID string, fileName string) (*Configuration, error) {
+/*
+func (c *Configuration) Load() error {
 	folder, err := ConfigFileFolder(appID)
 	if err != nil {
 		return nil, err
 	}
-	filePath := filepath.Join(folder, fileName)
-	c := &Configuration{}
-	if err := c.Load(filePath); err != nil {
+	c := &Configuration{
+		filePath: filepath.Join(folder, fileName),
+	}
+	if err := c.Load(); err != nil {
 		return nil, err
 	}
 	return c, nil
-}
+}*/
 
 func (c *Configuration) PericulosumPath() (string, error) {
 	path, err := os.Executable()
@@ -57,17 +66,17 @@ func (c *Configuration) PericulosumPath() (string, error) {
 }
 
 // Save - writes Configuration struct to file as YAML
-func (c *Configuration) Save(fileName string) (err error) {
+func (c *Configuration) Save() (err error) {
 	data, err := yaml.Marshal(c)
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(fileName, data, 0600)
+	return os.WriteFile(c.filePath, data, 0600)
 }
 
 // Load - reads Configuration struct from YAML file
-func (c *Configuration) Load(fileName string) error {
-	data, err := os.ReadFile(fileName)
+func (c *Configuration) Load() error {
+	data, err := os.ReadFile(c.filePath)
 	if err != nil {
 		return err
 	}
@@ -130,4 +139,12 @@ func InstallFolder() string {
 		return "/Applications"
 	}
 	return ""
+}
+
+func FilePath() (string, error) {
+	folder, err := ConfigFileFolder(globals.AppID)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(folder, globals.ConfigFileName), nil
 }

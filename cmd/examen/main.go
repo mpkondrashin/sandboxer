@@ -2,129 +2,123 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"os"
+	"path/filepath"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
-	"fyne.io/fyne/v2/widget"
 
-	"examen/pkg/grpc"
+	"examen/pkg/config"
+	"examen/pkg/logging"
 	"examen/pkg/state"
+	"examen/pkg/submit"
 	"examen/pkg/task"
 )
-
-type tappableIcon struct {
-	widget.Icon
-	callback func()
-}
-
-func newTappableIcon(res fyne.Resource, callback func()) *tappableIcon {
-	icon := &tappableIcon{
-		callback: callback,
-	}
-	icon.ExtendBaseWidget(icon)
-	icon.SetResource(res)
-	return icon
-}
-
-func (t *tappableIcon) Tapped(_ *fyne.PointEvent) {
-	log.Println("I have been tapped")
-	t.callback()
-}
-
-func (t *tappableIcon) TappedSecondary(_ *fyne.PointEvent) {
-}
 
 type Status interface {
 	Get(from int, count int)
 }
 
-type StatusWindow struct {
-	win   fyne.Window
-	vbox  *fyne.Container
-	from  int32
-	count int32
-	icons []fyne.Resource
+type ExamenApp struct {
+	app               fyne.App
+	submissionsWindow *SubmissionsWindow
+	optionsWindow     *OptionsWindow
 }
 
-func NewStatusWindow(app fyne.App) *StatusWindow {
-	s := &StatusWindow{
-		win:   app.NewWindow("Status"),
-		from:  0,
-		count: 10,
+func NewExamenApp(conf *config.Configuration) *ExamenApp {
+	fyneApp := app.New()
+	deskApp, ok := fyneApp.(desktop.App)
+	if !ok {
+		panic("only desktop supported")
 	}
-	for st := state.StateUnknown; st < state.StateCount; st++ {
-		r, err := fyne.LoadResourceFromPath(IconPath(st))
-		if err != nil {
-			panic(err)
-		}
-		s.icons = append(s.icons, r)
+	a := &ExamenApp{
+		app:               fyneApp,
+		submissionsWindow: NewSubmissionsWindow(fyneApp),
+		optionsWindow:     NewOptionsWindow(fyneApp, conf),
 	}
-	s.vbox = container.NewVBox()
-	s.win.SetCloseIntercept(func() {
-		s.win.Hide()
-	})
-	return s
+	deskApp.SetSystemTrayIcon(a.Icon())
+	deskApp.SetSystemTrayMenu(a.Menu())
+	return a
 }
 
-func (s *StatusWindow) Update() {
-	s.vbox.RemoveAll()
-	err := grpc.Status(s.from, s.count, func(tsk *task.Task) {
-		pathLabel := widget.NewLabel(tsk.Path)
-		//var icon *tappableIcon
-		icon := newTappableIcon(s.icons[tsk.State], func() {
-			// pup up menu
-		})
-		line := container.NewBorder(nil, nil, container.NewHBox(icon, pathLabel), nil)
-		s.vbox.Add(line)
-	})
+func (a *ExamenApp) Icon() fyne.Resource {
+	path := "../../resources/LowRisk.svg"
+	r, err := fyne.LoadResourceFromPath(path)
 	if err != nil {
-		s.win.SetContent(widget.NewLabel(err.Error()))
-		//dialog.ShowError(err, s.win)
-		return
+		panic(err)
 	}
-	if len(s.vbox.Objects) == 0 {
-		s.win.SetContent(widget.NewLabel("No tasks"))
-	} else {
-		border := container.NewBorder(s.vbox, nil, nil, nil, nil)
-		s.win.SetContent(border)
-	}
-}
-func (s *StatusWindow) Show() {
-	s.win.Show()
-}
-func (s *StatusWindow) ShowAndRun() {
-	s.win.ShowAndRun()
+	return r
 }
 
-func main() {
-	app := app.New()
-	statusWindow := NewStatusWindow(app)
-	if desk, ok := app.(desktop.App); ok {
-		m := fyne.NewMenu("MyApp",
-			fyne.NewMenuItem("Show", func() {
-				statusWindow.Show()
-			}),
-			fyne.NewMenuItem("Change Icon", func() {
-				r, err := fyne.LoadResourceFromPath(IconPath(state.StateLowRisk))
-				if err != nil {
-					panic(err)
-				}
-				desk.SetSystemTrayIcon(r)
-			}))
-		r, err := fyne.LoadResourceFromPath("../../resources/examen.png")
-		if err != nil {
-			panic(err)
-		}
-		desk.SetSystemTrayIcon(r)
-		desk.SetSystemTrayMenu(m)
-	}
-	statusWindow.Update()
-	statusWindow.ShowAndRun()
+func (s *ExamenApp) Run() {
+	s.submissionsWindow.Show()
+	s.submissionsWindow.win.ShowAndRun()
+}
+
+func (s *ExamenApp) Menu() *fyne.Menu {
+	return fyne.NewMenu("Examen",
+		fyne.NewMenuItem("Submissions...", s.Submissions),
+		fyne.NewMenuItem("Options...", s.Options),
+		//fyne.NewMenuItem("About...", nil),
+		fyne.NewMenuItem("Quit", s.Quit),
+	)
+}
+
+func (s *ExamenApp) Submissions() {
+	s.submissionsWindow.Show()
+}
+
+func (s *ExamenApp) Options() {
+	s.optionsWindow.Show()
+}
+
+func (s *ExamenApp) Quit() {
+	s.app.Quit()
 }
 
 func IconPath(s state.State) string {
 	return fmt.Sprintf("../../resources/%s.svg", s.String())
+}
+
+var Conf *config.Configuration
+
+func main() {
+	configFilePath, err := config.FilePath()
+	if err != nil {
+		panic(err)
+	}
+	conf := config.New(configFilePath)
+
+	close := setupLogging()
+	defer close()
+
+	list := task.NewList()
+	stop, err := submit.RunService(conf, list)
+	if err != nil {
+		panic(err)
+	}
+	defer stop()
+	app := NewExamenApp(conf)
+	app.Run()
+}
+
+func setupLogging() func() {
+	logging.SetLevel(logging.DEBUG)
+	//      logFileName := fmt.Sprintf("setup_%s.log", time.Now().Format("20060102_150405"))
+	logFileName := "examen.log"
+	logFilePath := filepath.Join(".", logFileName)
+	//      logFilePath := filepath.Join(os.TempDir(), logFileName)
+	fmt.Println(logFilePath)
+	file, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+	logger := logging.NewFileLogger(file)
+	logging.AddLogger(logger)
+	return func() {
+		logging.Infof("Close Logging")
+		logging.Close()
+		file.Close()
+	}
 }

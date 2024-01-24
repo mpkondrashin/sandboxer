@@ -6,18 +6,20 @@ import (
 
 	"examen/pkg/config"
 	"examen/pkg/fifo"
-	"examen/pkg/globals"
 	"examen/pkg/logging"
 )
 
 const submitLog = "submit.log"
 
 func main() {
-	config, err := config.LoadConfiguration(globals.AppID, globals.ConfigFileName)
+	configFilePath, err := config.FilePath()
 	if err != nil {
 		panic(err)
 	}
-	close := logging.NewFileLog(config.LogFolder(), submitLog)
+	conf := config.New(configFilePath)
+	_ = conf
+	//close := logging.NewFileLog(conf.LogFolder(), submitLog)
+	close := logging.NewFileLog(".", submitLog)
 	defer func() {
 		logging.Debugf("Close log file")
 		close()
@@ -39,6 +41,7 @@ func main() {
 	if err != nil {
 		os.Exit(1)
 	}
+	defer fifoWriter.Close()
 	fifoWriter.Write(os.Args[1])
 
 	logging.Infof("Submit finished")
