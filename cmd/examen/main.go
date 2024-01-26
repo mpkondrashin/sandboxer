@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -94,7 +93,6 @@ func IconPath(s state.State) string {
 func setupLogging(conf *config.Configuration) func() {
 	logging.SetLevel(logging.DEBUG)
 	//      logFileName := fmt.Sprintf("setup_%s.log", time.Now().Format("20060102_150405"))
-	logFileName := "examen.log"
 	logFolder, err := conf.LogFolder()
 	if err != nil {
 		panic(err)
@@ -102,17 +100,11 @@ func setupLogging(conf *config.Configuration) func() {
 	if err := os.MkdirAll(logFolder, 0700); err != nil {
 		panic(err)
 	}
-	logFilePath := filepath.Join(logFolder, logFileName)
-	file, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		panic(err)
-	}
-	logger := logging.NewFileLogger(file)
-	logging.AddLogger(logger)
+	logFileName := "examen.log"
+	close := logging.NewFileLog(logFolder, logFileName)
 	return func() {
 		logging.Infof("Close Logging")
-		logging.Close()
-		file.Close()
+		close()
 	}
 }
 

@@ -42,6 +42,7 @@ func NewScan(config *config.Configuration /*, check *goperic.Periculosum*/, list
 func (s *Scan) vOne() *vone.VOne {
 	return vone.NewVOne(s.config.VisionOne.Domain, s.config.VisionOne.Token)
 }
+
 func (s *Scan) InspecfFolder(folderPath string) {
 	logging.Debugf("InspectFolder(%s)", folderPath)
 	err := filepath.Walk(folderPath,

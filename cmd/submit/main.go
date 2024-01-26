@@ -3,7 +3,11 @@ package main
 import (
 	"log"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
 	"strings"
+	"time"
 
 	"examen/pkg/config"
 	"examen/pkg/fifo"
@@ -13,7 +17,55 @@ import (
 
 const submitLog = "submit.log"
 
-var fifoMissing = "open/create fifo failed: open /tmp/examen_fifo: device not configured"
+var (
+	fifoMissingDarwinPrefix = "open/create fifo failed"
+	fifoMissingDarwinSuffix = "device not configured"
+	fifoMisingWindows       = "create file failed: The system cannot find the file specified."
+)
+
+func ExamenIsDown(err error) bool {
+	if runtime.GOOS == "darwin" {
+		return strings.HasPrefix(err.Error(), fifoMissingDarwinPrefix) &&
+			strings.HasSuffix(err.Error(), fifoMissingDarwinSuffix)
+	}
+	if runtime.GOOS == "windows" {
+		return strings.HasPrefix(err.Error(), fifoMisingWindows)
+	}
+	return false
+}
+
+func LaunchExamen(conf *config.Configuration) {
+	logging.Infof("Launch Examen")
+	examenPath := filepath.Join(conf.Folder, "examen")
+	examenPath = "../examen/examen"
+	cmd := exec.Command(examenPath)
+	err := cmd.Start()
+	if err != nil {
+		//logging.Errorf("%v", err)
+		panic(err)
+	}
+	logging.Infof("Launched Examen")
+}
+
+func OpenFIFO(conf *config.Configuration) *fifo.Writer {
+	fifoWriter, err := fifo.NewWriter()
+	if err == nil {
+		return fifoWriter
+	}
+	if !ExamenIsDown(err) {
+		panic(err)
+	}
+	LaunchExamen(conf)
+	for i := 0; i < 10; i++ {
+		logging.Debugf("Wait for FIFO")
+		fifoWriter, err = fifo.NewWriter()
+		if err == nil {
+			break
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+	return fifoWriter
+}
 
 func main() {
 	configFilePath, err := config.FilePath()
@@ -46,11 +98,9 @@ func main() {
 	}
 	filePath := os.Args[1]
 	logging.Infof("Submit \"%s\"", filePath)
-	fifoWriter, err := fifo.NewWriter()
-	if err != nil {
-		logging.Errorf("%v (%T)", err, err)
-		log.Println(err)
-		os.Exit(1)
+	fifoWriter := OpenFIFO(conf)
+	if fifoWriter == nil {
+		panic("did not ")
 	}
 	defer func() {
 		logging.LogError(fifoWriter.Close())

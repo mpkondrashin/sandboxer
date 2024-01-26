@@ -16,30 +16,15 @@ import (
 )
 
 var (
-	wg      sync.WaitGroup
-	rw      sync.RWMutex
-	loggers []chan LogData
+	//wg     sync.WaitGroup
+	rw     sync.RWMutex
+	logger Logger
 )
 
-func AddLogger(l Logger) {
+func SetLogger(l Logger) {
 	rw.Lock()
 	defer rw.Unlock()
-	c := make(chan LogData, 1000)
-	loggers = append(loggers, c)
-	wg.Add(1)
-	go func() {
-		for d := range c {
-			l.Write(d)
-		}
-		wg.Done()
-	}()
-}
-
-func Close() {
-	for _, l := range loggers {
-		close(l)
-	}
-	wg.Wait()
+	logger = l
 }
 
 func SetTimeFormat(format string) {
@@ -63,7 +48,5 @@ func timeString() string {
 }
 
 func logData(d LogData) {
-	for _, each := range loggers {
-		each <- d
-	}
+	logger.Write(d)
 }

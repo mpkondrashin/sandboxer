@@ -5,14 +5,6 @@ import (
 	"path/filepath"
 )
 
-func InstallLogFolder() string {
-	path, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-	return filepath.Dir(path)
-}
-
 func NewFileLog(folder, fileName string) func() {
 	SetLevel(DEBUG)
 	logFilePath := filepath.Join(folder, fileName)
@@ -20,10 +12,8 @@ func NewFileLog(folder, fileName string) func() {
 	if err != nil {
 		panic(err)
 	}
-	logger := NewFileLogger(file)
-	AddLogger(logger)
+	SetLogger(NewFileLogger(file))
 	return func() {
-		Close()
 		file.Close()
 	}
 }

@@ -130,8 +130,8 @@ func LogError(err error) {
 }
 
 func logItf(severity int, format string, v ...interface{}) {
-	rw.RLock()
-	defer rw.RUnlock()
+	rw.Lock()
+	defer rw.Unlock()
 	if severity < loggingLevel {
 		return
 	}
