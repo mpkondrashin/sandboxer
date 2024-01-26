@@ -24,6 +24,7 @@ type Status interface {
 type ExamenApp struct {
 	app               fyne.App
 	submissionsWindow *SubmissionsWindow
+	quotaWindow       *QuotaWindow
 	optionsWindow     *OptionsWindow
 }
 
@@ -36,6 +37,7 @@ func NewExamenApp(conf *config.Configuration) *ExamenApp {
 	a := &ExamenApp{
 		app:               fyneApp,
 		submissionsWindow: NewSubmissionsWindow(fyneApp),
+		quotaWindow:       NewQuotaWindow(fyneApp, conf),
 		optionsWindow:     NewOptionsWindow(fyneApp, conf),
 	}
 	deskApp.SetSystemTrayIcon(a.Icon())
@@ -60,6 +62,7 @@ func (s *ExamenApp) Run() {
 func (s *ExamenApp) Menu() *fyne.Menu {
 	return fyne.NewMenu("Examen",
 		fyne.NewMenuItem("Submissions...", s.Submissions),
+		fyne.NewMenuItem("Quota...", s.Quota),
 		fyne.NewMenuItem("Options...", s.Options),
 		//fyne.NewMenuItem("About...", nil),
 		fyne.NewMenuItem("Quit", s.Quit),
@@ -68,6 +71,10 @@ func (s *ExamenApp) Menu() *fyne.Menu {
 
 func (s *ExamenApp) Submissions() {
 	s.submissionsWindow.Show()
+}
+
+func (s *ExamenApp) Quota() {
+	s.quotaWindow.Show()
 }
 
 func (s *ExamenApp) Options() {

@@ -20,19 +20,28 @@ import (
 type Scan struct {
 	list   *task.TaskList
 	config *config.Configuration
-	vOne   *vone.VOne
 	//check  *goperic.Periculosum
 }
 
 func NewScan(config *config.Configuration /*, check *goperic.Periculosum*/, list *task.TaskList) *Scan {
+	/*	if s.config.VisionOne.Token == "" {
+			return errors.New("token is not set")
+		}
+		if s.config.VisionOne.Domain == "" {
+			return errors.New("domain is not set")
+		}
+
+	*/
 	return &Scan{
 		list:   list,
 		config: config,
-		vOne:   vone.NewVOne(config.VisionOne.Domain, config.VisionOne.Token),
 		//check:  check,
 	}
 }
 
+func (s *Scan) vOne() *vone.VOne {
+	return vone.NewVOne(s.config.VisionOne.Domain, s.config.VisionOne.Token)
+}
 func (s *Scan) InspecfFolder(folderPath string) {
 	logging.Debugf("InspectFolder(%s)", folderPath)
 	err := filepath.Walk(folderPath,
@@ -41,7 +50,8 @@ func (s *Scan) InspecfFolder(folderPath string) {
 				return err
 			}
 			if info.Mode().IsRegular() {
-				go s.InspectFile(path)
+				//go
+				s.InspectFile(path)
 			}
 			return nil
 		})
@@ -87,16 +97,16 @@ func (s *Scan) InspectFile(filePath string) {
 }
 
 func (s *Scan) Submit(t task.ID) error {
-	if s.config.VisionOne.Domain == "" {
-		return errors.New("domain is not set")
-	}
 	if s.config.VisionOne.Token == "" {
 		return errors.New("token is not set")
+	}
+	if s.config.VisionOne.Domain == "" {
+		return errors.New("domain is not set")
 	}
 	task.SetState(t, state.StateUpload)
 	//task.SetState(t, state.State(rand.Int()%int(state.StateCount)))
 	//return nil
-	f, err := s.vOne.SandboxSubmitFile().SetFilePath(task.Path(t))
+	f, err := s.vOne().SandboxSubmitFile().SetFilePath(task.Path(t))
 	if err != nil {
 		return err
 	}
@@ -121,7 +131,7 @@ func (s *Scan) WaitForResult(t task.ID) error {
 	task.SetState(t, state.StateInspect)
 	for {
 		// Should we set temporary state "checking"?
-		status, err := s.vOne.SandboxSubmissionStatus(task.GetSandboxID(t)).Do(context.TODO())
+		status, err := s.vOne().SandboxSubmissionStatus(task.GetSandboxID(t)).Do(context.TODO())
 		if err != nil {
 			return fmt.Errorf("check status: %w", err)
 		}
@@ -143,7 +153,7 @@ func (s *Scan) WaitForResult(t task.ID) error {
 }
 
 func (s *Scan) GetResult(t task.ID) error {
-	results, err := s.vOne.SandboxAnalysisResults(task.GetSandboxID(t)).Do(context.TODO())
+	results, err := s.vOne().SandboxAnalysisResults(task.GetSandboxID(t)).Do(context.TODO())
 	if err != nil {
 		return err
 	}
