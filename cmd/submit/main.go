@@ -36,8 +36,12 @@ func ExamenIsDown(err error) bool {
 
 func LaunchExamen(conf *config.Configuration) {
 	logging.Infof("Launch Examen")
-	examenPath := filepath.Join(conf.Folder, "examen")
-	examenPath = "../examen/examen"
+	examenFileName := "examen"
+	if runtime.GOOS == "windows" {
+		examenFileName += ".exe"
+	}
+	examenPath := filepath.Join(conf.Folder, examenFileName)
+	//examenPath = "../examen/examen"
 	cmd := exec.Command(examenPath)
 	err := cmd.Start()
 	if err != nil {
