@@ -14,14 +14,18 @@ import (
 	"examen/pkg/globals"
 )
 
+type VisionOne struct {
+	Token  string        `yaml:"token"`
+	Domain string        `yaml:"aws_region"`
+	Sleep  time.Duration `yaml:"sleep"`
+}
+
 type Configuration struct {
 	filePath    string
-	Token       string        `yaml:"token"`
-	Domain      string        `yaml:"aws_region"`
-	Folder      string        `yaml:"folder"`
-	Ignore      []string      `yaml:"ignore"`
-	Periculosum string        `yaml:"periculosum"`
-	Sleep       time.Duration `yaml:"sleep"`
+	VisionOne   VisionOne `yaml:"vision_one"`
+	Folder      string    `yaml:"folder"`
+	Ignore      []string  `yaml:"ignore"`
+	Periculosum string    `yaml:"periculosum"`
 }
 
 func New(filePath string) *Configuration {
@@ -30,7 +34,9 @@ func New(filePath string) *Configuration {
 		Folder:      InstallFolder(),
 		Ignore:      []string{".DS_Store", "Thumbs.db"},
 		Periculosum: "check",
-		Sleep:       5 * time.Second,
+		VisionOne: VisionOne{
+			Sleep: 5 * time.Second,
+		},
 	}
 }
 
@@ -38,8 +44,18 @@ func (c *Configuration) GetFilePath() string {
 	return c.filePath
 }
 
-func (c *Configuration) LogFolder() string {
-	return filepath.Join(c.Folder, globals.AppFolderName, "logs")
+func (c *Configuration) LogFolder() (string, error) {
+	if runtime.GOOS == "windows" {
+		return filepath.Join(c.Folder, globals.AppFolderName, "logs"), nil
+	}
+	if runtime.GOOS == "darwin" {
+		folder, err := ConfigFileFolder(globals.AppID)
+		if err != nil {
+			return "", err
+		}
+		return filepath.Join(folder, "logs"), nil
+	}
+	return "", fmt.Errorf("%s: %w", runtime.GOOS, ErrUnsupportedOS)
 }
 
 /*
@@ -106,9 +122,9 @@ func ConfigFileFolder(appID string) (string, error) {
 	if runtime.GOOS == "windows" {
 		return configFileFolder("PROGRAMDATA", globals.AppFolderName, "") // XXX appID?
 	}
-	if runtime.GOOS == "linux" {
-		return configFileFolder("HOME", ".config", appID)
-	}
+	//	if runtime.GOOS == "linux" {
+	//		return configFileFolder("HOME", ".config", appID)
+	//	}
 	if runtime.GOOS == "darwin" {
 		return configFileFolder("HOME", "Library/Application Support", appID)
 	}

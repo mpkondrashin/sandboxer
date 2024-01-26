@@ -29,7 +29,7 @@ func main() {
 			logging.Criticalf("panic: %v", err)
 		}
 	}()
-	logging.Infof("Submit")
+	logging.Infof("Submit Started")
 	if len(os.Args) != 2 {
 		logging.Errorf("Missing or wrong number of parameters: %s", strings.Join(os.Args[1:], " "))
 		return
@@ -42,7 +42,7 @@ func main() {
 		os.Exit(1)
 	}
 	defer fifoWriter.Close()
-	fifoWriter.Write(os.Args[1])
-
+	err = fifoWriter.Write(os.Args[1])
+	logging.LogError(err)
 	logging.Infof("Submit finished")
 }

@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 
 	"examen/pkg/config"
+	"examen/pkg/globals"
 	"examen/pkg/logging"
 	"examen/pkg/state"
 	"examen/pkg/submit"
@@ -81,35 +82,20 @@ func IconPath(s state.State) string {
 	return fmt.Sprintf("../../resources/%s.svg", s.String())
 }
 
-var Conf *config.Configuration
+//var Conf *config.Configuration
 
-func main() {
-	configFilePath, err := config.FilePath()
-	if err != nil {
-		panic(err)
-	}
-	conf := config.New(configFilePath)
-
-	close := setupLogging()
-	defer close()
-
-	list := task.NewList()
-	stop, err := submit.RunService(conf, list)
-	if err != nil {
-		panic(err)
-	}
-	defer stop()
-	app := NewExamenApp(conf)
-	app.Run()
-}
-
-func setupLogging() func() {
+func setupLogging(conf *config.Configuration) func() {
 	logging.SetLevel(logging.DEBUG)
 	//      logFileName := fmt.Sprintf("setup_%s.log", time.Now().Format("20060102_150405"))
 	logFileName := "examen.log"
-	logFilePath := filepath.Join(".", logFileName)
-	//      logFilePath := filepath.Join(os.TempDir(), logFileName)
-	fmt.Println(logFilePath)
+	logFolder, err := conf.LogFolder()
+	if err != nil {
+		panic(err)
+	}
+	if err := os.MkdirAll(logFolder, 0700); err != nil {
+		panic(err)
+	}
+	logFilePath := filepath.Join(logFolder, logFileName)
 	file, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		panic(err)
@@ -121,4 +107,32 @@ func setupLogging() func() {
 		logging.Close()
 		file.Close()
 	}
+}
+
+func main() {
+	configFilePath, err := config.FilePath()
+	if err != nil {
+		panic(err)
+	}
+	conf := config.New(configFilePath)
+	if err := conf.Load(); err != nil {
+		panic(err)
+	}
+	close := setupLogging(conf)
+	defer close()
+	logging.Infof("%s Version %s Start", globals.AppName, globals.Version)
+	logging.Debugf("Configuration file: %s", configFilePath)
+	err = conf.Load()
+	logging.LogError(err)
+	if err != nil {
+		panic(err)
+	}
+	list := task.NewList()
+	stop, err := submit.RunService(conf, list)
+	if err != nil {
+		panic(err)
+	}
+	defer stop()
+	app := NewExamenApp(conf)
+	app.Run()
 }

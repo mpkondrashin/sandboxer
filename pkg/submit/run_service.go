@@ -24,11 +24,11 @@ type Scan struct {
 	//check  *goperic.Periculosum
 }
 
-func NewScan(config *config.Configuration, vOne *vone.VOne /*, check *goperic.Periculosum*/, list *task.TaskList) *Scan {
+func NewScan(config *config.Configuration /*, check *goperic.Periculosum*/, list *task.TaskList) *Scan {
 	return &Scan{
 		list:   list,
 		config: config,
-		vOne:   vOne,
+		vOne:   vone.NewVOne(config.VisionOne.Domain, config.VisionOne.Token),
 		//check:  check,
 	}
 }
@@ -41,7 +41,7 @@ func (s *Scan) InspecfFolder(folderPath string) {
 				return err
 			}
 			if info.Mode().IsRegular() {
-				s.InspectFile(path)
+				go s.InspectFile(path)
 			}
 			return nil
 		})
@@ -87,13 +87,15 @@ func (s *Scan) InspectFile(filePath string) {
 }
 
 func (s *Scan) Submit(t task.ID) error {
-	if s.config.Domain == "" {
+	if s.config.VisionOne.Domain == "" {
 		return errors.New("domain is not set")
 	}
-	if s.config.Token == "" {
+	if s.config.VisionOne.Token == "" {
 		return errors.New("token is not set")
 	}
 	task.SetState(t, state.StateUpload)
+	//task.SetState(t, state.State(rand.Int()%int(state.StateCount)))
+	//return nil
 	f, err := s.vOne.SandboxSubmitFile().SetFilePath(task.Path(t))
 	if err != nil {
 		return err
@@ -131,7 +133,7 @@ func (s *Scan) WaitForResult(t task.ID) error {
 			//if time.Now().After(endTime) {
 			//	return ErrTimeout
 			//}
-			time.Sleep(s.config.Sleep)
+			time.Sleep(s.config.VisionOne.Sleep)
 		case vone.StatusFailed:
 			return fmt.Errorf("%s: %s", status.Error.Code, status.Error.Message)
 		default:
@@ -166,19 +168,15 @@ func (s *Scan) GetResult(t task.ID) error {
 	return nil
 }
 
-//const examenSvcLog = "examen_svc.log"
-
 func RunService(conf *config.Configuration, list *task.TaskList) (func(), error) {
-	inbox := make(StringChannel)
+	inbox := make(StringChannel, 10000)
 	//stop := make(chan struct{})
 	go SubmitDispatch(inbox)
 	//	pericPath, err := config.PericulosumPath()
-
 	//	if err != nil {
 	//	}
 	//	goperic.NewPericulosum()
-	vOne := vone.NewVOne(conf.Domain, conf.Token)
-	scan := NewScan(conf, vOne, list)
+	scan := NewScan(conf, list)
 	go func() {
 		for s := range inbox {
 			logging.Debugf("Got %s", s)

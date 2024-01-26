@@ -19,6 +19,7 @@ func List() *TaskList {
 
 func SetState(id ID, s state.State) {
 	_list.Get(id).SetState(s)
+	_list.Updated()
 }
 
 func SetSandboxID(id ID, vOneID string) {
@@ -31,6 +32,7 @@ func GetSandboxID(id ID) string {
 
 func SetError(id ID, err error) {
 	_list.Get(id).SetError(err)
+	_list.Updated()
 }
 
 func Path(id ID) string {
@@ -152,6 +154,19 @@ func (l *TaskList) IterateIDs(from int, count int, callback func(id ID)) {
 	for _, k := range keys { //[from : from+count] {
 		callback(k)
 	}
+}
+
+func (l *TaskList) Process(callback func([]ID)) {
+	l.mx.RLock()
+	defer l.mx.RUnlock()
+	keys := make([]ID, len(l.Tasks))
+	i := 0
+	for k := range l.Tasks {
+		keys[i] = k
+		i++
+	}
+	sort.Slice(keys, func(i, j int) bool { return keys[i] > keys[j] })
+	callback(keys)
 }
 
 /*

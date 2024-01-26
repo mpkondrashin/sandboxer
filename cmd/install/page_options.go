@@ -38,7 +38,7 @@ func (p *PageOptions) Run(win fyne.Window, installer *Installer) {
 		logging.Errorf("LoadConfig: %v", err)
 		dialog.ShowError(err, win)
 	}
-	p.tokenEntry.SetText(installer.config.Token)
+	p.tokenEntry.SetText(installer.config.VisionOne.Token)
 
 }
 
@@ -46,6 +46,6 @@ func (p *PageOptions) AquireData(installer *Installer) error {
 	if p.tokenEntry.Text == "" {
 		return fmt.Errorf("token field is empty")
 	}
-	installer.config.Token = p.tokenEntry.Text
+	installer.config.VisionOne.Token = p.tokenEntry.Text
 	return nil
 }

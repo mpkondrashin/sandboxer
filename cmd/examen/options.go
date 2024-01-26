@@ -31,6 +31,7 @@ func NewOptionsWindow(app fyne.App, conf *config.Configuration) *OptionsWindow {
 	labelTop := widget.NewLabel("Please open Vision One console to get all nessesary parameters")
 	s.tokenEntry = widget.NewMultiLineEntry()
 	s.tokenEntry.Wrapping = fyne.TextWrapBreak
+	s.tokenEntry.OnChanged = s.DetectDomain
 	tokenFormItem := widget.NewFormItem("Token:", s.tokenEntry)
 	tokenFormItem.HintText = "Go to XXXXXXX"
 
@@ -57,12 +58,13 @@ func (s *OptionsWindow) Save() {
 	//		dialog.ShowError(err, s.win)
 	//		return
 	//	}
-	s.conf.Token = s.tokenEntry.Text
+	s.conf.VisionOne.Token = s.tokenEntry.Text
 	if err := s.conf.Save(); err != nil {
-		logging.Errorf("LoadConfig: %v", err)
+		logging.Errorf("Save Config: %v", err)
 		dialog.ShowError(err, s.win)
 		return
 	}
+	s.win.Hide()
 }
 
 func (s *OptionsWindow) Cancel() {
@@ -70,11 +72,16 @@ func (s *OptionsWindow) Cancel() {
 }
 
 func (s *OptionsWindow) Update() {
-	s.tokenEntry.SetText(s.conf.Token) // ???
-	if s.conf.Domain == "" {
-		s.conf.Domain = vone.DetectVisionOneDomain(context.TODO(), s.conf.Token)
+	s.tokenEntry.SetText(s.conf.VisionOne.Token) // ???
+	if s.conf.VisionOne.Domain == "" {
+		s.conf.VisionOne.Domain = vone.DetectVisionOneDomain(context.TODO(), s.conf.VisionOne.Token)
 	}
-	s.domainLabel.SetText(s.conf.Domain)
+	s.domainLabel.SetText(s.conf.VisionOne.Domain)
+}
+
+func (s *OptionsWindow) DetectDomain(token string) {
+	domain := vone.DetectVisionOneDomain(context.TODO(), token)
+	s.domainLabel.SetText(domain)
 }
 
 func (s *OptionsWindow) Show() {
