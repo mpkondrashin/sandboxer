@@ -41,10 +41,9 @@ func LaunchSandboxer(conf *config.Configuration) {
 		executableFileName += ".exe"
 	}
 	executablePath := filepath.Join(conf.Folder, globals.AppName, executableFileName)
+	logging.Infof("Run " + executablePath)
 	cmd := exec.Command(executablePath)
-	err := cmd.Start()
-	if err != nil {
-		//logging.Errorf("%v", err)
+	if err := cmd.Start(); err != nil {
 		panic(err)
 	}
 	logging.Infof("Launched " + globals.AppName)
@@ -103,7 +102,7 @@ func main() {
 	logging.Infof("Submit \"%s\"", filePath)
 	fifoWriter := OpenFIFO(conf)
 	if fifoWriter == nil {
-		panic("did not ")
+		panic(globals.AppName + " is not running and can not be launched")
 	}
 	defer func() {
 		logging.LogError(fifoWriter.Close())
