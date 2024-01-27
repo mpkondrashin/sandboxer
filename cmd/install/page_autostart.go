@@ -1,10 +1,10 @@
 package main
 
 import (
-	"examen/pkg/globals"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
+
+	"sandboxer/pkg/globals"
 )
 
 type PageAutostart struct {

@@ -5,10 +5,11 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"examen/pkg/logging"
+	"sandboxer/pkg/globals"
+	"sandboxer/pkg/logging"
 )
 
-const installWizardLog = "examen_setup_wizard.log"
+const installWizardLog = globals.Name + "_setup_wizard.log"
 
 func IsWindows() bool {
 	return runtime.GOOS == "windows"

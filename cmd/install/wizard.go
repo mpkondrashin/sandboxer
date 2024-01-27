@@ -1,8 +1,6 @@
 package main
 
 import (
-	"examen/pkg/globals"
-	"examen/pkg/logging"
 	"fmt"
 	"image/png"
 	"log"
@@ -18,9 +16,12 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+
+	"sandboxer/pkg/globals"
+	"sandboxer/pkg/logging"
 )
 
-//go:generate fyne bundle --name IconSVGResource --output resource.go   sandbox.svg
+//go:generate fyne bundle --name IconSVGResource --output resource.go ../../resources/icon.png
 
 type Wizard struct {
 	pages          []Page
@@ -50,7 +51,7 @@ func NewWizard(capturesFolder string) *Wizard {
 	}
 	c.app.Lifecycle()
 	_ = c.installer.LoadConfig()
-	c.win = c.app.NewWindow("Examen Install Program")
+	c.win = c.app.NewWindow(globals.AppName + " Install Program")
 	c.win.Resize(fyne.NewSize(600, 400))
 	//c.win.SetFixedSize(true)
 	c.win.SetMaster()

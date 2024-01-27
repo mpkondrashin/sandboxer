@@ -6,7 +6,7 @@ import (
 
 	"bitbucket.org/avd/go-ipc/fifo"
 
-	"examen/pkg/globals"
+	"sandboxer/pkg/globals"
 )
 
 type Writer struct {

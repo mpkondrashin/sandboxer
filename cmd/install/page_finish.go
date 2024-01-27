@@ -1,11 +1,11 @@
 package main
 
 import (
-	"examen/pkg/globals"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+
+	"sandboxer/pkg/globals"
 )
 
 type PageFinish struct {
@@ -18,7 +18,7 @@ func (p *PageFinish) Name() string {
 }
 
 func (p *PageFinish) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
-	l1 := widget.NewLabel("Examen service sucessfully installed.")
+	l1 := widget.NewLabel(globals.AppName + " service sucessfully installed.")
 	l2 := widget.NewLabel("Right click on any file and pick Send To -> " + globals.AppName + ".")
 	return container.NewVBox(l1, l2)
 }

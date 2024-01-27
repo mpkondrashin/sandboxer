@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sandboxer/pkg/logging"
 	"strings"
 
 	"github.com/go-ole/go-ole"
@@ -138,4 +139,21 @@ func PidFilePath() (string, error) {
 		return "", err
 	}
 	return filepath.Join(folder, Name+".pid"), nil
+}
+
+func SetupLogging(logFileName string) (func(), error) {
+	logging.SetLevel(logging.DEBUG)
+	//      logFileName := fmt.Sprintf("setup_%s.log", time.Now().Format("20060102_150405"))
+	logFolder, err := LogsFolder()
+	if err != nil {
+		return nil, err
+	}
+	if err := os.MkdirAll(logFolder, 0700); err != nil {
+		return nil, err
+	}
+	close := logging.NewFileLog(logFolder, logFileName)
+	return func() {
+		logging.Infof("Close Logging")
+		close()
+	}, nil
 }

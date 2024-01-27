@@ -1,7 +1,7 @@
 package main
 
 import (
-	"examen/pkg/logging"
+	"sandboxer/pkg/logging"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"

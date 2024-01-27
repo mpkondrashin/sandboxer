@@ -5,10 +5,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/kardianos/service"
 	"gopkg.in/yaml.v2"
 
-	"examen/pkg/globals"
+	"sandboxer/pkg/globals"
 )
 
 type VisionOne struct {
@@ -86,6 +85,7 @@ func (c *Configuration) Path(fileName string) string {
 	return filepath.Join(c.Folder, globals.AppFolderName, fileName)
 }
 
+/*
 func (c *Configuration) Service(i service.Interface) (service.Service, error) {
 	svcConfig := &service.Config{
 		Name:        globals.SvcName,
@@ -95,3 +95,4 @@ func (c *Configuration) Service(i service.Interface) (service.Service, error) {
 	}
 	return service.New(i, svcConfig)
 }
+*/

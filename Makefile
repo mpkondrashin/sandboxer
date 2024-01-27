@@ -40,7 +40,7 @@ setup.zip: cmd/setup/setup$(EXE)
 
 cmd/setup/setup$(EXE): cmd/setup/embed/install$(EXE).gz cmd/setup/embed/opengl32.dll.gz $(wildcard cmd/setup/*.go)
 #	echo $(wildcard cmd/install/*.go)
-	fyne package --os $(GOOS) --name setup --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/setup
+	fyne package --os $(GOOS) --name setup --appID in.kondrash.sandboxer --appVersion 0.0.1 --icon ../../resources/icon.png --release --sourceDir ./cmd/setup
 
 cmd/setup/embed/install$(EXE).gz: cmd/install/install$(EXE)
 	gzip -fc cmd/install/install.exe > cmd/setup/embed/install.exe.gz
@@ -48,33 +48,26 @@ cmd/setup/embed/install$(EXE).gz: cmd/install/install$(EXE)
 cmd/setup/embed/opengl32.dll.gz: resources/opengl32.dll
 	gzip -fc resources/opengl32.dll  > cmd/setup/embed/opengl32.dll.gz
 
-cmd/install/install.exe: cmd/install/embed/opengl32.dll.gz cmd/install/embed/examen.exe.gz cmd/install/embed/submit.exe.gz $(wildcard cmd/install/*.go) $(wildcard pkg/extract/*.go)  $(wildcard pkg/globals/*.go)
-	fyne package --os $(GOOS) --name install --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/install
+cmd/install/install.exe: cmd/install/embed/opengl32.dll.gz cmd/install/embed/sandboxer.exe.gz cmd/install/embed/submit.exe.gz $(wildcard cmd/install/*.go) $(wildcard pkg/extract/*.go)  $(wildcard pkg/globals/*.go)
+	fyne package --os $(GOOS) --name install --appID in.kondrash.sandboxer --appVersion 0.0.1 --icon ../../resources/icon.png --release --sourceDir ./cmd/install
 
 cmd/install/embed/opengl32.dll.gz: resources/opengl32.dll
 	gzip -fc resources/opengl32.dll  > cmd/install/embed/opengl32.dll.gz
 
-#cmd/install/embed/examensvc.exe.gz: cmd/examensvc/examensvc.exe
-#	gzip -fc cmd/examensvc/examensvc.exe  > cmd/install/embed/examensvc.exe.gz
-
-cmd/install/embed/examen.exe.gz: cmd/examen/examen.exe
-	gzip -fc cmd/examen/examen.exe  > cmd/install/embed/examen.exe.gz
+cmd/install/embed/sandboxer.exe.gz: cmd/sandboxer/sandboxer.exe
+	gzip -fc cmd/sandboxer/sandboxer.exe  > cmd/install/embed/sandboxer.exe.gz
 
 cmd/submit/submit.exe: $(wildcard cmd/submit/*.go)  $(wildcard pkg/globals/*.go)
-	fyne package --os $(GOOS) --name submit --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/submit
+	fyne package --os $(GOOS) --name submit --appID in.kondrash.sandboxer --appVersion 0.0.1 --icon ../../resources/icon.png --release --sourceDir ./cmd/submit
 
 cmd/install/embed/submit.exe.gz: cmd/submit/submit.exe
 	gzip -fc cmd/submit/submit.exe  > cmd/install/embed/submit.exe.gz
 
-cmd/examen/examen.exe: $(wildcard cmd/examen/*.go) $(wildcard pkg/globals/*.go)
-	fyne package --os $(GOOS) --name examen --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/examen
-
-
-#cmd/examensvc/examensvc.exe: $(wildcard cmd/examensvc/*.go)
-#	fyne package --os $(GOOS) --name examensvc --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/examensvc
+cmd/sandboxer/sandboxer.exe: $(wildcard cmd/sandboxer/*.go) $(wildcard pkg/globals/*.go)
+	fyne package --os $(GOOS) --name sandboxer --appID in.kondrash.sandboxer --appVersion 0.0.1 --icon ../../resources/icon.png --release --sourceDir ./cmd/sandboxer
 
 clean: tidy
 	rm -f setup.zip
 
 tidy:
-	rm -f cmd/examen/examen.exe cmd/install/install.exe cmd/setup/setup.exe
+	rm -f cmd/sandboxer/sandboxer.exe cmd/install/install.exe cmd/setup/setup.exe

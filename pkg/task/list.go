@@ -1,10 +1,11 @@
 package task
 
 import (
-	"examen/pkg/logging"
-	"examen/pkg/state"
 	"sort"
 	"sync"
+
+	"sandboxer/pkg/logging"
+	"sandboxer/pkg/state"
 )
 
 var _list *TaskList

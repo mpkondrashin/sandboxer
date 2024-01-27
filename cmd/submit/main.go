@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"examen/pkg/config"
-	"examen/pkg/fifo"
-	"examen/pkg/globals"
-	"examen/pkg/logging"
+	"sandboxer/pkg/config"
+	"sandboxer/pkg/fifo"
+	"sandboxer/pkg/globals"
+	"sandboxer/pkg/logging"
 )
 
 const submitLog = "submit.log"
@@ -23,7 +23,7 @@ var (
 	fifoMisingWindows       = "create file failed: The system cannot find the file specified."
 )
 
-func ExamenIsDown(err error) bool {
+func IsDown(err error) bool {
 	if runtime.GOOS == "darwin" {
 		return strings.HasPrefix(err.Error(), fifoMissingDarwinPrefix) &&
 			strings.HasSuffix(err.Error(), fifoMissingDarwinSuffix)
@@ -34,21 +34,20 @@ func ExamenIsDown(err error) bool {
 	return false
 }
 
-func LaunchExamen(conf *config.Configuration) {
-	logging.Infof("Launch Examen")
-	examenFileName := "examen"
+func LaunchSandboxer(conf *config.Configuration) {
+	logging.Infof("Launch " + globals.AppName)
+	executableFileName := globals.AppName
 	if runtime.GOOS == "windows" {
-		examenFileName += ".exe"
+		executableFileName += ".exe"
 	}
-	examenPath := filepath.Join(conf.Folder, examenFileName)
-	//examenPath = "../examen/examen"
-	cmd := exec.Command(examenPath)
+	executablePath := filepath.Join(conf.Folder, executableFileName)
+	cmd := exec.Command(executablePath)
 	err := cmd.Start()
 	if err != nil {
 		//logging.Errorf("%v", err)
 		panic(err)
 	}
-	logging.Infof("Launched Examen")
+	logging.Infof("Launched " + globals.AppName)
 }
 
 func OpenFIFO(conf *config.Configuration) *fifo.Writer {
@@ -56,10 +55,10 @@ func OpenFIFO(conf *config.Configuration) *fifo.Writer {
 	if err == nil {
 		return fifoWriter
 	}
-	if !ExamenIsDown(err) {
+	if !IsDown(err) {
 		panic(err)
 	}
-	LaunchExamen(conf)
+	LaunchSandboxer(conf)
 	for i := 0; i < 10; i++ {
 		logging.Debugf("Wait for FIFO")
 		fifoWriter, err = fifo.NewWriter()

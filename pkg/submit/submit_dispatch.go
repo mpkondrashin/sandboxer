@@ -1,9 +1,10 @@
 package submit
 
 import (
-	"examen/pkg/fifo"
-	"examen/pkg/logging"
 	"log"
+
+	"sandboxer/pkg/fifo"
+	"sandboxer/pkg/logging"
 )
 
 type StringChannel chan string

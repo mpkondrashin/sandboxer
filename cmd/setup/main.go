@@ -9,14 +9,15 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"examen/pkg/extract"
-	"examen/pkg/logging"
+	"sandboxer/pkg/extract"
+	"sandboxer/pkg/globals"
+	"sandboxer/pkg/logging"
 )
 
 //go:embed embed/*
 var embedFS embed.FS
 
-const examenExecuteWizardLog = "examen_setup.log"
+const wizardLog = globals.Name + "_setup.log"
 
 func IsWindows() bool {
 	return runtime.GOOS == "windows"
@@ -31,7 +32,7 @@ func InstallLogFolder() string {
 }
 
 func main() {
-	close := logging.NewFileLog(InstallLogFolder(), examenExecuteWizardLog)
+	close := logging.NewFileLog(InstallLogFolder(), wizardLog)
 	defer close()
 	logging.Infof("Execute Start")
 	self, err := os.Executable()

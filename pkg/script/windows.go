@@ -26,5 +26,5 @@ func (Windows) StopService(name string) string {
 }
 
 func (Windows) StopProcess(name string) string {
-	return fmt.Sprintf("taskkill /im %s /f", name)
+	return fmt.Sprintf("taskkill /im %s.exe /f", name)
 }

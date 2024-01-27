@@ -11,11 +11,11 @@ import (
 	"strconv"
 	"strings"
 
-	"examen/pkg/config"
-	"examen/pkg/extract"
-	"examen/pkg/globals"
-	"examen/pkg/logging"
-	"examen/pkg/script"
+	"sandboxer/pkg/config"
+	"sandboxer/pkg/extract"
+	"sandboxer/pkg/globals"
+	"sandboxer/pkg/logging"
+	"sandboxer/pkg/script"
 )
 
 //go:embed embed/*.gz
@@ -105,7 +105,7 @@ func (i *Installer) Stages() []InstallStage {
 		{"Uninstall script", i.StageCreateUninstallScript},
 		{"Create folders", i.StageCreateFolders},
 		{"Generate config", i.StageCreateConfig},
-		{"Stop Examen", i.StageStopExamen},
+		{"Stop " + globals.AppName, i.StageStopProgram},
 		{"Wait for service to stop", i.StageWaitServiceToStop},
 		//{"Uninstall service", i.StageUninstallService},
 		{"Extract executables", i.StageExtractExecutable},
@@ -180,8 +180,8 @@ func (i *Installer) StageCreateConfig() error {
 	return i.uninstallScript.AddLine(script.Get().RemoveDir(i.config.GetFilePath()))
 }
 
-func (i *Installer) StageStopExamen() error {
-	logging.Debugf("Install: StopExamen")
+func (i *Installer) StageStopProgram() error {
+	logging.Debugf("Install: Stop " + globals.AppName)
 	pidFilePath, err := globals.PidFilePath()
 	if err != nil {
 		return err
@@ -189,23 +189,23 @@ func (i *Installer) StageStopExamen() error {
 	data, err := os.ReadFile(pidFilePath)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			logging.Debugf("Install: StopExamen: %s: %v", pidFilePath, err)
+			logging.Debugf("Install: Stop "+globals.AppName+": %s: %v", pidFilePath, err)
 			return nil
 		}
 		return err
 	}
 	pid, err := strconv.Atoi(string(data))
 	if err != nil {
-		logging.Debugf("Install: StopExamen: %s: %v", string(data), err)
+		logging.Debugf("Install: Stop"+globals.AppName+": %s: %v", string(data), err)
 		return nil
 	}
 	proc, err := os.FindProcess(pid)
 	if err != nil {
-		logging.Debugf("Install: StopExamen: FindProcess(%d): %v", pid, err)
+		logging.Debugf("Install: Stop"+globals.AppName+": FindProcess(%d): %v", pid, err)
 		return nil
 	}
 	if err := proc.Kill(); err != nil {
-		logging.Debugf("Install: StopExamen: Kill %d: %v", pid, err)
+		logging.Debugf("Install: Stop"+globals.AppName+": Kill %d: %v", pid, err)
 		return nil
 	}
 	return nil
@@ -219,7 +219,7 @@ func (i *Installer) StageWaitServiceToStop() error {
 func (i *Installer) StageExtractExecutable() error {
 	logging.Debugf("Install: StageExtractExecutable")
 	toExtract := []string{
-		"embed/examen.exe.gz",
+		"embed/" + globals.Name + ".exe.gz",
 		"embed/submit.exe.gz",
 	}
 	if IsWindows() {

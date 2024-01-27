@@ -1,4 +1,4 @@
-module examen
+module sandboxer
 
 go 1.21.5
 

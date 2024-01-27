@@ -1,7 +1,6 @@
 package main
 
 import (
-	"examen/pkg/globals"
 	"fmt"
 	"net/url"
 
@@ -9,10 +8,12 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
+
+	"sandboxer/pkg/globals"
 )
 
 const (
-	IntoText = "Examen provides ability to check files using Vision One sandbox. " +
+	IntoText = globals.AppName + " provides ability to check files using Vision One sandbox. " +
 		"You will have to provide API Key to use this service."
 
 	NoteText = "Please close all MMC windows before continuing."
@@ -65,8 +66,8 @@ func (p *PageIntro) Content(win fyne.Window, installer *Installer) fyne.CanvasOb
 	noteMarkdown := widget.NewRichTextFromMarkdown(NoteText)
 	noteMarkdown.Wrapping = fyne.TextWrapWord
 
-	repoURL, _ := url.Parse("https://github.com/mpkondrashin/examen")
-	repoLink := widget.NewHyperlink("Examen repository on GitHub", repoURL)
+	repoURL, _ := url.Parse("https://github.com/mpkondrashin/" + globals.Name)
+	repoLink := widget.NewHyperlink(globals.AppName+" repository on GitHub", repoURL)
 
 	licensePopUp := func() {
 		licenseLabel := widget.NewLabel(License)

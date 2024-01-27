@@ -1,13 +1,14 @@
 package main
 
 import (
-	"examen/pkg/logging"
 	"fmt"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
+
+	"sandboxer/pkg/logging"
 )
 
 type PageOptions struct {

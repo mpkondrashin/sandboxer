@@ -9,12 +9,12 @@ import (
 	"strings"
 	"time"
 
-	"examen/pkg/config"
-	"examen/pkg/logging"
-	"examen/pkg/state"
-	"examen/pkg/task"
-
 	"github.com/mpkondrashin/vone"
+
+	"sandboxer/pkg/config"
+	"sandboxer/pkg/logging"
+	"sandboxer/pkg/state"
+	"sandboxer/pkg/task"
 )
 
 type Scan struct {
