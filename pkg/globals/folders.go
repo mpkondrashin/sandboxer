@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/go-ole/go-ole"
 	"github.com/go-ole/go-ole/oleutil"
@@ -123,7 +124,8 @@ func AutoStartWindows(appPath string) (string, error) {
 		return "", fmt.Errorf("%s: %w", userProfile, ErrNoUserProfile)
 	}
 	appName := filepath.Base(appPath)
-	startupLinkPath := filepath.Join(userProfileFolder, "AppData", "Roaming", "Microsoft", "Windows", "Start Menu", "Programs", "Startup", appName)
+	fileName := strings.TrimSuffix(appName, filepath.Ext(appName))
+	startupLinkPath := filepath.Join(userProfileFolder, "AppData", "Roaming", "Microsoft", "Windows", "Start Menu", "Programs", "Startup", fileName+".lnk")
 	if err := makeLink(appPath, startupLinkPath); err != nil {
 		return "", err
 	}
