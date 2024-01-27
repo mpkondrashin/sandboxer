@@ -26,7 +26,7 @@ type Installer struct {
 }
 
 func NewInstaller(appID string) (*Installer, error) {
-	configFolder, err := config.ConfigFileFolder(appID)
+	configFolder, err := globals.UserDataFolder()
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (i *Installer) SaveConfig() error {
 }
 
 func (i *Installer) ConfigFileFolder() (string, error) {
-	return config.ConfigFileFolder(i.appID)
+	return globals.UserDataFolder()
 }
 
 func (i *Installer) Path(fileName string) string {
@@ -135,17 +135,21 @@ func (i *Installer) StageCreateUninstallScript() error {
 
 func (i *Installer) StageCreateFolders() error {
 	logging.Debugf("Install: StageCreateFolders")
+	logsFolder, err := globals.LogsFolder()
+	if err != nil {
+		return err
+	}
 	folders := []string{
-		"",
-		"logs",
+		i.config.Folder,
+		globals.InstallFolder(),
+		logsFolder,
 	}
 	for _, f := range folders {
-		folder := filepath.Join(i.config.Folder, globals.AppFolderName, f)
-		logging.Debugf("Install: Create folder \"%s\"", folder)
-		if err := os.MkdirAll(folder, 0766); err != nil {
+		logging.Debugf("Install: Create folder \"%s\"", f)
+		if err := os.MkdirAll(f, 0766); err != nil {
 			return err
 		}
-		err := i.uninstallScript.AddLine(script.Get().RemoveDir(folder))
+		err := i.uninstallScript.AddLine(script.Get().RemoveDir(f))
 		if err != nil {
 			return err
 		}
@@ -174,7 +178,13 @@ func (i *Installer) StageCreateConfig() error {
 
 func (i *Installer) StageStopExamen() error {
 	logging.Debugf("Install: StopExamen")
+	/*
+	   os
+	   func FindProcess(pid int) (*Process, error)
+	   func (p *Process) Kill() error
+	   func (p *Process) Signal(sig Signal) error
 
+	*/
 	//time.Sleep(1 * time.Second)
 	return nil
 }

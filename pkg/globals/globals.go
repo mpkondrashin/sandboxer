@@ -3,8 +3,9 @@ package globals
 const (
 	AppName        = "Examen"
 	AppFolderName  = "Examen"
-	AppID          = "com.github.mpkondrashin.examen"
-	ConfigFileName = "examen.yaml"
+	Name           = "examen"
+	AppID          = "com.github.mpkondrashin." + Name
+	ConfigFileName = Name + ".yaml"
 	SvcFileName    = "examensvc.exe" // XXX only windows?
 	SvcName        = "examen"
 	SvcDisplayName = "Examen Sandbox Submission Tool"

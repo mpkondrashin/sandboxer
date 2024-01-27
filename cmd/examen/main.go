@@ -93,7 +93,7 @@ func IconPath(s state.State) string {
 func setupLogging(conf *config.Configuration) func() {
 	logging.SetLevel(logging.DEBUG)
 	//      logFileName := fmt.Sprintf("setup_%s.log", time.Now().Format("20060102_150405"))
-	logFolder, err := conf.LogFolder()
+	logFolder, err := globals.LogsFolder()
 	if err != nil {
 		panic(err)
 	}
@@ -109,7 +109,7 @@ func setupLogging(conf *config.Configuration) func() {
 }
 
 func main() {
-	configFilePath, err := config.FilePath()
+	configFilePath, err := globals.ConfigurationFilePath()
 	if err != nil {
 		panic(err)
 	}

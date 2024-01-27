@@ -72,7 +72,7 @@ func OpenFIFO(conf *config.Configuration) *fifo.Writer {
 }
 
 func main() {
-	configFilePath, err := config.FilePath()
+	configFilePath, err := globals.ConfigurationFilePath()
 	if err != nil {
 		panic(err)
 	}
@@ -81,7 +81,7 @@ func main() {
 		panic(err)
 	}
 	//close := logging.NewFileLog(conf.LogFolder(), submitLog)
-	logFolder, err := conf.LogFolder()
+	logFolder, err := globals.LogsFolder()
 	if err != nil {
 		panic(err)
 	}

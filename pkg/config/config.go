@@ -1,11 +1,8 @@
 package config
 
 import (
-	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 	"time"
 
 	"github.com/kardianos/service"
@@ -31,7 +28,7 @@ type Configuration struct {
 func New(filePath string) *Configuration {
 	return &Configuration{
 		filePath:    filePath,
-		Folder:      InstallFolder(),
+		Folder:      globals.InstallFolder(),
 		Ignore:      []string{".DS_Store", "Thumbs.db"},
 		Periculosum: "check",
 		VisionOne: VisionOne{
@@ -42,20 +39,6 @@ func New(filePath string) *Configuration {
 
 func (c *Configuration) GetFilePath() string {
 	return c.filePath
-}
-
-func (c *Configuration) LogFolder() (string, error) {
-	if runtime.GOOS == "windows" {
-		return filepath.Join(c.Folder, globals.AppFolderName, "logs"), nil
-	}
-	if runtime.GOOS == "darwin" {
-		folder, err := ConfigFileFolder(globals.AppID)
-		if err != nil {
-			return "", err
-		}
-		return filepath.Join(folder, "logs"), nil
-	}
-	return "", fmt.Errorf("%s: %w", runtime.GOOS, ErrUnsupportedOS)
 }
 
 /*
@@ -111,56 +94,4 @@ func (c *Configuration) Service(i service.Interface) (service.Service, error) {
 		Executable:  c.Path(globals.SvcFileName),
 	}
 	return service.New(i, svcConfig)
-}
-
-var (
-	ErrNoUserProfile = errors.New("missing environment variable")
-	ErrUnsupportedOS = errors.New("unsupported OS")
-)
-
-func ConfigFileFolder(appID string) (string, error) {
-	if runtime.GOOS == "windows" {
-		return configFileFolder("PROGRAMDATA", globals.AppFolderName, "") // XXX appID?
-	}
-	//	if runtime.GOOS == "linux" {
-	//		return configFileFolder("HOME", ".config", appID)
-	//	}
-	if runtime.GOOS == "darwin" {
-		return configFileFolder("HOME", "Library/Application Support", appID)
-	}
-	return "", fmt.Errorf("%s: %w", runtime.GOOS, ErrUnsupportedOS)
-}
-
-func configFileFolder(profileVariable string, dir string, appID string) (string, error) {
-	userProfile := os.Getenv(profileVariable)
-	if userProfile == "" {
-		return "", fmt.Errorf("%s: %w", profileVariable, ErrNoUserProfile)
-	}
-	folder := filepath.Join(userProfile, dir, appID)
-	//err := os.MkdirAll(folder, 0700)
-	//if err != nil {
-	//return "", err
-	//}
-	return folder, nil
-}
-
-func InstallFolder() string {
-	if runtime.GOOS == "windows" {
-		return os.Getenv("PROGRAMFILES")
-	}
-	if runtime.GOOS == "linux" {
-		return "/usr/local/bin"
-	}
-	if runtime.GOOS == "darwin" {
-		return "/Applications"
-	}
-	return ""
-}
-
-func FilePath() (string, error) {
-	folder, err := ConfigFileFolder(globals.AppID)
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(folder, globals.ConfigFileName), nil
 }
