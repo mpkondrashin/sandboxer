@@ -48,7 +48,7 @@ cmd/setup/embed/install$(EXE).gz: cmd/install/install$(EXE)
 cmd/setup/embed/opengl32.dll.gz: resources/opengl32.dll
 	gzip -fc resources/opengl32.dll  > cmd/setup/embed/opengl32.dll.gz
 
-cmd/install/install.exe: cmd/install/embed/opengl32.dll.gz cmd/install/embed/examen.exe.gz cmd/install/embed/submit.exe.gz $(wildcard cmd/install/*.go) $(wildcard pkg/extract/*.go)
+cmd/install/install.exe: cmd/install/embed/opengl32.dll.gz cmd/install/embed/examen.exe.gz cmd/install/embed/submit.exe.gz $(wildcard cmd/install/*.go) $(wildcard pkg/extract/*.go)  $(wildcard pkg/globals/*.go)
 	fyne package --os $(GOOS) --name install --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/install
 
 cmd/install/embed/opengl32.dll.gz: resources/opengl32.dll
@@ -60,13 +60,13 @@ cmd/install/embed/opengl32.dll.gz: resources/opengl32.dll
 cmd/install/embed/examen.exe.gz: cmd/examen/examen.exe
 	gzip -fc cmd/examen/examen.exe  > cmd/install/embed/examen.exe.gz
 
-cmd/submit/submit.exe: $(wildcard cmd/submit/*.go)
+cmd/submit/submit.exe: $(wildcard cmd/submit/*.go)  $(wildcard pkg/globals/*.go)
 	fyne package --os $(GOOS) --name submit --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/submit
 
 cmd/install/embed/submit.exe.gz: cmd/submit/submit.exe
 	gzip -fc cmd/submit/submit.exe  > cmd/install/embed/submit.exe.gz
 
-cmd/examen/examen.exe: $(wildcard cmd/examen/*.go)
+cmd/examen/examen.exe: $(wildcard cmd/examen/*.go) $(wildcard pkg/globals/*.go)
 	fyne package --os $(GOOS) --name examen --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/examen
 
 
