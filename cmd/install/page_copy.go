@@ -49,7 +49,7 @@ func (p *PageInstallation) Run(win fyne.Window, installer *Installer) {
 		index++
 		return nil
 	})
-	p.statusLabel.SetText("")
+	p.statusLabel.SetText("Done")
 	if err != nil {
 		p.statusLabel.SetText("Failed")
 		logging.LogError(err)

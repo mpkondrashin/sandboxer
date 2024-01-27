@@ -24,3 +24,7 @@ func (Darwin) UninstallService(name string) string {
 func (Darwin) StopService(name string) string {
 	return fmt.Sprintf("# stopping %s", name)
 }
+
+func (Darwin) StopProcess(name string) string {
+	return fmt.Sprintf("killall %s", name)
+}

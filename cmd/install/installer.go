@@ -144,8 +144,7 @@ func (i *Installer) StageCreateFolders() error {
 		return err
 	}
 	folders := []string{
-		i.config.Folder,
-		globals.InstallFolder(),
+		filepath.Join(i.config.Folder, globals.AppName),
 		logsFolder,
 	}
 	for _, f := range folders {
@@ -254,17 +253,30 @@ func (i *Installer) StageExtendSendTo() error {
 }
 
 func (i *Installer) StageAutostart() error {
-	logging.Debugf("Install: StageAutostart")
+	logging.Debugf("Install: Autostart")
 	if !i.autostart {
 		logging.Debugf("Install: StageAutostart: Skip")
 		return nil
 	}
-	appPath := filepath.Join(i.InstallFolder(), globals.Name+".exe")
+	appPath := filepath.Join(i.InstallFolder(), globals.AppName+".exe")
 	linkPath, err := globals.AutoStart(appPath)
 	if err != nil {
 		return err
 	}
 	return i.uninstallScript.AddLine(script.Get().RemoveDir(linkPath))
+}
+
+func (i *Installer) StageUninstall() error {
+	logging.Debugf("Install: Uninstall")
+	pidPath, err := globals.PidFilePath()
+	if err != nil {
+		return err
+	}
+	err = i.uninstallScript.AddLine(script.Get().RemoveDir(pidPath))
+	if err != nil {
+		return err
+	}
+	return i.uninstallScript.AddLine(script.Get().StopProcess(globals.AppName))
 }
 
 /*

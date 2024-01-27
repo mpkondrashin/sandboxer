@@ -8,6 +8,7 @@ type Platform interface {
 	RemoveDir(path string) string
 	UninstallService(name string) string
 	StopService(name string) string
+	StopProcess(name string) string
 }
 
 func Get() Platform {

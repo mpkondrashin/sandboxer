@@ -24,3 +24,7 @@ func (Windows) UninstallService(name string) string {
 func (Windows) StopService(name string) string {
 	return fmt.Sprintf("sc stop %s", name)
 }
+
+func (Windows) StopProcess(name string) string {
+	return fmt.Sprintf("taskkill /im %s /f", name)
+}
