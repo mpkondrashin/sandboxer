@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"embed"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -187,18 +188,25 @@ func (i *Installer) StageStopExamen() error {
 	}
 	data, err := os.ReadFile(pidFilePath)
 	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			logging.Debugf("Install: StopExamen: %s: %v", pidFilePath, err)
+			return nil
+		}
 		return err
 	}
 	pid, err := strconv.Atoi(string(data))
 	if err != nil {
-		return err
+		logging.Debugf("Install: StopExamen: %s: %v", string(data), err)
+		return nil
 	}
 	proc, err := os.FindProcess(pid)
 	if err != nil {
-		return err
+		logging.Debugf("Install: StopExamen: FindProcess(%d): %v", pid, err)
+		return nil
 	}
 	if err := proc.Kill(); err != nil {
-		return err
+		logging.Debugf("Install: StopExamen: Kill %d: %v", pid, err)
+		return nil
 	}
 	return nil
 }
