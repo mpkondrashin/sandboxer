@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -23,7 +24,11 @@ func InstallLogFolder() string {
 	return filepath.Dir(path)
 }
 func main() {
-	close := logging.NewFileLog(InstallLogFolder(), installWizardLog)
+	close, err := logging.NewFileLog(InstallLogFolder(), installWizardLog)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "NewFileLog: %v", err)
+		os.Exit(10)
+	}
 	defer func() {
 		logging.Debugf("Close log file")
 		close()
