@@ -74,9 +74,8 @@ func ExtendContextMenuWindows(appPath string) (string, error) {
 	if userProfile == "" {
 		return "", fmt.Errorf("%s: %w", appData, ErrNoUserProfile)
 	}
-	sendTo := `Microsoft\Windows\SendTo`
 	linkName := AppName + ".lnk"
-	linkPath := filepath.Join(userProfile, sendTo, linkName)
+	linkPath := filepath.Join(userProfile, "Microsoft", "Windows", "SendTo", linkName)
 	if err := makeLink(appPath, linkPath); err != nil {
 		return "", err
 	}
@@ -107,4 +106,34 @@ func makeLink(src, dst string) error {
 		return err
 	}
 	return nil
+}
+
+func AutoStart(appPath string) (string, error) {
+	if runtime.GOOS == "windows" {
+		return AutoStartWindows(appPath)
+	}
+	//Darwin ?
+	return "", nil
+}
+
+func AutoStartWindows(appPath string) (string, error) {
+	userProfile := "USERPROFILE"
+	userProfileFolder := os.Getenv(userProfile)
+	if userProfile == "" {
+		return "", fmt.Errorf("%s: %w", userProfile, ErrNoUserProfile)
+	}
+	appName := filepath.Base(appPath)
+	startupLinkPath := filepath.Join(userProfileFolder, "AppData", "Roaming", "Microsoft", "Windows", "Start Menu", "Programs", "Startup", appName)
+	if err := makeLink(appPath, startupLinkPath); err != nil {
+		return "", err
+	}
+	return startupLinkPath, nil
+}
+
+func PidFilePath() (string, error) {
+	folder, err := UserDataFolder()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(folder, Name+".pid"), nil
 }

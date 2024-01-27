@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"examen/pkg/config"
@@ -22,6 +23,7 @@ var embedFS embed.FS
 type Installer struct {
 	appID           string
 	config          *config.Configuration
+	autostart       bool
 	uninstallScript *script.Script
 }
 
@@ -34,8 +36,9 @@ func NewInstaller(appID string) (*Installer, error) {
 	logging.Debugf("Configuration path: %s", configPath)
 
 	return &Installer{
-		appID:  appID,
-		config: config.New(configPath),
+		appID:     appID,
+		config:    config.New(configPath),
+		autostart: true,
 	}, nil
 }
 
@@ -107,7 +110,6 @@ func (i *Installer) Stages() []InstallStage {
 		{"Extract executables", i.StageExtractExecutable},
 		{"Extend Send To menu", i.StageExtendSendTo},
 		{"Install service", i.StageAutostart},
-		{"Start service", i.StageStart},
 	}
 }
 
@@ -179,33 +181,30 @@ func (i *Installer) StageCreateConfig() error {
 
 func (i *Installer) StageStopExamen() error {
 	logging.Debugf("Install: StopExamen")
-	/*
-	   os
-	   func FindProcess(pid int) (*Process, error)
-	   func (p *Process) Kill() error
-	   func (p *Process) Signal(sig Signal) error
-
-	*/
-	//time.Sleep(1 * time.Second)
+	pidFilePath, err := globals.PidFilePath()
+	if err != nil {
+		return err
+	}
+	data, err := os.ReadFile(pidFilePath)
+	if err != nil {
+		return err
+	}
+	pid, err := strconv.Atoi(string(data))
+	if err != nil {
+		return err
+	}
+	proc, err := os.FindProcess(pid)
+	if err != nil {
+		return err
+	}
+	if err := proc.Kill(); err != nil {
+		return err
+	}
 	return nil
 }
 
 func (i *Installer) StageWaitServiceToStop() error {
 	logging.Debugf("Install: WaitServiceToStop")
-	return nil
-}
-func (i *Installer) StageUninstallService() error {
-	logging.Debugf("Install: UninstallService")
-	s, err := i.config.Service(nil)
-	if err != nil {
-		return err
-	}
-	if err := s.Uninstall(); err != nil {
-		if strings.Contains(err.Error(), fmt.Sprintf("service %s is not installed", globals.SvcName)) {
-			return nil
-		}
-		return err
-	}
 	return nil
 }
 
@@ -230,9 +229,15 @@ func (i *Installer) StageExtractExecutable() error {
 	}
 	return nil
 }
+
+func (i *Installer) StageExtractPericulosum() error {
+	logging.Debugf("Install: StageExtractPericulosum")
+	return nil
+}
+
 func (i *Installer) StageExtendSendTo() error {
 	logging.Debugf("Install: ExtendSendTo")
-	appPath := filepath.Join(i.InstallFolder(), globals.Name+".exe")
+	appPath := filepath.Join(i.InstallFolder(), "submit.exe")
 	linkPath, err := globals.ExtendContextMenu(appPath)
 	if err != nil {
 		return err
@@ -240,32 +245,18 @@ func (i *Installer) StageExtendSendTo() error {
 	return i.uninstallScript.AddLine(script.Get().RemoveDir(linkPath))
 }
 
-func (i *Installer) StageExtractPericulosum() error {
-	logging.Debugf("Install: StageExtractPericulosum")
-	///
-	return nil
-}
-
-func (i *Installer) StageRightClickExtension() error {
-	logging.Debugf("Install: StageRightClickExtension")
-	// Computer/HCU/Directory/Background//shell
-	// + New
-	// Examen
-	// New key
-
-	// command=app path %1
-	////
-	return nil
-}
-
 func (i *Installer) StageAutostart() error {
-	logging.Debugf("Install: Autostart")
-	return nil
-}
-
-func (i *Installer) StageStart() error {
-	logging.Debugf("Install: Start")
-	return nil
+	logging.Debugf("Install: StageAutostart")
+	if !i.autostart {
+		logging.Debugf("Install: StageAutostart: Skip")
+		return nil
+	}
+	appPath := filepath.Join(i.InstallFolder(), globals.Name+".exe")
+	linkPath, err := globals.AutoStart(appPath)
+	if err != nil {
+		return err
+	}
+	return i.uninstallScript.AddLine(script.Get().RemoveDir(linkPath))
 }
 
 /*

@@ -59,6 +59,7 @@ func NewWizard(capturesFolder string) *Wizard {
 		&PageOptions{},
 		&PageDomain{},
 		&PageFolder{},
+		&PageLaunch{},
 		&PageInstallation{},
 	}
 	prtScr := &desktop.CustomShortcut{KeyName: fyne.KeyI, Modifier: fyne.KeyModifierControl}
