@@ -108,11 +108,13 @@ func SavePid() (func(), error) {
 func main() {
 	configFilePath, err := globals.ConfigurationFilePath()
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "globals.ConfigurationFilePath: %v", err)
+		os.Exit(10)
 	}
 	conf := config.New(configFilePath)
 	if err := conf.Load(); err != nil {
-		fmt.Println(err)
+		fmt.Fprintf(os.Stderr, "conf.Load: %v", err)
+		os.Exit(20)
 	}
 	close, err := globals.SetupLogging(globals.Name + ".log")
 	if err != nil {
@@ -124,14 +126,18 @@ func main() {
 	logging.Debugf("Configuration file: %s", configFilePath)
 	removePid, err := SavePid()
 	if err != nil {
-		logging.Errorf("Save Pid: %v", err)
-		panic(err)
+		logging.Errorf("Save pid: %v", err)
+		fmt.Fprintf(os.Stderr, "Save pid: %v", err)
+		os.Exit(30)
+
 	}
 	defer removePid()
 	list := task.NewList()
 	stop, err := submit.RunService(conf, list)
 	if err != nil {
-		panic(err)
+		logging.Errorf("RunService: %v", err)
+		fmt.Fprintf(os.Stderr, "RunService: %v", err)
+		os.Exit(30)
 	}
 	defer stop()
 	app := NewSandboxingApp(conf)
