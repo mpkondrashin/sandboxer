@@ -12,7 +12,6 @@ import (
 )
 
 type PageDomain struct {
-	//regionList     *widget.Select
 	chooseLabel      *widget.Label
 	visionOneDomains *widget.Select
 }

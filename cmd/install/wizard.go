@@ -59,8 +59,9 @@ func NewWizard(capturesFolder string) *Wizard {
 		&PageOptions{},
 		&PageDomain{},
 		&PageFolder{},
-		&PageLaunch{},
+		&PageAutostart{},
 		&PageInstallation{},
+		&PageFinish{},
 	}
 	prtScr := &desktop.CustomShortcut{KeyName: fyne.KeyI, Modifier: fyne.KeyModifierControl}
 	c.win.Canvas().AddShortcut(prtScr, c.captureWindowContents)
