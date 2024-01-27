@@ -40,7 +40,7 @@ func LaunchSandboxer(conf *config.Configuration) {
 	if runtime.GOOS == "windows" {
 		executableFileName += ".exe"
 	}
-	executablePath := filepath.Join(conf.Folder, executableFileName)
+	executablePath := filepath.Join(conf.Folder, globals.AppName, executableFileName)
 	cmd := exec.Command(executablePath)
 	err := cmd.Start()
 	if err != nil {
