@@ -105,6 +105,7 @@ func (i *Installer) Stages() []InstallStage {
 		{"Wait for service to stop", i.StageWaitServiceToStop},
 		//{"Uninstall service", i.StageUninstallService},
 		{"Extract executables", i.StageExtractExecutable},
+		{"Extend Send To menu", i.StageExtendSendTo},
 		{"Install service", i.StageAutostart},
 		{"Start service", i.StageStart},
 	}
@@ -228,6 +229,15 @@ func (i *Installer) StageExtractExecutable() error {
 		}
 	}
 	return nil
+}
+func (i *Installer) StageExtendSendTo() error {
+	logging.Debugf("Install: ExtendSendTo")
+	appPath := filepath.Join(i.InstallFolder(), globals.Name+".exe")
+	linkPath, err := globals.ExtendContextMenu(appPath)
+	if err != nil {
+		return err
+	}
+	return i.uninstallScript.AddLine(script.Get().RemoveDir(linkPath))
 }
 
 func (i *Installer) StageExtractPericulosum() error {
