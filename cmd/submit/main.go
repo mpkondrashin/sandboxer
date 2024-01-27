@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -75,18 +75,25 @@ func OpenFIFO(conf *config.Configuration) *fifo.Writer {
 func main() {
 	configFilePath, err := globals.ConfigurationFilePath()
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "ConfigurationFilePath: %v", err)
+		os.Exit(10)
 	}
 	conf := config.New(configFilePath)
 	if err := conf.Load(); err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "conf.Load: %v", err)
+		os.Exit(20)
 	}
 	//close := logging.NewFileLog(conf.LogFolder(), submitLog)
 	logFolder, err := globals.LogsFolder()
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "LogsFolder: %v", err)
+		os.Exit(40)
 	}
-	close := logging.NewFileLog(logFolder, submitLog)
+	close, err := logging.NewFileLog(logFolder, submitLog)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "NewFileLog: %v", err)
+		os.Exit(50)
+	}
 	defer func() {
 		logging.Debugf("Close log file")
 		close()
@@ -105,16 +112,15 @@ func main() {
 	logging.Infof("Submit \"%s\"", filePath)
 	fifoWriter := OpenFIFO(conf)
 	if fifoWriter == nil {
-		panic(globals.AppName + " is not running and can not be launched")
+		logging.Errorf(globals.AppName + " is not running and can not be launched")
+		os.Exit(60)
 	}
 	defer func() {
 		logging.LogError(fifoWriter.Close())
 	}()
 	if err = fifoWriter.Write(filePath); err != nil {
-		logging.Errorf("%v", err)
-		log.Println(err)
-		os.Exit(2)
+		logging.Errorf("fifoWriter.Write: %v", err)
+		os.Exit(70)
 	}
-
 	logging.Infof("Submit finished")
 }

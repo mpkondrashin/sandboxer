@@ -152,7 +152,10 @@ func SetupLogging(logFileName string) (func(), error) {
 	if err := os.MkdirAll(logFolder, 0700); err != nil {
 		return nil, err
 	}
-	close := logging.NewFileLog(logFolder, logFileName)
+	close, err := logging.NewFileLog(logFolder, logFileName)
+	if err != nil {
+		return nil, err
+	}
 	return func() {
 		logging.Infof("Close Logging")
 		close()

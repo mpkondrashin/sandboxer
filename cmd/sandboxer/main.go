@@ -137,7 +137,7 @@ func main() {
 	if err != nil {
 		logging.Errorf("RunService: %v", err)
 		fmt.Fprintf(os.Stderr, "RunService: %v", err)
-		os.Exit(30)
+		os.Exit(40)
 	}
 	defer stop()
 	app := NewSandboxingApp(conf)
