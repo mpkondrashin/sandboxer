@@ -46,6 +46,9 @@ func LaunchSandboxer(conf *config.Configuration) {
 	if err := cmd.Start(); err != nil {
 		panic(err)
 	}
+	if err := cmd.Wait(); err != nil {
+		logging.Debugf(globals.AppName+" exited with with error: %v", err)
+	}
 	logging.Infof("Launched " + globals.AppName)
 }
 
