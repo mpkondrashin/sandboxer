@@ -8,15 +8,12 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"examen/pkg/config"
 	"examen/pkg/extract"
 	"examen/pkg/globals"
 	"examen/pkg/logging"
 	"examen/pkg/script"
-
-	"github.com/kardianos/service"
 )
 
 //go:embed embed/*.gz
@@ -104,12 +101,12 @@ func (i *Installer) Stages() []InstallStage {
 		{"Uninstall script", i.StageCreateUninstallScript},
 		{"Create folders", i.StageCreateFolders},
 		{"Generate config", i.StageCreateConfig},
-		{"Stop service", i.StageStopService},
+		{"Stop Examen", i.StageStopExamen},
 		{"Wait for service to stop", i.StageWaitServiceToStop},
-		{"Uninstall service", i.StageUninstallService},
+		//{"Uninstall service", i.StageUninstallService},
 		{"Extract executables", i.StageExtractExecutable},
-		{"Install service", i.StageInstallService},
-		{"Start service", i.StageStartService},
+		{"Install service", i.StageAutostart},
+		{"Start service", i.StageStart},
 	}
 }
 
@@ -175,46 +172,16 @@ func (i *Installer) StageCreateConfig() error {
 	return i.uninstallScript.AddLine(script.Get().RemoveDir(i.config.GetFilePath()))
 }
 
-func (i *Installer) StageStopService() error {
-	logging.Debugf("Install: StopService")
-	s, err := i.config.Service(nil)
-	if err != nil {
-		return err
-	}
-	if err := s.Stop(); err != nil {
-		logging.Debugf("Install: StopService: %v", err)
-		if strings.Contains(err.Error(), "The service has not been started") {
-			return nil
-		}
-		if strings.Contains(err.Error(), "The specified service does not exist as an installed service") {
-			return nil
-		}
-		return err
-	}
-	time.Sleep(1 * time.Second)
+func (i *Installer) StageStopExamen() error {
+	logging.Debugf("Install: StopExamen")
+
+	//time.Sleep(1 * time.Second)
 	return nil
 }
 
 func (i *Installer) StageWaitServiceToStop() error {
 	logging.Debugf("Install: WaitServiceToStop")
-	s, err := i.config.Service(nil)
-	if err != nil {
-		return err
-	}
-	sleepDuration := 500 * time.Millisecond
-	tries := 10
-	for i := 0; i < tries; i++ {
-		status, err := s.Status()
-		if err != nil {
-			return err
-		}
-		logging.Debugf("Install: Service Status: %v", status)
-		if status == service.StatusUnknown || status == service.StatusStopped {
-			return nil
-		}
-		time.Sleep(sleepDuration)
-	}
-	return fmt.Errorf("service %s did not stop within %v", globals.SvcName, sleepDuration*time.Duration(tries))
+	return nil
 }
 func (i *Installer) StageUninstallService() error {
 	logging.Debugf("Install: UninstallService")
@@ -234,7 +201,6 @@ func (i *Installer) StageUninstallService() error {
 func (i *Installer) StageExtractExecutable() error {
 	logging.Debugf("Install: StageExtractExecutable")
 	toExtract := []string{
-		"embed/examensvc.exe.gz",
 		"embed/examen.exe.gz",
 		"embed/submit.exe.gz",
 	}
@@ -272,30 +238,14 @@ func (i *Installer) StageRightClickExtension() error {
 	return nil
 }
 
-func (i *Installer) StageInstallService() error {
-	s, err := i.config.Service(nil)
-	if err != nil {
-		return err
-	}
-	if err := s.Install(); err != nil {
-		// https://stackoverflow.com/questions/20561990/how-to-solve-the-specified-service-has-been-marked-for-deletion-error
-		return fmt.Errorf("%v\nHave youe closed all MMC consoles?", err)
-	}
-	return i.uninstallScript.AddLine(script.Get().UninstallService(globals.SvcName))
+func (i *Installer) StageAutostart() error {
+	logging.Debugf("Install: Autostart")
+	return nil
 }
 
-func (i *Installer) StageStartService() error {
-	s, err := i.config.Service(nil)
-	if err != nil {
-		return err
-	}
-	if err := s.Start(); err != nil {
-		if IsWindows() {
-			return fmt.Errorf("%v\nCheck Application Log for details", err)
-		}
-		return err
-	}
-	return i.uninstallScript.AddLine(script.Get().StopService(globals.SvcName))
+func (i *Installer) StageStart() error {
+	logging.Debugf("Install: Start")
+	return nil
 }
 
 /*

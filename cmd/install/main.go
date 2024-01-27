@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"path/filepath"
 	"runtime"
 
 	"examen/pkg/logging"
@@ -13,8 +14,15 @@ func IsWindows() bool {
 	return runtime.GOOS == "windows"
 }
 
+func InstallLogFolder() string {
+	path, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	return filepath.Dir(path)
+}
 func main() {
-	close := logging.NewFileLog(logging.InstallLogFolder(), installWizardLog)
+	close := logging.NewFileLog(InstallLogFolder(), installWizardLog)
 	defer func() {
 		logging.Debugf("Close log file")
 		close()
