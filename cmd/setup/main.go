@@ -6,6 +6,7 @@ import (
 	"embed"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 
 	"examen/pkg/extract"
@@ -21,8 +22,16 @@ func IsWindows() bool {
 	return runtime.GOOS == "windows"
 }
 
+func InstallLogFolder() string {
+	path, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	return filepath.Dir(path)
+}
+
 func main() {
-	close := logging.NewFileLog(logging.InstallLogFolder(), examenExecuteWizardLog)
+	close := logging.NewFileLog(InstallLogFolder(), examenExecuteWizardLog)
 	defer close()
 	logging.Infof("Execute Start")
 	self, err := os.Executable()
