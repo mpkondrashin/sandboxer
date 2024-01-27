@@ -111,6 +111,7 @@ func (i *Installer) Stages() []InstallStage {
 		{"Extract executables", i.StageExtractExecutable},
 		{"Extend Send To menu", i.StageExtendSendTo},
 		{"Install service", i.StageAutostart},
+		{"Stop runnin " + globals.AppName, i.StageUninstall},
 	}
 }
 
