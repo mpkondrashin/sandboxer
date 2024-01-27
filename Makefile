@@ -48,14 +48,14 @@ cmd/setup/embed/install$(EXE).gz: cmd/install/install$(EXE)
 cmd/setup/embed/opengl32.dll.gz: resources/opengl32.dll
 	gzip -fc resources/opengl32.dll  > cmd/setup/embed/opengl32.dll.gz
 
-cmd/install/install.exe: cmd/install/embed/opengl32.dll.gz cmd/install/embed/examen.exe.gz cmd/install/embed/examensvc.exe.gz cmd/install/embed/submit.exe.gz $(wildcard cmd/install/*.go) $(wildcard pkg/extract/*.go)
+cmd/install/install.exe: cmd/install/embed/opengl32.dll.gz cmd/install/embed/examen.exe.gz cmd/install/embed/submit.exe.gz $(wildcard cmd/install/*.go) $(wildcard pkg/extract/*.go)
 	fyne package --os $(GOOS) --name install --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/install
 
 cmd/install/embed/opengl32.dll.gz: resources/opengl32.dll
 	gzip -fc resources/opengl32.dll  > cmd/install/embed/opengl32.dll.gz
 
-cmd/install/embed/examensvc.exe.gz: cmd/examensvc/examensvc.exe
-	gzip -fc cmd/examensvc/examensvc.exe  > cmd/install/embed/examensvc.exe.gz
+#cmd/install/embed/examensvc.exe.gz: cmd/examensvc/examensvc.exe
+#	gzip -fc cmd/examensvc/examensvc.exe  > cmd/install/embed/examensvc.exe.gz
 
 cmd/install/embed/examen.exe.gz: cmd/examen/examen.exe
 	gzip -fc cmd/examen/examen.exe  > cmd/install/embed/examen.exe.gz
@@ -70,11 +70,11 @@ cmd/examen/examen.exe: $(wildcard cmd/examen/*.go)
 	fyne package --os $(GOOS) --name examen --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/examen
 
 
-cmd/examensvc/examensvc.exe: $(wildcard cmd/examensvc/*.go)
-	fyne package --os $(GOOS) --name examensvc --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/examensvc
+#cmd/examensvc/examensvc.exe: $(wildcard cmd/examensvc/*.go)
+#	fyne package --os $(GOOS) --name examensvc --appID in.kondrash.examen --appVersion 0.0.1 --icon ../../resources/examen.png --release --sourceDir ./cmd/examensvc
 
 clean: tidy
 	rm -f setup.zip
 
 tidy:
-	rm -f cmd/examen/examen.exe cmd/examensvc/examensvc.exe cmd/install/install.exe cmd/setup/setup.exe
+	rm -f cmd/examen/examen.exe cmd/install/install.exe cmd/setup/setup.exe
