@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -108,6 +109,20 @@ func setupLogging(conf *config.Configuration) func() {
 	}
 }
 
+func SavePid() (func(), error) {
+	pidFilePath, err := globals.PidFilePath()
+	if err != nil {
+		return nil, err
+	}
+	pid := strconv.Itoa(os.Getpid())
+	if err := os.WriteFile(pidFilePath, []byte(pid), 0644); err != nil {
+		return nil, err
+	}
+	return func() {
+		os.Remove(pidFilePath)
+	}, nil
+}
+
 func main() {
 	configFilePath, err := globals.ConfigurationFilePath()
 	if err != nil {
@@ -119,6 +134,12 @@ func main() {
 	}
 	close := setupLogging(conf)
 	defer close()
+	removePid, err := SavePid()
+	if err != nil {
+		logging.Errorf("Save Pid: %v", err)
+		panic(err)
+	}
+	defer removePid()
 	logging.Infof("%s Version %s Start", globals.AppName, globals.Version)
 	logging.Debugf("Configuration file: %s", configFilePath)
 	err = conf.Load()
