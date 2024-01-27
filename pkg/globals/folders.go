@@ -78,6 +78,7 @@ func ExtendContextMenuWindows(appPath string) (string, error) {
 	}
 	linkName := AppName + ".lnk"
 	linkPath := filepath.Join(userProfile, "Microsoft", "Windows", "SendTo", linkName)
+	_ = os.Remove(linkPath)
 	if err := makeLink(appPath, linkPath); err != nil {
 		return "", err
 	}
