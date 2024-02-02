@@ -67,7 +67,7 @@ func OpenFIFO(conf *config.Configuration) *fifo.Writer {
 		if err == nil {
 			break
 		}
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(1 * time.Second)
 	}
 	return fifoWriter
 }
