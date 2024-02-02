@@ -46,6 +46,7 @@ func NewSandboxingApp(conf *config.Configuration, channels *dispatchers.Channels
 }
 
 func (a *SandboxerApp) Icon() fyne.Resource {
+	return ApplicationIcon
 	path := "../../resources/LowRisk.svg"
 	r, err := fyne.LoadResourceFromPath(path)
 	if err != nil {

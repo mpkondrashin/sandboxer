@@ -150,7 +150,7 @@ func (i *Installer) StageCreateFolders() error {
 	}
 	for _, f := range folders {
 		logging.Debugf("Install: Create folder \"%s\"", f)
-		if err := os.MkdirAll(f, 0766); err != nil {
+		if err := os.MkdirAll(f, 0755); err != nil {
 			return err
 		}
 		err := i.uninstallScript.AddLine(script.Get().RemoveDir(f))
