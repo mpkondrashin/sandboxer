@@ -1,11 +1,10 @@
 package state
 
-import "errors"
+//go:generate enum -package state -type State -names New,Upload,Inspected,Check,WaitForResult,Ignored,Unsupported,Error,NoRisk,LowRisk,MediumRisk,HighRisk,Count
 
-//go:generate enum -package state -type State -names Unknown,New,Upload,Inspect,Report,Unsupported,Error,NoRisk,LowRisk,MediumRisk,HighRisk,Count
+//var ErrIDNotFound = errors.New("id not found")
 
-var ErrIDNotFound = errors.New("id not found")
-
+/*
 type Object struct {
 	ID    string
 	Path  string
@@ -21,3 +20,4 @@ type FileState interface {
 	SetState(id string, state State) error
 	ListObjects() ([]Object, error)
 }
+*/

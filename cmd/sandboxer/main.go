@@ -10,10 +10,10 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 
 	"sandboxer/pkg/config"
+	"sandboxer/pkg/dispatchers"
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
 	"sandboxer/pkg/state"
-	"sandboxer/pkg/submit"
 	"sandboxer/pkg/task"
 )
 
@@ -28,7 +28,7 @@ type SandboxerApp struct {
 	optionsWindow     *OptionsWindow
 }
 
-func NewSandboxingApp(conf *config.Configuration) *SandboxerApp {
+func NewSandboxingApp(conf *config.Configuration, channels *dispatchers.Channels, list *task.TaskList) *SandboxerApp {
 	fyneApp := app.New()
 	deskApp, ok := fyneApp.(desktop.App)
 	if !ok {
@@ -36,7 +36,7 @@ func NewSandboxingApp(conf *config.Configuration) *SandboxerApp {
 	}
 	a := &SandboxerApp{
 		app:               fyneApp,
-		submissionsWindow: NewSubmissionsWindow(fyneApp),
+		submissionsWindow: NewSubmissionsWindow(fyneApp, channels, list),
 		quotaWindow:       NewQuotaWindow(fyneApp, conf),
 		optionsWindow:     NewOptionsWindow(fyneApp, conf),
 	}
@@ -132,14 +132,17 @@ func main() {
 
 	}
 	defer removePid()
+	//list := task.NewList()
+	channels := dispatchers.NewChannels()
 	list := task.NewList()
-	stop, err := submit.RunService(conf, list)
-	if err != nil {
-		logging.Errorf("RunService: %v", err)
-		fmt.Fprintf(os.Stderr, "RunService: %v", err)
-		os.Exit(40)
-	}
-	defer stop()
-	app := NewSandboxingApp(conf)
+	launcher := dispatchers.NewLauncher(conf, channels, list)
+	launcher.Run() //stop, err := submit.RunService(conf, list)
+	//if err != nil {
+	//	logging.Errorf("RunService: %v", err)
+	//	fmt.Fprintf(os.Stderr, "RunService: %v", err)
+	//	os.Exit(40)
+	//}
+	defer launcher.Stop()
+	app := NewSandboxingApp(conf, channels, list)
 	app.Run()
 }

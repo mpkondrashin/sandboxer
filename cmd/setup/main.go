@@ -4,6 +4,7 @@ package main
 import (
 	"bytes"
 	"embed"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -32,24 +33,31 @@ func InstallLogFolder() string {
 }
 
 func main() {
-	close := logging.NewFileLog(InstallLogFolder(), wizardLog)
+	close, err := logging.NewFileLog(InstallLogFolder(), wizardLog)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "NewFileLog: %v", err)
+		os.Exit(10)
+	}
 	defer close()
 	logging.Infof("Execute Start")
 	self, err := os.Executable()
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "Executeable: %v", err)
+		os.Exit(20)
 	}
 	logging.Infof("Path: %s", self)
 	tempFolder, err := os.Getwd()
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "Getwd: %v", err)
+		os.Exit(30)
 	}
 	logging.Infof("Temp folder: %s", tempFolder)
 	if IsWindows() {
 		path, err := extract.FileGZ(embedFS, tempFolder, "embed/opengl32.dll.gz")
 		logging.LogError(err)
 		if err != nil {
-			panic(err)
+			fmt.Fprintf(os.Stderr, "FileGZ: %v", err)
+			os.Exit(40)
 		}
 		logging.Debugf("Extracted: %s", path)
 		//defer cleanup()
@@ -57,7 +65,8 @@ func main() {
 	installPath, err := extract.FileGZ(embedFS, tempFolder, "embed/install.exe.gz")
 	logging.LogError(err)
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "FileGZ: %v", err)
+		os.Exit(50)
 	}
 	logging.Debugf("Execute: %s", installPath)
 	cmd := exec.Command(installPath)

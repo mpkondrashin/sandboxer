@@ -1,37 +1,100 @@
-package submit
+package dispatchers
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
-	"time"
-
-	"github.com/mpkondrashin/vone"
-
 	"sandboxer/pkg/config"
+	"sandboxer/pkg/fifo"
 	"sandboxer/pkg/logging"
-	"sandboxer/pkg/state"
 	"sandboxer/pkg/task"
+	"sync"
 )
 
+const (
+	PrefilterDispatchers = 1
+	UploadDispatchers    = 5
+	WaitDispatchers      = 5
+	ResultDispatchers    = 5
+)
+
+type Launcher struct {
+	conf     *config.Configuration
+	channels *Channels
+	list     *task.TaskList
+}
+
+func NewLauncher(conf *config.Configuration, channels *Channels, list *task.TaskList) *Launcher {
+	return &Launcher{
+		conf:     conf,
+		channels: channels,
+		list:     list,
+	}
+}
+
+func (l *Launcher) Run() {
+	base := NewBaseDispatcher(l.conf, l.channels, l.list)
+	dispatchers := []struct {
+		count      int
+		dispatcher Dispatcher
+	}{
+		{ResultDispatchers, NewResultDispatch(base)},
+		{WaitDispatchers, NewWaitDispatch(base)},
+		{UploadDispatchers, NewUploadDispatch(base)},
+		{PrefilterDispatchers, NewPrefilterDispatch(base)},
+	}
+	var wg sync.WaitGroup
+	for _, d := range dispatchers {
+		for i := 0; i < d.count; i++ {
+			wg.Add(1)
+			go l.RunDispatcher(d.dispatcher, &wg)
+		}
+	}
+	submit := NewSubmitDispatch(base)
+	wg.Add(1)
+	go submit.Run(&wg)
+	//wg.Wait()
+}
+
+func (l *Launcher) RunDispatcher(disp Dispatcher, wg *sync.WaitGroup) {
+	//ctx, cancel := context.WithCancel(context.TODO())
+	logging.Debugf("Start %T", disp)
+	ch := disp.InboundChannel()
+	for id := range l.channels.TaskChannel[ch] {
+		_ = l.list.Task(id, func(tsk *task.Task) error {
+			//tsk := l.list.Get(id)
+			err := disp.ProcessTask(tsk)
+			if err != nil {
+				tsk.SetError(err)
+				logging.Errorf("Task #%d: %v (%T)", id, err, disp)
+			}
+			return nil
+		})
+	}
+	wg.Done()
+}
+
+func (l *Launcher) Stop() error {
+	l.channels.Close() // Should we move it to the end?
+	fifoWriter, err := fifo.NewWriter()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		logging.LogError(fifoWriter.Close())
+	}()
+	if err = fifoWriter.Write(StopPath); err != nil {
+		return err
+	}
+	return nil
+}
+
+/*
 type Scan struct {
 	list   *task.TaskList
 	config *config.Configuration
 	//check  *goperic.Periculosum
 }
 
-func NewScan(config *config.Configuration /*, check *goperic.Periculosum*/, list *task.TaskList) *Scan {
-	/*	if s.config.VisionOne.Token == "" {
-			return errors.New("token is not set")
-		}
-		if s.config.VisionOne.Domain == "" {
-			return errors.New("domain is not set")
-		}
+func NewScan(config *config.Configuration , list *task.TaskList) *Scan {
 
-	*/
 	return &Scan{
 		list:   list,
 		config: config,
@@ -129,7 +192,7 @@ func (s *Scan) Submit(t task.ID) error {
 }
 
 func (s *Scan) WaitForResult(t task.ID) error {
-	task.SetState(t, state.StateInspect)
+	task.SetState(t, state.StateInspected)
 	for {
 		// Should we set temporary state "checking"?
 		status, err := s.vOne().SandboxSubmissionStatus(task.GetSandboxID(t)).Do(context.TODO())
@@ -182,7 +245,7 @@ func (s *Scan) GetResult(t task.ID) error {
 func RunService(conf *config.Configuration, list *task.TaskList) (func(), error) {
 	inbox := make(StringChannel, 10000)
 	//stop := make(chan struct{})
-	go SubmitDispatch(inbox)
+	go SubmitDispatchFunc(inbox)
 	//	pericPath, err := config.PericulosumPath()
 	//	if err != nil {
 	//	}
@@ -196,3 +259,4 @@ func RunService(conf *config.Configuration, list *task.TaskList) (func(), error)
 	}()
 	return func() { close(inbox) }, nil
 }
+*/

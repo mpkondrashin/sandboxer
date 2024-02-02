@@ -1,7 +1,6 @@
 package state
 
-import "fmt"
-
+/*
 type MemState struct {
 	objects []Object
 }
@@ -28,3 +27,4 @@ func (m *MemState) SetState(id string, state State) error {
 func (m *MemState) ListObjects() ([]Object, error) {
 	return m.objects, nil
 }
+*/

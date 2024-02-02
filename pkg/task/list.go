@@ -5,9 +5,9 @@ import (
 	"sync"
 
 	"sandboxer/pkg/logging"
-	"sandboxer/pkg/state"
 )
 
+/*
 var _list *TaskList
 
 func init() {
@@ -33,6 +33,10 @@ func GetSandboxID(id ID) string {
 
 func SetError(id ID, err error) {
 	_list.Get(id).SetError(err)
+	_list.Updated()
+}
+func SetMessage(id ID, msg string) {
+	_list.Get(id).SetMessage(msg)
 	_list.Updated()
 }
 
@@ -61,11 +65,34 @@ func Iterate(callback func(*Task)) {
 	_list.Iterate(callback)
 }*/
 
+/*
+Submissions:
+task.Delete(tsk.Number)
+task.List().Process(func(ids []task.ID) {
+return s.CardWidget(task.NewTask("placeholder"))
+task.List().Task(ids[i], func(tsk *task.Task) error {
+tsk = task.NewTask("placeholder")
+<-task.List().Changes():
+
+Dispatchers:
+task.SetMessage(id, detectionName+threatType)
+task.New(s)
+task.Path(id)
+task.SetSandboxID(id, response.ID)
+task.Delete(id)
+task.GetSandboxID(id)
+task.SetError(id, err)
+*/
+type TaskListInterface interface {
+	NewTask(path string) ID
+}
+
 type TaskList struct {
 	mx sync.RWMutex
 	//changeMX sync.Mutex
-	changed chan struct{}
-	Tasks   map[ID]*Task
+	changed    chan struct{}
+	Tasks      map[ID]*Task
+	tasksCount ID
 }
 
 func NewList() *TaskList {
@@ -90,36 +117,42 @@ func (l *TaskList) Changes() chan struct{} {
 	return l.changed
 }
 
-func (l *TaskList) Add(tsk *Task) {
-	l.mx.Lock()
-	defer l.mx.Unlock()
+func (l *TaskList) NewTask(path string) ID {
+	defer l.lockUnlock()() //mx.Lock()
+	logging.Debugf("NewTask %d, %s", l.tasksCount, path)
+	tsk := NewTask(l.tasksCount, path)
 	l.Tasks[tsk.Number] = tsk
-	logging.Debugf("%p XXX List Unlock (in Add)", l)
 	l.Updated()
+	l.tasksCount++
+	return tsk.Number
 }
 
 func (l *TaskList) Del(tsk *Task) {
-	l.mx.Lock()
-	defer l.mx.Unlock()
+	defer l.lockUnlock()()
 	delete(l.Tasks, tsk.Number)
 	l.Updated()
 }
 func (l *TaskList) DelByID(id ID) {
-	l.mx.Lock()
-	defer l.mx.Unlock()
+	defer l.lockUnlock()() //mx.Lock()
+	logging.Debugf("DelByID, id = %d, len = %d", id, len(l.Tasks))
 	delete(l.Tasks, id)
 	l.Updated()
 }
 
 func (l *TaskList) Get(num ID) *Task {
-	l.mx.RLock()
-	defer l.mx.RUnlock()
+	defer l.lockUnlock()()
 	return l.Tasks[num]
 }
 
+func (l *TaskList) Task(num ID, callback func(tsk *Task) error) error {
+	//defer l.lockUnlock()()
+	tsk := l.Tasks[num]
+	//defer tsk.lockUnlock()()
+	return callback(tsk)
+}
+
 func (l *TaskList) Iterate(callback func(*Task)) {
-	l.mx.RLock()
-	defer l.mx.RUnlock()
+	defer l.lockUnlock()()
 	keys := make([]ID, len(l.Tasks))
 	i := 0
 	for k := range l.Tasks {
@@ -133,8 +166,8 @@ func (l *TaskList) Iterate(callback func(*Task)) {
 }
 
 func (l *TaskList) IterateIDs(from int, count int, callback func(id ID)) {
-	l.mx.RLock()
-	defer l.mx.RUnlock()
+	defer l.lockUnlock()()
+
 	keys := make([]ID, len(l.Tasks))
 	i := 0
 	for k := range l.Tasks {
@@ -156,17 +189,26 @@ func (l *TaskList) IterateIDs(from int, count int, callback func(id ID)) {
 		callback(k)
 	}
 }
-
+func (l *TaskList) lockUnlock() func() {
+	logging.Debugf("Lock %p", l)
+	//l.mx.Lock()
+	return func() {} // l.unlock
+}
+func (l *TaskList) unlock() {
+	//logging.Debugf("Unlock %p", l)
+	//l.mx.Unlock()
+}
 func (l *TaskList) Process(callback func([]ID)) {
-	l.mx.RLock()
-	defer l.mx.RUnlock()
+	defer l.lockUnlock()()
 	keys := make([]ID, len(l.Tasks))
+	logging.Debugf("keys len = %d", len(l.Tasks))
 	i := 0
 	for k := range l.Tasks {
 		keys[i] = k
 		i++
 	}
 	sort.Slice(keys, func(i, j int) bool { return keys[i] > keys[j] })
+	logging.Debugf("slice: %v", keys)
 	callback(keys)
 }
 
