@@ -71,7 +71,10 @@ func (a *SandboxerApp) Icon() fyne.Resource {
 }
 
 func (s *SandboxerApp) Run() {
-	//s.submissionsWindow.Show(s.EnableSubmissionsMenuItem)
+	if len(os.Args) == 2 && os.Args[1] == "--submissions" {
+		s.submissionMenuItem.Disabled = true
+		s.submissionsWindow.Show()
+	}
 	s.app.Run()
 	//s.quotaWindow.win.ShowAndRun()
 }
