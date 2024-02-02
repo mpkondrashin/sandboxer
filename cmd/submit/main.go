@@ -42,7 +42,7 @@ func LaunchSandboxer(conf *config.Configuration) {
 	}
 	executablePath := filepath.Join(conf.Folder, globals.AppName, executableFileName)
 	logging.Infof("Run " + executablePath)
-	cmd := exec.Command(executablePath)
+	cmd := exec.Command(executablePath, "--submissions")
 	if err := cmd.Start(); err != nil {
 		panic(err)
 	}
