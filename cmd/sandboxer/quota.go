@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
@@ -16,7 +15,9 @@ import (
 )
 
 type QuotaWindow struct {
-	win        fyne.Window
+	ModalWindow
+	//win            fyne.Window
+	//enableMenuItem func()
 	conf       *config.Configuration
 	reserve    binding.String
 	submission binding.String
@@ -24,9 +25,10 @@ type QuotaWindow struct {
 	remaining  binding.String
 }
 
-func NewQuotaWindow(app fyne.App, conf *config.Configuration) *QuotaWindow {
+func NewQuotaWindow(modalWindow ModalWindow, conf *config.Configuration) *QuotaWindow {
 	s := &QuotaWindow{
-		win:        app.NewWindow("Quota"),
+		ModalWindow: modalWindow,
+		//enableMenuItem: enableMenuItem,
 		conf:       conf,
 		reserve:    binding.NewString(),
 		submission: binding.NewString(),
@@ -34,11 +36,7 @@ func NewQuotaWindow(app fyne.App, conf *config.Configuration) *QuotaWindow {
 		remaining:  binding.NewString(),
 	}
 	s.Reset()
-	s.win.SetCloseIntercept(func() {
-		//logging.Debugf("XXX Close")
-		s.Hide()
-	})
-	//	s.win.Resize(fyne.Size{Width: 400, Height: 300})
+
 	reserveCountItem := widget.NewFormItem("Daily Reserve:", widget.NewLabelWithData(s.reserve))
 	submissionCountItem := widget.NewFormItem("Files Submitted:", widget.NewLabelWithData(s.submission))
 	exemptionCountItem := widget.NewFormItem("Unsupported Files Submitted:", widget.NewLabelWithData(s.exemption))
@@ -54,7 +52,6 @@ func NewQuotaWindow(app fyne.App, conf *config.Configuration) *QuotaWindow {
 		updateItem,
 	)
 	s.win.SetContent(form)
-	//s.win.Content().MinSize (fyne.Size{Width: 400, Height: 300})
 	return s
 }
 
@@ -111,11 +108,14 @@ func (s *QuotaWindow) Update() {
 	*/
 }
 
-func (s *QuotaWindow) Show() {
+func (s *QuotaWindow) Show(enableMenuItem func()) {
 	s.win.Show()
 	go s.Update()
 }
 
+/*
 func (s *QuotaWindow) Hide() {
 	s.win.Hide()
 }
+
+*/

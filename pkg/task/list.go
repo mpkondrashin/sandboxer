@@ -1,6 +1,7 @@
 package task
 
 import (
+	"fmt"
 	"sort"
 	"sync"
 
@@ -147,6 +148,9 @@ func (l *TaskList) Get(num ID) *Task {
 func (l *TaskList) Task(num ID, callback func(tsk *Task) error) error {
 	//defer l.lockUnlock()()
 	tsk := l.Tasks[num]
+	if tsk == nil {
+		return fmt.Errorf("missing task #%d", num)
+	}
 	//defer tsk.lockUnlock()()
 	return callback(tsk)
 }
@@ -165,6 +169,7 @@ func (l *TaskList) Iterate(callback func(*Task)) {
 	}
 }
 
+/*
 func (l *TaskList) IterateIDs(from int, count int, callback func(id ID)) {
 	defer l.lockUnlock()()
 
@@ -189,16 +194,19 @@ func (l *TaskList) IterateIDs(from int, count int, callback func(id ID)) {
 		callback(k)
 	}
 }
+*/
+
 func (l *TaskList) lockUnlock() func() {
 	logging.Debugf("Lock %p", l)
-	//l.mx.Lock()
-	return func() {} // l.unlock
+	l.mx.Lock()
+	return l.unlock // func() {} //
 }
 func (l *TaskList) unlock() {
-	//logging.Debugf("Unlock %p", l)
-	//l.mx.Unlock()
+	logging.Debugf("Unlock %p", l)
+	l.mx.Unlock()
 }
-func (l *TaskList) Process(callback func([]ID)) {
+
+func (l *TaskList) GetIDs() []ID {
 	defer l.lockUnlock()()
 	keys := make([]ID, len(l.Tasks))
 	logging.Debugf("keys len = %d", len(l.Tasks))
@@ -207,6 +215,11 @@ func (l *TaskList) Process(callback func([]ID)) {
 		keys[i] = k
 		i++
 	}
+	return keys
+}
+
+func (l *TaskList) Process(callback func([]ID)) {
+	keys := l.GetIDs()
 	sort.Slice(keys, func(i, j int) bool { return keys[i] > keys[j] })
 	logging.Debugf("slice: %v", keys)
 	callback(keys)

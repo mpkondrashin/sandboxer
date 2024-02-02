@@ -15,21 +15,18 @@ import (
 )
 
 type OptionsWindow struct {
+	ModalWindow
 	conf         *config.Configuration
-	win          fyne.Window
 	tokenEntry   *widget.Entry
 	domainLabel  *widget.Label
 	cancelDetect context.CancelFunc
 }
 
-func NewOptionsWindow(app fyne.App, conf *config.Configuration) *OptionsWindow {
+func NewOptionsWindow(modalWindow ModalWindow, conf *config.Configuration) *OptionsWindow {
 	s := &OptionsWindow{
-		conf: conf,
-		win:  app.NewWindow("Options"),
+		ModalWindow: modalWindow,
+		conf:        conf,
 	}
-	s.win.SetCloseIntercept(func() {
-		s.win.Hide()
-	})
 
 	labelTop := widget.NewLabel("Please open Vision One console to get all nessesary parameters")
 	s.tokenEntry = widget.NewMultiLineEntry()

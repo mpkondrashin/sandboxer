@@ -26,40 +26,36 @@ import (
 )
 
 type SubmissionsWindow struct {
+	ModalWindow
+	//hidden     bool
 	stopUpdate chan struct{}
-	win        fyne.Window
-	vbox       *fyne.Container
-	from       int
-	count      int
+	//win                       fyne.Window
+	//enableSubmissionsMenuItem func()
+	vbox  *fyne.Container
+	from  int
+	count int
 	//icons []fyne.Resource
 	list     *task.TaskList
 	channels *dispatchers.Channels
 }
 
-func NewSubmissionsWindow(app fyne.App, channels *dispatchers.Channels, list *task.TaskList) *SubmissionsWindow {
+func NewSubmissionsWindow(modalWindow ModalWindow, channels *dispatchers.Channels, list *task.TaskList) *SubmissionsWindow {
 	s := &SubmissionsWindow{
+		ModalWindow: modalWindow,
+		//hidden:     true,
 		stopUpdate: make(chan struct{}),
-		win:        app.NewWindow("Submissions"),
-		from:       0,
-		count:      10,
-		list:       list,
-		channels:   channels,
-		vbox:       container.NewVBox(widget.NewLabel("No Sumbissions")),
+		//win:                       app.NewWindow("Submissions"),
+		//enableSubmissionsMenuItem: enableSubmissionsMenuItem,
+		from:     0,
+		count:    10,
+		list:     list,
+		channels: channels,
+		vbox:     container.NewVBox(widget.NewLabel("No Sumbissions")),
 	}
-	//	for st := state.StateNew; st < state.StateCount; st++ {
-	//		r, err := fyne.LoadResourceFromPath(IconPath(st))
-	//		if err != nil {
-	//			panic(err)
-	//		}
-	//		s.icons = append(s.icons, r)
-	//	}
-	//s.vbox = container.NewVBox()
-	s.win.SetCloseIntercept(func() {
-		//logging.Debugf("XXX Close")
-		s.Hide()
-	})
+	//	s.win.SetCloseIntercept(func() {
+	//		s.Hide()
+	//	})
 	s.win.Resize(fyne.Size{Width: 400, Height: 300})
-	//s.win.Content().MinSize (fyne.Size{Width: 400, Height: 300})
 	return s
 }
 
@@ -164,51 +160,6 @@ func (s *SubmissionsWindow) CardWidget(tsk *task.Task) fyne.CanvasObject {
 	)
 }
 
-func (s *SubmissionsWindow) _Update() {
-	logging.Debugf("XXX SubmissionsWindow.Update()")
-	//s.vbox.RemoveAll()
-	//b := newContextMenuLable("context", m)
-	//s.vbox.Add(b)
-	//s.list.Add(task.NewTask("C:\\asd\\asd.txt"))
-	var list *widget.List
-	s.list.Process(func(ids []task.ID) {
-		logging.Debugf("XXX SubmissionsWindow.Update() Process")
-		if len(ids) == 0 {
-			return
-		}
-		idsCopy := ids[:]
-		list = widget.NewList(
-			func() int {
-				return len(idsCopy)
-			},
-			func() fyne.CanvasObject {
-				//icon := newTappableIcon(s.icons[state.StateHighRisk], nil)
-				return s.CardWidget(task.NewTask(0, "placeholder")) /*container.NewPadded(container.NewBorder(
-				widget.NewLabel("message"), nil, icon, nil,
-				widget.NewLabel("message")))*/
-			},
-			func(i widget.ListItemID, o fyne.CanvasObject) {
-				padded := o.(*fyne.Container)
-				padded.RemoveAll()
-				_ = s.list.Task(idsCopy[i], func(tsk *task.Task) error {
-					if tsk == nil {
-						tsk = task.NewTask(0, "placeholder")
-						//logging.Debugf("tsk = nil, i = %d, ids[i]=%d , ids = %v", i, ids[i], ids)
-					}
-					card := s.CardWidget(tsk)
-					padded.Add(card)
-					return nil
-				})
-			})
-	})
-	if list != nil {
-		logging.Debugf("XXX SubmissionsWindow.Update() List.Length = %d", list.Length())
-		s.win.SetContent(list)
-	} else {
-		s.win.SetContent(widget.NewLabel("No submissions"))
-	}
-}
-
 func (s *SubmissionsWindow) Update() {
 	logging.Debugf("XXX SubmissionsWindow.Update()")
 	s.vbox.RemoveAll()
@@ -242,33 +193,35 @@ func (s *SubmissionsWindow) Update() {
 }
 
 func (s *SubmissionsWindow) Show() {
+	//	if !s.hidden {
+	//		return
+	//}
+	//s.hidden = false
 	s.win.Show()
-	fps := time.Millisecond * 100
+	fps := time.Millisecond * 300
 	go func() {
-		// updateTime := time.Now().Add(fps)
 		haveChanges := true
 		for {
 			select {
 			case <-s.stopUpdate:
+				s.Hide() // s.enableSubmissionsMenuItem()
 				return
 			case <-s.list.Changes():
 				haveChanges = true
 			case <-time.After(fps):
-				logging.Debugf("Update")
 				if !haveChanges {
 					break
 				}
-				// if time.Now().After(updateTime) {
+				logging.Debugf("Update")
 				s.Update()
 				haveChanges = false
-				// updateTime = time.Now().Add(fps)
-				// }
 			}
 		}
 	}()
 }
 
 func (s *SubmissionsWindow) Hide() {
+	//s.hidden = true
 	s.stopUpdate <- struct{}{}
 	s.win.Hide()
 }
