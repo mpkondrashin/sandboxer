@@ -106,7 +106,7 @@ func (c *Wizard) captureWindowContents(shortcut fyne.Shortcut) {
 */
 func (c *Wizard) Window(p Page) fyne.CanvasObject {
 	left := container.NewVBox()
-	image := canvas.NewImageFromResource(IconSVGResource)
+	image := canvas.NewImageFromResource(ApplicationIcon)
 	image.SetMinSize(fyne.NewSize(52, 52))
 	image.FillMode = canvas.ImageFillContain
 	left.Add(image)
