@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"sandboxer/pkg/logging"
-	"sandboxer/pkg/state"
 	"sandboxer/pkg/task"
 	"strings"
 )
@@ -40,7 +39,7 @@ func (d *PrefilterDispatch) ProcessTask(tsk *task.Task) error {
 		return errors.New("not regular file")
 	}
 	if d.ShouldIgnore(tsk.Path) {
-		tsk.SetState(state.StateIgnored)
+		tsk.SetRiskLevel(task.RiskLevelUnsupported)
 		d.list.Updated()
 		return nil
 	}

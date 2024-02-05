@@ -44,7 +44,7 @@ func NewOptionsWindow(modalWindow ModalWindow, conf *config.Configuration) *Opti
 	)
 
 	saveButton := widget.NewButton("Save", s.Save)
-	cancelButton := widget.NewButton("Cancel", s.Cancel)
+	cancelButton := widget.NewButton("Cancel", s.Hide)
 	bottons := container.NewHBox(cancelButton, saveButton)
 	// add link to open v1 console(?)
 	s.win.SetContent(container.NewVBox(labelTop, optionsForm, bottons))
@@ -61,13 +61,14 @@ func (s *OptionsWindow) Save() {
 		dialog.ShowError(err, s.win)
 		return
 	}
-	s.win.Hide()
+	s.Hide()
 }
 
-func (s *OptionsWindow) Cancel() {
-	s.win.Hide()
-}
-
+/*
+	func (s *OptionsWindow) Cancel() {
+		s.Hide()
+	}
+*/
 const ErrorDomain = "Error"
 
 func (s *OptionsWindow) Update() {

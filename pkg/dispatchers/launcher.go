@@ -63,6 +63,7 @@ func (l *Launcher) RunDispatcher(disp Dispatcher, wg *sync.WaitGroup) {
 			err := disp.ProcessTask(tsk)
 			if err != nil {
 				tsk.SetError(err)
+				l.list.Updated()
 				logging.Errorf("Task #%d: %v (%T)", id, err, disp)
 			}
 			return nil

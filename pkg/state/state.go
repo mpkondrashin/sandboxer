@@ -1,6 +1,7 @@
 package state
 
-//go:generate enum -package state -type State -names New,Upload,Inspected,Check,WaitForResult,Ignored,Unsupported,Error,NoRisk,LowRisk,MediumRisk,HighRisk,Count
+//---g---o:generate enum -package state -type State -names New,Upload,Inspected,Check,WaitForResult,Ignored,Unsupported,Error,NoRisk,LowRisk,MediumRisk,HighRisk,Count
+//go:generate enum -package state -type State -names New,Upload,Inspected,Check,WaitForResult,Finished,Count
 
 //var ErrIDNotFound = errors.New("id not found")
 

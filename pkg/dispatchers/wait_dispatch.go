@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"sandboxer/pkg/logging"
-	"sandboxer/pkg/state"
 	"sandboxer/pkg/task"
 	"time"
 
@@ -26,7 +25,8 @@ func (*WaitDispatch) InboundChannel() int {
 }
 
 func (d *WaitDispatch) ProcessTask(tsk *task.Task) error {
-	tsk.SetState(state.StateCheck)
+	tsk.SetState(task.StateCheck)
+	d.list.Updated()
 	vOne, err := d.vOne()
 	if err != nil {
 		return err
@@ -39,16 +39,22 @@ func (d *WaitDispatch) ProcessTask(tsk *task.Task) error {
 	logging.Debugf("%s Status: %v", tsk.SandboxID, status.Status)
 	switch status.Status {
 	case vone.StatusSucceeded:
-		tsk.SetState(state.StateWaitForResult)
+		tsk.SetState(task.StateWaitForResult)
 		d.list.Updated()
 		d.Channel(ChResult) <- tsk.Number
 		return nil
 	case vone.StatusRunning:
-		tsk.SetState(state.StateInspected)
+		tsk.SetState(task.StateInspected)
 		d.list.Updated()
 		time.Sleep(d.conf.VisionOne.Sleep)
 		d.Channel(ChWait) <- tsk.Number
 	case vone.StatusFailed:
+		if status.Error.Code == "Unsupported" {
+			tsk.SetState(task.StateDone)
+			tsk.SetRiskLevel(task.RiskLevelUnsupported)
+			tsk.SetMessage(status.Error.Message)
+			return nil
+		}
 		return fmt.Errorf("%s: %s", status.Error.Code, status.Error.Message)
 	default:
 		return fmt.Errorf("unknown status: %s", status.Status)

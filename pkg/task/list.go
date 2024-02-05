@@ -128,11 +128,13 @@ func (l *TaskList) NewTask(path string) ID {
 	return tsk.Number
 }
 
-func (l *TaskList) Del(tsk *Task) {
-	defer l.lockUnlock()()
-	delete(l.Tasks, tsk.Number)
-	l.Updated()
-}
+/*
+	func (l *TaskList) Del(tsk *Task) {
+		defer l.lockUnlock()()
+		delete(l.Tasks, tsk.Number)
+		l.Updated()
+	}
+*/
 func (l *TaskList) DelByID(id ID) {
 	defer l.lockUnlock()() //mx.Lock()
 	logging.Debugf("DelByID, id = %d, len = %d", id, len(l.Tasks))

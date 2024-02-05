@@ -3,7 +3,6 @@ package dispatchers
 import (
 	"context"
 	"sandboxer/pkg/logging"
-	"sandboxer/pkg/state"
 	"sandboxer/pkg/task"
 )
 
@@ -22,7 +21,7 @@ func NewUploadDispatch(d BaseDispatcher) *UploadDispatch {
 }
 
 func (d *UploadDispatch) ProcessTask(tsk *task.Task) error {
-	tsk.SetState(state.StateUpload)
+	tsk.SetState(task.StateUpload)
 	d.list.Updated()
 
 	vOne, err := d.vOne()
@@ -39,7 +38,7 @@ func (d *UploadDispatch) ProcessTask(tsk *task.Task) error {
 	}
 	tsk.SetSandboxID(response.ID)
 	logging.Infof("Accepted: %v", response.ID)
-	tsk.SetState(state.StateInspected)
+	tsk.SetState(task.StateInspected)
 	d.list.Updated()
 	d.Channel(ChWait) <- tsk.Number
 	return nil

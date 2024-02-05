@@ -14,14 +14,13 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/mpkondrashin/fileicon"
 
 	"sandboxer/pkg/dispatchers"
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
-	"sandboxer/pkg/state"
 	"sandboxer/pkg/task"
 )
 
@@ -59,37 +58,36 @@ func NewSubmissionsWindow(modalWindow ModalWindow, channels *dispatchers.Channel
 	return s
 }
 
-func StateColor(s state.State) color.Color {
-	switch s {
-	//case state.StateUnknown:
-	//case state.StateNew:
-	//case state.StateUpload:
-	//case state.StateInspect:
-	//case state.StateReport:
-	//return color.RGBA{0, 0, 0, 255}
-	case state.StateUnsupported, state.StateIgnored:
-		return color.RGBA{158, 158, 158, 255}
-	case state.StateError:
-		return color.RGBA{255, 0, 0, 255}
-	case state.StateNoRisk:
-		return color.RGBA{0, 255, 0, 255}
-	case state.StateLowRisk:
-		return color.RGBA{255, 153, 0, 255}
-	case state.StateMediumRisk:
-		return color.RGBA{230, 102, 0, 255}
-	case state.StateHighRisk:
-		return color.RGBA{204, 51, 0, 255}
-	default:
-		return color.RGBA{0, 0, 0, 255}
+/*
+	func StateColor(s state.State) color.Color {
+		switch s {
+		//case state.StateUnknown:
+		//case state.StateNew:
+		//case state.StateUpload:
+		//case state.StateInspect:
+		//case state.StateReport:
+		//return color.RGBA{0, 0, 0, 255}
+		case state.StateUnsupported, state.StateIgnored:
+			return color.RGBA{158, 158, 158, 255}
+		case state.StateError:
+			return color.RGBA{255, 0, 0, 255}
+		case state.StateNoRisk:
+			return color.RGBA{0, 255, 0, 255}
+		case state.StateLowRisk:
+			return color.RGBA{255, 153, 0, 255}
+		case state.StateMediumRisk:
+			return color.RGBA{230, 102, 0, 255}
+		case state.StateHighRisk:
+			return color.RGBA{204, 51, 0, 255}
+		default:
+			return color.RGBA{0, 0, 0, 255}
+		}
 	}
-}
-
+*/
 func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 	downloadItem := fyne.NewMenuItem("Download Report", func() {})
 	downloadInvestigation := fyne.NewMenuItem("Download Investigation Package", func() {})
-	if tsk.State != state.StateHighRisk &&
-		tsk.State != state.StateMediumRisk &&
-		tsk.State != state.StateLowRisk {
+	if tsk.State != task.StateDone {
 		downloadItem.Disabled = true
 		downloadInvestigation.Disabled = true
 	}
@@ -112,11 +110,11 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 
 	deleteFileItem = fyne.NewMenuItem("Delete File", deleteFileAction)
 	recheckAction := func() {
-		tsk.SetState(state.StateNew)
+		tsk.SetState(task.StateNew)
 		s.channels.TaskChannel[dispatchers.ChPrefilter] <- tsk.Number
 	}
 	recheckItem := fyne.NewMenuItem("Recheck File", recheckAction)
-	if tsk.State != state.StateError {
+	if tsk.RiskLevel != task.RiskLevelError {
 		recheckItem.Disabled = true
 	}
 	return fyne.NewMenu(globals.AppName,
@@ -129,18 +127,30 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 		deleteFileItem)
 }
 
+func IconForFile(path string) *canvas.Image {
+	iconData := fileicon.FileIcon(path)
+	iconResource := &fyne.StaticResource{
+		StaticName:    filepath.Base(path),
+		StaticContent: []byte(iconData),
+	}
+	icon := canvas.NewImageFromResource(iconResource)
+	icon.SetMinSize(fyne.NewSize(26, 26))
+	icon.FillMode = canvas.ImageFillContain
+	return icon
+}
+
 func (s *SubmissionsWindow) CardWidget(tsk *task.Task) fyne.CanvasObject {
 	path := tsk.Path
-	uri := storage.NewFileURI(path)
-	icon := container.NewPadded(widget.NewFileIcon(uri))
+	icon := IconForFile(path)
+	//uri := storage.NewFileURI(path)
+	//icon := container.NewPadded(widget.NewFileIcon(uri))
 	//icon.Resize(fyne.Size{Width: 100, Height: 100})
-	clr := StateColor(tsk.State)
 	fileNameText := canvas.NewText(filepath.Base(path), color.Black)
 	fileNameText.TextStyle = fyne.TextStyle{Bold: true}
-	stateText := canvas.NewText(Split(tsk.State.String()), clr)
+	stateText := canvas.NewText(Split(tsk.GetState()), tsk.RiskLevel.Color())
 	//stateText.Color = clr
 	logging.Debugf("XXX MESSAGE GET: %v", tsk)
-	messageText := canvas.NewText(tsk.Message, clr)
+	messageText := canvas.NewText(tsk.Message, tsk.RiskLevel.Color())
 	messageText.TextStyle = fyne.TextStyle{Italic: true}
 	messageText.TextSize = 10
 	//messageText.Color = StateColor(tsk.State)
@@ -155,7 +165,7 @@ func (s *SubmissionsWindow) CardWidget(tsk *task.Task) fyne.CanvasObject {
 		s.PopUpMenu(tsk),
 	)
 	return container.NewBorder(
-		nil, nil, icon, menuIcon,
+		nil, nil, container.NewPadded(icon), menuIcon,
 		vbox,
 	)
 }

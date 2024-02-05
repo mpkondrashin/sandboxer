@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"sandboxer/pkg/logging"
-	"sandboxer/pkg/state"
 )
 
 type ID int64
@@ -26,7 +25,8 @@ type Task struct {
 	Number     ID
 	SubmitTime time.Time
 	Path       string
-	State      state.State
+	State      State
+	RiskLevel  RiskLevel
 	Message    string
 	SandboxID  string
 }
@@ -36,7 +36,8 @@ func NewTask(id ID, path string) *Task {
 		Number:     id,
 		SubmitTime: time.Now(),
 		Path:       path,
-		State:      state.StateNew,
+		State:      StateNew,
+		RiskLevel:  RiskLevelUnknown,
 		Message:    "",
 		SandboxID:  "",
 	}
@@ -47,10 +48,16 @@ func NewTask(id ID, path string) *Task {
 //		return t.mx.Unlock
 //}
 
-func (t *Task) SetState(newState state.State) {
+func (t *Task) SetState(newState State) {
 	logging.Debugf("SetState(%v)", newState)
 	t.State = newState
-	t.Message = ""
+}
+
+func (t *Task) GetState() string {
+	if t.State == StateDone {
+		return t.RiskLevel.String()
+	}
+	return t.State.String()
 }
 
 func (t *Task) SetID(id string) {
@@ -68,9 +75,14 @@ func (t *Task) SetSandboxID(sandboxID string) {
 func (t *Task) String() string {
 	return fmt.Sprintf("Task %d; submitted on: %v; state: %v; id: %s; message: %s, path: %s", t.Number, t.SubmitTime, t.State, t.SandboxID, t.Message, t.Path)
 }
+func (t *Task) SetRiskLevel(riskLevel RiskLevel) {
+	t.State = StateDone
+	t.RiskLevel = riskLevel
+}
 
 func (t *Task) SetError(err error) {
-	t.State = state.StateError
+	t.State = StateDone
+	t.RiskLevel = RiskLevelError
 	t.Message = err.Error()
 }
 

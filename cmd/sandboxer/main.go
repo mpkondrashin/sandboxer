@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -13,7 +15,6 @@ import (
 	"sandboxer/pkg/dispatchers"
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
-	"sandboxer/pkg/state"
 	"sandboxer/pkg/task"
 )
 
@@ -106,7 +107,7 @@ func (s *SandboxerApp) EnableQuotaMenuItem() {
 }
 
 func (s *SandboxerApp) EnableOptionsMenuItem() {
-	s.submissionMenuItem.Disabled = false
+	s.optionsMenuItem.Disabled = false
 	s.menu.Refresh()
 }
 
@@ -126,7 +127,7 @@ func (s *SandboxerApp) Quit() {
 	s.app.Quit()
 }
 
-func IconPath(s state.State) string {
+func IconPath(s task.State) string {
 	return fmt.Sprintf("../../resources/%s.svg", s.String())
 }
 
@@ -146,6 +147,16 @@ func SavePid() (func(), error) {
 	}, nil
 }
 
+func HandleSignals() {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		logging.Debugf("Got")
+		os.Exit(1)
+	}()
+}
+
 func main() {
 	configFilePath, err := globals.ConfigurationFilePath()
 	if err != nil {
@@ -163,6 +174,8 @@ func main() {
 	} else {
 		defer close()
 	}
+	//HandleSignals()
+
 	logging.Infof("%s Version %s Start", globals.AppName, globals.Version)
 	logging.Debugf("Configuration file: %s", configFilePath)
 	removePid, err := SavePid()
@@ -170,7 +183,6 @@ func main() {
 		logging.Errorf("Save pid: %v", err)
 		fmt.Fprintf(os.Stderr, "Save pid: %v", err)
 		os.Exit(30)
-
 	}
 	defer removePid()
 	//list := task.NewList()

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"sandboxer/pkg/logging"
-	"sandboxer/pkg/state"
 	"sandboxer/pkg/task"
 	"strings"
 
@@ -31,28 +30,23 @@ func (d *ResultDispatch) ProcessTask(tsk *task.Task) error {
 		return err
 	}
 	//	time.Sleep(10 * time.Second)
-	tsk.SetState(state.StateCheck)
+	tsk.SetState(task.StateCheck)
 	d.list.Updated()
 	results, err := vOne.SandboxAnalysisResults(tsk.SandboxID).Do(context.TODO())
 	if err != nil {
-		if strings.HasSuffix(err.Error(), "NotFound: Not Found") {
-			logging.Debugf("error %v", err)
-			d.Channel(ChResult) <- tsk.Number
-			//task.SetState(id, state.StateUnsupported)
-			return nil
-		}
 		return err
 	}
 	//logging.Debugf("XXX MESSAGE SET: %v", tsk)
 	switch results.RiskLevel {
 	case vone.RiskLevelHigh:
-		tsk.SetState(state.StateHighRisk)
+		tsk.SetRiskLevel(task.RiskLevelHigh)
 	case vone.RiskLevelMedium:
-		tsk.SetState(state.StateMediumRisk)
+		tsk.SetRiskLevel(task.RiskLevelMedium)
 	case vone.RiskLevelLow:
-		tsk.SetState(state.StateLowRisk)
+		tsk.SetRiskLevel(task.RiskLevelLow)
 	case vone.RiskLevelNoRisk:
-		tsk.SetState(state.StateNoRisk)
+		tsk.SetRiskLevel(task.RiskLevelNoRisk)
+		tsk.SetMessage(task.RiskLevelNoRisk.String())
 	default:
 		return fmt.Errorf("unknown risk level: %d", results.RiskLevel)
 	}

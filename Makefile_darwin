@@ -4,7 +4,7 @@
 Sandboxer.dmg: output/sandboxer.app output/sandboxer.app/Contents/MacOS/submit
 	hdiutil create -volname "Sandboxer" -srcfolder "output" -ov -format UDZO "Sandboxer.dmg"
 
-output/sandboxer.app: $(wildcard cmd/sandboxer/*.go) $(wildcard pkg/globals/*.go) cmd/sandboxer/icon.go
+output/sandboxer.app: $(wildcard cmd/sandboxer/*.go) $(wildcard pkg/*/*.go) cmd/sandboxer/icon.go
 	fyne package --os darwin --name sandboxer --appID in.kondrash.sandboxer --appVersion 0.0.1 --icon ../../resources/icon.png --release --sourceDir ./cmd/sandboxer
 	rm -rf output
 	mkdir -p output
@@ -13,7 +13,7 @@ output/sandboxer.app: $(wildcard cmd/sandboxer/*.go) $(wildcard pkg/globals/*.go
 cmd/sandboxer/icon.go: resources/icon.png 
 	fyne bundle --name ApplicationIcon --package main --output cmd/sandboxer/icon.go resources/icon.png 
 
-output/sandboxer.app/Contents/MacOS/submit: $(wildcard cmd/submit/*.go)  $(wildcard pkg/globals/*.go)
+output/sandboxer.app/Contents/MacOS/submit: $(wildcard cmd/submit/*.go) $(wildcard pkg/*/*.go)
 	go build -o ./output/sandboxer.app/Contents/MacOS ./cmd/submit
 
 clean:
