@@ -17,4 +17,4 @@ output/sandboxer.app/Contents/MacOS/submit: $(wildcard cmd/submit/*.go) $(wildca
 	go build -o ./output/sandboxer.app/Contents/MacOS ./cmd/submit
 
 clean:
-	rm -f output
+	rm -rf output Sandboxer.dmg  
