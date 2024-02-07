@@ -114,6 +114,10 @@ func (l *TaskList) Updated() {
 	l.changed <- struct{}{}
 }
 
+func (l *TaskList) Length() int {
+	return len(l.Tasks)
+}
+
 func (l *TaskList) Changes() chan struct{} {
 	return l.changed
 }

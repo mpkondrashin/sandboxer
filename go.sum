@@ -234,6 +234,8 @@ github.com/mpkondrashin/fileicon v0.0.3 h1:CbekI9mfEDL6RAbHW5gLXf3PdeAqBmLhtGxdB
 github.com/mpkondrashin/fileicon v0.0.3/go.mod h1:61z1CWr+2fRHwyz4P7Aby6aeHvshhMy2cJoi2ag3lSo=
 github.com/mpkondrashin/fileicon v0.0.4 h1:TF8g2K2QhRt/Ec/DDazomrCul9jdsfQ3PuDYg1izSmk=
 github.com/mpkondrashin/fileicon v0.0.4/go.mod h1:61z1CWr+2fRHwyz4P7Aby6aeHvshhMy2cJoi2ag3lSo=
+github.com/mpkondrashin/fileicon v0.0.5 h1:jT8mxRJeS2KHXQa1oXbkNmB3wOY1qGfR5Oqblay0HeI=
+github.com/mpkondrashin/fileicon v0.0.5/go.mod h1:61z1CWr+2fRHwyz4P7Aby6aeHvshhMy2cJoi2ag3lSo=
 github.com/mpkondrashin/vone v0.0.21-0.20240129162813-c59b693abd1f h1:bJ6AgIsqhs9q1wWZ++zzuWYMj1dSxvxsm+Ywdm22s0E=
 github.com/mpkondrashin/vone v0.0.21-0.20240129162813-c59b693abd1f/go.mod h1:ZoWZSkwcOAHkCv9co3vs60gaMzolV9Hg3Ftpa/jPWDY=
 github.com/mpkondrashin/vone v0.0.21 h1:ZeZ7XkBpGnkj98Dct7tcdTihnl0Uscb42W3vQSnj+uU=
