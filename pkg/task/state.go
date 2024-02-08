@@ -17,6 +17,7 @@ const (
 	StateInspected
 	StateCheck
 	StateWaitForResult
+	StateReport
 	StateDone
 	StateCount
 )
@@ -28,6 +29,7 @@ func (v State) String() string {
 		StateUpload:        "Upload",
 		StateInspected:     "Inspected",
 		StateCheck:         "Check",
+		StateReport:        "Report",
 		StateWaitForResult: "Wait For Result",
 		StateDone:          "Done",
 		StateCount:         "Count",
@@ -43,13 +45,14 @@ func (v State) String() string {
 var ErrUnknownState = errors.New("unknown State")
 
 var mapStateFromString = map[string]State{
-	"new":           StateNew,
-	"upload":        StateUpload,
-	"inspected":     StateInspected,
-	"check":         StateCheck,
-	"waitforresult": StateWaitForResult,
-	"finished":      StateDone,
-	"count":         StateCount,
+	"new":             StateNew,
+	"upload":          StateUpload,
+	"inspected":       StateInspected,
+	"check":           StateCheck,
+	"report":          StateReport,
+	"wait for result": StateWaitForResult,
+	"finished":        StateDone,
+	"count":           StateCount,
 }
 
 // UnmarshalJSON implements the Unmarshaler interface of the json package for State.

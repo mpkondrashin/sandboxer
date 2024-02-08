@@ -13,6 +13,7 @@ const (
 	UploadDispatchers    = 5
 	WaitDispatchers      = 5
 	ResultDispatchers    = 5
+	ReportDispatcher     = 5
 )
 
 type Launcher struct {
@@ -35,6 +36,7 @@ func (l *Launcher) Run() {
 		count      int
 		dispatcher Dispatcher
 	}{
+		{ReportDispatcher, NewReportDispatch(base)},
 		{ResultDispatchers, NewResultDispatch(base)},
 		{WaitDispatchers, NewWaitDispatch(base)},
 		{UploadDispatchers, NewUploadDispatch(base)},

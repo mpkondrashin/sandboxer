@@ -36,6 +36,7 @@ func (d *ResultDispatch) ProcessTask(tsk *task.Task) error {
 	if err != nil {
 		return err
 	}
+	tsk.SetDigest(results.Digest.MD5, results.Digest.SHA1, results.Digest.SHA256)
 	//logging.Debugf("XXX MESSAGE SET: %v", tsk)
 	switch results.RiskLevel {
 	case vone.RiskLevelHigh:
@@ -50,6 +51,7 @@ func (d *ResultDispatch) ProcessTask(tsk *task.Task) error {
 	default:
 		return fmt.Errorf("unknown risk level: %d", results.RiskLevel)
 	}
+	d.Channel(ChReport) <- tsk.Number
 	detectionName := strings.Join(results.DetectionNames, ", ")
 	threatType := strings.Join(results.ThreatTypes, ", ")
 	tsk.SetMessage(detectionName + threatType)

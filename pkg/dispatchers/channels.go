@@ -21,6 +21,7 @@ const (
 	ChUpload
 	ChWait
 	ChResult
+	ChReport
 	ChCount
 )
 

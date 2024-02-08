@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -87,7 +88,6 @@ func (s *SubmissionsWindow) Content() fyne.CanvasObject {
 		container.NewScroll(s.vbox),
 	)
 }
-
 func (s *SubmissionsWindow) Next() {
 	l := s.list.Length()
 	if s.from+s.count >= l {
@@ -106,10 +106,13 @@ func (s *SubmissionsWindow) Prev() {
 }
 
 func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
-	downloadItem := fyne.NewMenuItem("Download Report", func() {})
+	downloadItem := fyne.NewMenuItem("Show Report", func() {
+		s.OpenReport(tsk.Report)
+	})
+	downloadItem.Disabled = tsk.Report == ""
 	downloadInvestigation := fyne.NewMenuItem("Download Investigation Package", func() {})
 	if tsk.State != task.StateDone {
-		downloadItem.Disabled = true
+		//		downloadItem.Disabled = true
 		downloadInvestigation.Disabled = true
 	}
 	var deleteFileItem *fyne.MenuItem
@@ -148,8 +151,19 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 		deleteFileItem)
 }
 
-func IconForFile(path string) *canvas.Image {
-	iconData := fileicon.FileIcon(path)
+func (s *SubmissionsWindow) OpenReport(report string) {
+	cmd := exec.Command("open", report)
+	err := cmd.Run()
+	if err != nil {
+		dialog.ShowError(err, s.win)
+	}
+}
+
+func IconForFile(path string) fyne.CanvasObject {
+	iconData, err := fileicon.FileIcon(path)
+	if err != nil {
+		iconData = fileicon.VanilaIcon()
+	}
 	iconResource := &fyne.StaticResource{
 		StaticName:    filepath.Base(path),
 		StaticContent: []byte(iconData),
@@ -157,7 +171,28 @@ func IconForFile(path string) *canvas.Image {
 	icon := canvas.NewImageFromResource(iconResource)
 	icon.SetMinSize(fyne.NewSize(26, 26))
 	icon.FillMode = canvas.ImageFillContain
-	return icon
+	if err == nil {
+		return icon
+	}
+	ext := filepath.Ext(path)
+	if len(ext) > 0 {
+		ext = ext[1:]
+	}
+	var maxSize float32 = 10
+	var size float32
+	if len(ext) > 0 {
+		size = maxSize * 3 / float32(len(ext))
+	}
+	if size > maxSize {
+		size = maxSize
+	}
+	t := canvas.NewText(ext, color.RGBA{128, 128, 128, 255})
+	t.TextStyle = fyne.TextStyle{
+		Bold: true,
+	}
+	t.TextSize = size
+	labelBorder := container.NewCenter(t)
+	return container.NewStack(icon, labelBorder)
 }
 
 func (s *SubmissionsWindow) CardWidget(tsk *task.Task) fyne.CanvasObject {

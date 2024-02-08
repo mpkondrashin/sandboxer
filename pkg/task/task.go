@@ -29,6 +29,10 @@ type Task struct {
 	RiskLevel  RiskLevel
 	Message    string
 	SandboxID  string
+	MD5        string
+	SHA1       string
+	SHA256     string
+	Report     string
 }
 
 func NewTask(id ID, path string) *Task {
@@ -88,4 +92,20 @@ func (t *Task) SetError(err error) {
 
 func (t *Task) SetMessage(message string) {
 	t.Message = message
+}
+
+func (t *Task) SetReport(report string) {
+	t.Report = report
+}
+
+func (t *Task) SetDigest(MD5, SHA1, SHA256 string) {
+	if MD5 != "" {
+		t.MD5 = MD5
+	}
+	if SHA1 != "" {
+		t.SHA1 = SHA1
+	}
+	if SHA256 != "" {
+		t.SHA256 = SHA256
+	}
 }
