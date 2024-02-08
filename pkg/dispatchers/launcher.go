@@ -9,11 +9,12 @@ import (
 )
 
 const (
-	PrefilterDispatchers = 1
-	UploadDispatchers    = 5
-	WaitDispatchers      = 5
-	ResultDispatchers    = 5
-	ReportDispatcher     = 5
+	PrefilterDispatchers    = 1
+	UploadDispatchers       = 5
+	WaitDispatchers         = 5
+	ResultDispatchers       = 5
+	ReportDispatcher        = 5
+	InvestigationDispatcher = 5
 )
 
 type Launcher struct {
@@ -36,6 +37,7 @@ func (l *Launcher) Run() {
 		count      int
 		dispatcher Dispatcher
 	}{
+		{InvestigationDispatcher, NewInvestigationDispatch(base)},
 		{ReportDispatcher, NewReportDispatch(base)},
 		{ResultDispatchers, NewResultDispatch(base)},
 		{WaitDispatchers, NewWaitDispatch(base)},

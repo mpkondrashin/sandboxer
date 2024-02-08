@@ -13,6 +13,11 @@ import (
 	"github.com/go-ole/go-ole/oleutil"
 )
 
+const (
+	TasksFolder = "tasks"
+	logsFolder  = "logs"
+)
+
 var (
 	ErrNoUserProfile = errors.New("missing environment variable")
 	ErrUnsupportedOS = errors.New("unsupported OS")
@@ -59,7 +64,7 @@ func LogsFolder() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(folder, "logs"), nil
+	return filepath.Join(folder, logsFolder), nil
 }
 
 func ExtendContextMenu(appPath string) (string, error) {

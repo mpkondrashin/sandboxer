@@ -2,9 +2,12 @@ package task
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"sandboxer/pkg/logging"
+
+	"gopkg.in/yaml.v2"
 )
 
 type ID int64
@@ -22,17 +25,18 @@ var (
 */
 type Task struct {
 	//	mx         sync.Mutex
-	Number     ID
-	SubmitTime time.Time
-	Path       string
-	State      State
-	RiskLevel  RiskLevel
-	Message    string
-	SandboxID  string
-	MD5        string
-	SHA1       string
-	SHA256     string
-	Report     string
+	Number        ID
+	SubmitTime    time.Time
+	Path          string
+	State         State
+	RiskLevel     RiskLevel
+	Message       string
+	SandboxID     string
+	MD5           string
+	SHA1          string
+	SHA256        string
+	Report        string
+	Investigation string
 }
 
 func NewTask(id ID, path string) *Task {
@@ -98,6 +102,10 @@ func (t *Task) SetReport(report string) {
 	t.Report = report
 }
 
+func (t *Task) SetInvestigation(investigation string) {
+	t.Investigation = investigation
+}
+
 func (t *Task) SetDigest(MD5, SHA1, SHA256 string) {
 	if MD5 != "" {
 		t.MD5 = MD5
@@ -108,4 +116,12 @@ func (t *Task) SetDigest(MD5, SHA1, SHA256 string) {
 	if SHA256 != "" {
 		t.SHA256 = SHA256
 	}
+}
+
+func (t *Task) Save(filePath string) error {
+	data, err := yaml.Marshal(t)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filePath, data, 0644)
 }

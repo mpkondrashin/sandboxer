@@ -22,6 +22,7 @@ const (
 	ChWait
 	ChResult
 	ChReport
+	ChInvestigation
 	ChCount
 )
 

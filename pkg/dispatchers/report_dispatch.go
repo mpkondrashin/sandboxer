@@ -40,17 +40,16 @@ func (d *ReportDispatch) ProcessTask(tsk *task.Task) error {
 	tsk.SetReport(filePath)
 	tsk.SetState(task.StateDone)
 	d.list.Updated()
+	d.Channel(ChInvestigation) <- tsk.Number
 	return nil
 }
-
-const ReportsFolder = "reports"
 
 func (d *ReportDispatch) ReportPath(tsk *task.Task) (string, error) {
 	baseFolder, err := globals.UserDataFolder()
 	if err != nil {
 		return "", err
 	}
-	folder := filepath.Join(baseFolder, ReportsFolder, tsk.SHA256)
+	folder := filepath.Join(baseFolder, globals.TasksFolder, tsk.SHA256)
 	if err := os.MkdirAll(folder, 0755); err != nil {
 		return "", err
 	}

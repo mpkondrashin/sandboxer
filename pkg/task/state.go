@@ -18,6 +18,7 @@ const (
 	StateCheck
 	StateWaitForResult
 	StateReport
+	StateInvestigation
 	StateDone
 	StateCount
 )
@@ -29,8 +30,9 @@ func (v State) String() string {
 		StateUpload:        "Upload",
 		StateInspected:     "Inspected",
 		StateCheck:         "Check",
-		StateReport:        "Report",
 		StateWaitForResult: "Wait For Result",
+		StateReport:        "Report",
+		StateInvestigation: "Investiation",
 		StateDone:          "Done",
 		StateCount:         "Count",
 	}[v]
@@ -49,8 +51,9 @@ var mapStateFromString = map[string]State{
 	"upload":          StateUpload,
 	"inspected":       StateInspected,
 	"check":           StateCheck,
-	"report":          StateReport,
 	"wait for result": StateWaitForResult,
+	"report":          StateReport,
+	"investigation":   StateInvestigation,
 	"finished":        StateDone,
 	"count":           StateCount,
 }

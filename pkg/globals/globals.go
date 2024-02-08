@@ -7,6 +7,7 @@ const (
 	AppID          = "com.github.mpkondrashin." + Name
 	ConfigFileName = Name + ".yaml"
 	FIFOName       = Name + "_submit_fifo"
+
 	//SvcFileName    = "exam-ensvc.exe" // XXX only windows?
 	//SvcName        = Name
 	//SvcDisplayName = "Ex-amen Sandbox Submission Tool"

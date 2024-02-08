@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -110,11 +111,12 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 		s.OpenReport(tsk.Report)
 	})
 	downloadItem.Disabled = tsk.Report == ""
-	downloadInvestigation := fyne.NewMenuItem("Download Investigation Package", func() {})
-	if tsk.State != task.StateDone {
-		//		downloadItem.Disabled = true
-		downloadInvestigation.Disabled = true
-	}
+
+	downloadInvestigation := fyne.NewMenuItem("Investigation Package", func() {
+		s.OpenInvestigation(tsk.Investigation)
+	})
+	downloadInvestigation.Disabled = tsk.Investigation == ""
+
 	var deleteFileItem *fyne.MenuItem
 	deleteFileAction := func() {
 		dialog.ShowConfirm("Delete file",
@@ -133,6 +135,9 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 	}
 
 	deleteFileItem = fyne.NewMenuItem("Delete File", deleteFileAction)
+	deleteFileItem.Disabled = tsk.RiskLevel != task.RiskLevelHigh &&
+		tsk.RiskLevel != task.RiskLevelMedium &&
+		tsk.RiskLevel != task.RiskLevelLow
 	recheckAction := func() {
 		tsk.SetState(task.StateNew)
 		s.channels.TaskChannel[dispatchers.ChPrefilter] <- tsk.Number
@@ -152,7 +157,23 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 }
 
 func (s *SubmissionsWindow) OpenReport(report string) {
-	cmd := exec.Command("open", report)
+	command := "open"
+	if runtime.GOOS == "windows" {
+		command = "start"
+	}
+	cmd := exec.Command(command, report)
+	err := cmd.Run()
+	if err != nil {
+		dialog.ShowError(err, s.win)
+	}
+}
+
+func (s *SubmissionsWindow) OpenInvestigation(investigation string) {
+	command := "open"
+	if runtime.GOOS == "windows" {
+		command = "start"
+	}
+	cmd := exec.Command(command, investigation)
 	err := cmd.Run()
 	if err != nil {
 		dialog.ShowError(err, s.win)
