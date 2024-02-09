@@ -29,7 +29,7 @@ setup.zip: cmd/setup/setup.exe
 preproc.exe:  $(wildcard cmd/preproc/*.go)
 	go build ./cmd/preproc
 
-cmd/setup/setup.exe.manifest: cmd/preproc/preproc.exe cmd/setup/manifest.template
+cmd/setup/setup.exe.manifest: preproc.exe cmd/setup/manifest.template
 	preproc.exe --version $(VERSION) --build $(BUILD) $< $@
 
 cmd/setup/setup.syso: cmd/setup/setup.exe.manifest
