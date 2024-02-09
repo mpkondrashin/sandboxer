@@ -23,8 +23,9 @@ type Status interface {
 }
 
 type SandboxerApp struct {
-	app                fyne.App
-	menu               *fyne.Menu
+	app  fyne.App
+	menu *fyne.Menu
+	// SUBMIT_FILE submitMenuItem     *fyne.MenuItem
 	submissionMenuItem *fyne.MenuItem
 	quotaMenuItem      *fyne.MenuItem
 	optionsMenuItem    *fyne.MenuItem
@@ -57,6 +58,19 @@ func NewSandboxingApp(conf *config.Configuration, channels *dispatchers.Channels
 		NewModalWindow(a.app.NewWindow("Options..."), a.EnableOptionsMenuItem),
 		conf,
 	)
+	/* SUBMIT_FILE
+	a.submitMenuItem = fyne.NewMenuItem("Submit File", func() {
+		fmt.Println("Submit file")
+		dialog.ShowFileOpen(func(uri fyne.URIReadCloser, err error) {
+			fmt.Println("Open", err)
+			if err != nil {
+				return
+			}
+			channels.TaskChannel[dispatchers.ChPrefilter] <- list.NewTask(uri.URI().String())
+			list.Updated()
+		}, a.optionsWindow.win)
+	})
+	*/
 	a.submissionMenuItem = fyne.NewMenuItem("Submissions...", a.Submissions)
 	a.quotaMenuItem = fyne.NewMenuItem("Quota...", a.Quota)
 	a.optionsMenuItem = fyne.NewMenuItem("Options...", a.Options)
@@ -82,12 +96,17 @@ func (s *SandboxerApp) Run() {
 
 func (s *SandboxerApp) Menu() *fyne.Menu {
 	return fyne.NewMenu(globals.AppName,
+		// SUBMIT_FILE s.submitMenuItem,
 		s.submissionMenuItem,
 		s.quotaMenuItem,
 		s.optionsMenuItem,
 		fyne.NewMenuItemSeparator(), //fyne.NewMenuItem("About...", nil),
 		fyne.NewMenuItem("Quit", s.Quit),
 	)
+}
+
+func (s *SandboxerApp) SubmitFile() {
+
 }
 
 func (s *SandboxerApp) Submissions() {

@@ -248,32 +248,29 @@ func (s *SubmissionsWindow) CardWidget(tsk *task.Task) fyne.CanvasObject {
 		t.Icon(theme.IconNameMoreVertical),
 		s.PopUpMenu(tsk),
 	)
-	return container.NewBorder(
-		nil, nil, container.NewPadded(icon), menuIcon,
-		vbox,
-	)
+	return container.NewHBox(menuIcon, container.NewPadded(icon), vbox)
+	//container.NewBorder(
+	//	nil, nil, container.NewHBox(menuIcon, container.NewPadded(icon)), nil, //menuIcon,
+	//		vbox,
+	//	)
 }
 
 func (s *SubmissionsWindow) Update() {
-	s.pageLabel.Text = fmt.Sprintf("Submissions %d - %d out of %d", s.from+1, s.from+s.count+1, s.list.Length())
+	to := s.from + s.count + 1
+	if to > s.list.Length() {
+		to = s.list.Length()
+	}
+	s.pageLabel.Text = fmt.Sprintf("Submissions %d - %d out of %d", s.from+1, to, s.list.Length())
 	s.pageLabel.Refresh()
 	//	logging.Debugf("XXX SubmissionsWindow.Update()")
-	//s.l.SetText(s.l.Text + "!")
-	//	return
 	s.vbox.RemoveAll()
-	//b := newContextMenuLable("context", m)
-	//s.vbox.Add(b)
-	//s.list.Add(task.NewTask("C:\\asd\\asd.txt"))
-
 	s.list.Process(func(ids []task.ID) {
-		//logging.Debugf("XXX SubmissionsWindow.Update() Process")
-		//for i, idx := range ids {
 		for i := s.from; i < s.from+s.count && i < len(ids); i++ {
 			idx := ids[i]
 			_ = s.list.Task(idx, func(tsk *task.Task) error {
-				if tsk == nil {
-					//tsk = task.NewTask(0, "placeholder")
-				}
+				//if tsk == nil {
+				//tsk = task.NewTask(0, "placeholder")
+				//}
 				card := s.CardWidget(tsk)
 				s.vbox.Add(card) // padded
 				s.vbox.Add(canvas.NewLine(color.RGBA{158, 158, 158, 255}))
@@ -291,25 +288,15 @@ func (s *SubmissionsWindow) Update() {
 			s.buttonNext.Disable()
 		}
 	})
-	if len(s.vbox.Objects) > 0 {
-
-		//logging.Debugf("XXX SubmissionsWindow.Update() List.Length = %d", len(s.vbox.Objects))
-		//s.win.SetContent(container.NewScroll(s.vbox))
-	} else {
+	if len(s.vbox.Objects) == 0 {
 		s.vbox.Add(widget.NewLabel("No submissions"))
 		s.buttonNext.Disable()
 		s.buttonPrev.Disable()
-		//s.win.SetContent(widget.NewLabel("No submissions"))
 	}
 	s.vbox.Refresh()
-	//s.win.Canvas().Refresh()
 }
 
 func (s *SubmissionsWindow) Show() {
-	//	if !s.hidden {
-	//		return
-	//}
-	//s.hidden = false
 	s.win.Show()
 	fps := time.Millisecond * 300
 	go func() {

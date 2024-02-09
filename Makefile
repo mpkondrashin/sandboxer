@@ -1,48 +1,44 @@
 
 .PHONY: clean tidy
 
-#ifeq ($(PROCESSOR_ARCHITEW6432),AMD64)
-GOOS="unknown_OS"
-MOVE="unknown_move_command"
-EXE=""
-TAR=""
-ZIP=""
+#GOOPTS := -ldflags="-extldflags=-static"
+# -tags sqlite_omit_load_extension
+GOOS=windows
 
-ifeq ($(OS),Windows_NT)
-	GOOS=windows
-#	MOVE=move /Y
-	EXE=.exe
-#	TAR="rem"
-	ZIP="powershell Compress-Archive
+REV=$(shell git rev-list --tags --max-count=1)
+VERSION_FULL=$(shell git describe --tags $(REV))
+VERSION_V := $(word 1,$(subst -, ,$(VERSION_FULL)))
+VERSION := $(subst v,,$(VERSION_V))
+ifeq ($(VERSION),)
+VERSION := v
+endif
+BUILD = $(shell git rev-list --all --count)
+ifeq ($(BUILD),)
+BUILD := b
+endif
 
-# $(1) - archive name
-# $(2) - file to put into archive`
+EXE=.exe
+
 define zip
 	powershell Compress-Archive  -Force "$(2)" "$(1)"
 endef
-else
-	GOOS=darwin
-#	MOVE=mv -f
-	EXE=.app
-#	TAR="tag cfv"
-# $(1) - archive name
-# $(2) - file to put into archive`
-define zip
-	#    $(eval $@_HOSTNAME = $(1))
-	#    $(eval $@_PORT = $(2))
-	zip $(1) $(2)
-endef
-endif
 
-setup.zip: cmd/setup/setup$(EXE)
-#	echo $(wildcard cmd/install/*.go)
-	$(call zip, "setup.zip" , "cmd/setup/setup$(EXE)")
+setup.zip: cmd/setup/setup.exe
+	$(call zip, "setup.zip" , "cmd/setup/setup.exe")
 
-cmd/setup/setup$(EXE): cmd/setup/embed/install$(EXE).gz cmd/setup/embed/opengl32.dll.gz $(wildcard cmd/setup/*.go)
-#	echo $(wildcard cmd/install/*.go)
+preproc.exe:  $(wildcard cmd/preproc/*.go)
+	go build ./cmd/preproc
+
+cmd/setup/setup.exe.manifest: cmd/preproc/preproc.exe cmd/setup/manifest.template
+	preproc.exe --version $(VERSION) --build $(BUILD) $< $@
+
+cmd/setup/setup.syso: cmd/setup/setup.exe.manifest
+	rsrc -manifest cmd/setup/setup.exe.manifest -o cmd/setup/setup.syso
+
+cmd/setup/setup.exe: cmd/setup/embed/install.exe.gz cmd/setup/embed/opengl32.dll.gz $(wildcard cmd/setup/*.go)
 	fyne package --os $(GOOS) --name setup --appID in.kondrash.sandboxer --appVersion 0.0.1 --icon ../../resources/icon.png --release --sourceDir ./cmd/setup
 
-cmd/setup/embed/install$(EXE).gz: cmd/install/install$(EXE)
+cmd/setup/embed/install.exe.gz: cmd/install/install.exe
 	gzip -fc cmd/install/install.exe > cmd/setup/embed/install.exe.gz
 
 cmd/setup/embed/opengl32.dll.gz: resources/opengl32.dll
@@ -53,7 +49,6 @@ cmd/install/install.exe: cmd/install/embed/opengl32.dll.gz cmd/install/embed/san
 
 cmd/install/resource.go: resources/icon_transparent.png 
 	fyne bundle --name ApplicationIcon --package main --output cmd/install/resource.go resources/icon_transparent.png 
-
 
 cmd/install/embed/opengl32.dll.gz: resources/opengl32.dll
 	gzip -fc resources/opengl32.dll  > cmd/install/embed/opengl32.dll.gz
@@ -78,3 +73,4 @@ clean: tidy
 
 tidy:
 	rm -f cmd/sandboxer/sandboxer.exe cmd/install/install.exe cmd/setup/setup.exe
+
