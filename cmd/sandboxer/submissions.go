@@ -272,13 +272,9 @@ func (s *SubmissionsWindow) Update() {
 			idx := ids[i]
 			_ = s.list.Task(idx, func(tsk *task.Task) error {
 				if tsk == nil {
-					tsk = task.NewTask(0, "placeholder")
-					//logging.Debugf("tsk = nil, i = %d, ids[i]=%d , ids = %v", i, ids[i], ids)
+					//tsk = task.NewTask(0, "placeholder")
 				}
 				card := s.CardWidget(tsk)
-				//				if i > 0 {
-				//				}
-				_ = i
 				s.vbox.Add(card) // padded
 				s.vbox.Add(canvas.NewLine(color.RGBA{158, 158, 158, 255}))
 				return nil
