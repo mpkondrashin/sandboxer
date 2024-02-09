@@ -1,6 +1,9 @@
 package main
 
 import (
+	"os/exec"
+	"path/filepath"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
@@ -28,6 +31,10 @@ func (p *PageFinish) Content(win fyne.Window, installer *Installer) fyne.CanvasO
 func (p *PageFinish) Run(win fyne.Window, installer *Installer) {}
 
 func (p *PageFinish) AquireData(installer *Installer) error {
-
-	return nil
+	if !p.runCheck.Checked {
+		return nil
+	}
+	path := filepath.Join(installer.InstallFolder(), globals.Name+".exe")
+	cmd := exec.Command(path, "--submissions")
+	return cmd.Run()
 }
