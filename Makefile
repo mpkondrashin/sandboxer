@@ -35,8 +35,9 @@ cmd/setup/setup.exe.manifest: cmd/preproc/preproc.exe cmd/setup/manifest.templat
 cmd/setup/setup.syso: cmd/setup/setup.exe.manifest
 	rsrc -manifest cmd/setup/setup.exe.manifest -o cmd/setup/setup.syso
 
-cmd/setup/setup.exe: cmd/setup/embed/install.exe.gz cmd/setup/embed/opengl32.dll.gz $(wildcard cmd/setup/*.go)
-	fyne package --os $(GOOS) --name setup --appID in.kondrash.sandboxer --appVersion 0.0.1 --icon ../../resources/icon.png --release --sourceDir ./cmd/setup
+cmd/setup/setup.exe: cmd/setup/embed/install.exe.gz cmd/setup/embed/opengl32.dll.gz $(wildcard cmd/setup/*.go) cmd/setup/setup.syso
+	GOOS=windows go build -C cmd/setup setup 
+#--icon ../../resources/icon.png
 
 cmd/setup/embed/install.exe.gz: cmd/install/install.exe
 	gzip -fc cmd/install/install.exe > cmd/setup/embed/install.exe.gz
