@@ -9,6 +9,7 @@ import (
 )
 
 type PageFinish struct {
+	runCheck *widget.Check
 }
 
 var _ Page = &PageAutostart{}
@@ -20,11 +21,13 @@ func (p *PageFinish) Name() string {
 func (p *PageFinish) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
 	l1 := widget.NewLabel(globals.AppName + " service sucessfully installed.")
 	l2 := widget.NewLabel("Right click on any file and pick Send To -> " + globals.AppName + ".")
-	return container.NewVBox(l1, l2)
+	p.runCheck = widget.NewCheck("Run "+globals.AppName+"now: ", nil)
+	return container.NewVBox(l1, l2, p.runCheck)
 }
 
 func (p *PageFinish) Run(win fyne.Window, installer *Installer) {}
 
 func (p *PageFinish) AquireData(installer *Installer) error {
+
 	return nil
 }
