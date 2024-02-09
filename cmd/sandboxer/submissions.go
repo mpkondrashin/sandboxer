@@ -28,7 +28,9 @@ type SubmissionsWindow struct {
 	ModalWindow
 	stopUpdate chan struct{}
 	//enableSubmissionsMenuItem func()
-	vbox *fyne.Container
+	vbox       *fyne.Container
+	buttonNext *widget.Button
+	buttonPrev *widget.Button
 	//pageLabel *widget.Label
 	pageLabel *canvas.Text
 	from      int
@@ -52,6 +54,11 @@ func NewSubmissionsWindow(modalWindow ModalWindow, channels *dispatchers.Channel
 		vbox:      container.NewVBox(widget.NewLabel("No Sumbissions")),
 		//vbox:     container.NewVBox(widget.NewLabel("No Sumbissions")),
 	}
+	s.buttonPrev = widget.NewButton("<", s.Prev)
+	s.buttonPrev.Disable()
+	s.buttonNext = widget.NewButton(">", s.Next)
+	s.buttonNext.Disable()
+
 	s.pageLabel.TextSize = 12
 	//stateText := canvas.NewText(tsk.GetState(), tsk.RiskLevel.Color())
 
@@ -72,8 +79,8 @@ func NewSubmissionsWindow(modalWindow ModalWindow, channels *dispatchers.Channel
 
 func (s *SubmissionsWindow) Content() fyne.CanvasObject {
 	navigationHBox := container.NewHBox(
-		widget.NewButton("<", s.Prev),
-		widget.NewButton(">", s.Next),
+		s.buttonPrev,
+		s.buttonNext,
 	)
 	buttons := container.NewBorder(
 		nil,
@@ -277,12 +284,25 @@ func (s *SubmissionsWindow) Update() {
 				return nil
 			})
 		}
+		if s.from > 0 {
+			s.buttonPrev.Enable()
+		} else {
+			s.buttonPrev.Disable()
+		}
+		if s.from+s.count < len(ids) {
+			s.buttonNext.Enable()
+		} else {
+			s.buttonNext.Disable()
+		}
 	})
 	if len(s.vbox.Objects) > 0 {
+
 		//logging.Debugf("XXX SubmissionsWindow.Update() List.Length = %d", len(s.vbox.Objects))
 		//s.win.SetContent(container.NewScroll(s.vbox))
 	} else {
 		s.vbox.Add(widget.NewLabel("No submissions"))
+		s.buttonNext.Disable()
+		s.buttonPrev.Disable()
 		//s.win.SetContent(widget.NewLabel("No submissions"))
 	}
 	s.vbox.Refresh()
