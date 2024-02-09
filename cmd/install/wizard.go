@@ -151,6 +151,13 @@ func (c *Wizard) Buttons() (*widget.Button, *widget.Button) {
 }
 
 func (c *Wizard) Quit() {
+	logging.Debugf("Quit")
+	err := c.pages[c.current].AquireData(c.installer)
+	if err != nil {
+		logging.Errorf("AquireData: %v", err)
+		dialog.ShowError(err, c.win)
+	}
+	//dialog.ShowConfirm()
 	c.app.Quit()
 }
 
