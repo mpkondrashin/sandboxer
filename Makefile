@@ -27,7 +27,7 @@ setup.zip: cmd/setup/setup.exe
 	$(call zip, "setup.zip" , "cmd/setup/setup.exe")
 
 preproc.exe:  $(wildcard cmd/preproc/*.go)
-	go build ./cmd/preproc
+	GOOS=windows go build ./cmd/preproc
 
 cmd/setup/setup.exe.manifest: preproc.exe cmd/setup/manifest.template
 	preproc.exe --version $(VERSION) --build $(BUILD) $< $@
