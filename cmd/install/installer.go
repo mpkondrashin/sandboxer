@@ -10,9 +10,11 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"sandboxer/pkg/config"
 	"sandboxer/pkg/extract"
+	"sandboxer/pkg/fifo"
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
 	"sandboxer/pkg/script"
@@ -213,7 +215,16 @@ func (i *Installer) StageStopProgram() error {
 
 func (i *Installer) StageWaitServiceToStop() error {
 	logging.Debugf("Install: WaitServiceToStop")
-	return nil
+	for i := 0; i < 10; i++ {
+		fifoWriter, err := fifo.NewWriter()
+		if err != nil && fifo.IsDown(err) {
+			return nil
+		}
+		fifoWriter.Close()
+		logging.Debugf("Wait for FIFO")
+		time.Sleep(1 * time.Second)
+	}
+	return fmt.Errorf("stop Submissions and run setup again")
 }
 
 func (i *Installer) StageExtractExecutable() error {

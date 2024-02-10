@@ -18,23 +18,6 @@ import (
 
 const submitLog = "submit.log"
 
-var (
-	fifoMissingDarwinPrefix = "open/create fifo failed"
-	fifoMissingDarwinSuffix = "device not configured"
-	fifoMisingWindows       = "create file failed: The system cannot find the file specified."
-)
-
-func IsDown(err error) bool {
-	if runtime.GOOS == "darwin" {
-		return strings.HasPrefix(err.Error(), fifoMissingDarwinPrefix) &&
-			strings.HasSuffix(err.Error(), fifoMissingDarwinSuffix)
-	}
-	if runtime.GOOS == "windows" {
-		return strings.HasPrefix(err.Error(), fifoMisingWindows)
-	}
-	return false
-}
-
 var ErrUnsupportedOS = errors.New("unsupported OS")
 
 func SubmissionsExecutablePath(conf *config.Configuration) (string, error) {
@@ -73,7 +56,7 @@ func OpenFIFO(conf *config.Configuration) *fifo.Writer {
 	if err == nil {
 		return fifoWriter
 	}
-	if !IsDown(err) {
+	if !fifo.IsDown(err) {
 		panic(err)
 	}
 	LaunchSandboxer(conf)

@@ -3,6 +3,8 @@ package fifo
 import (
 	"encoding/json"
 	"os"
+	"runtime"
+	"strings"
 
 	"bitbucket.org/avd/go-ipc/fifo"
 
@@ -50,4 +52,21 @@ func (r *Reader) Close() error {
 
 func (w *Reader) Read(data any) error {
 	return json.NewDecoder(w.fifo).Decode(data)
+}
+
+var (
+	fifoMissingDarwinPrefix = "open/create fifo failed"
+	fifoMissingDarwinSuffix = "device not configured"
+	fifoMisingWindows       = "create file failed: The system cannot find the file specified."
+)
+
+func IsDown(err error) bool {
+	if runtime.GOOS == "darwin" {
+		return strings.HasPrefix(err.Error(), fifoMissingDarwinPrefix) &&
+			strings.HasSuffix(err.Error(), fifoMissingDarwinSuffix)
+	}
+	if runtime.GOOS == "windows" {
+		return strings.HasPrefix(err.Error(), fifoMisingWindows)
+	}
+	return false
 }
