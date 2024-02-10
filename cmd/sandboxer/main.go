@@ -29,9 +29,11 @@ type SandboxerApp struct {
 	submissionMenuItem *fyne.MenuItem
 	quotaMenuItem      *fyne.MenuItem
 	optionsMenuItem    *fyne.MenuItem
+	aboutMenuItem      *fyne.MenuItem
 	submissionsWindow  *SubmissionsWindow
 	quotaWindow        *QuotaWindow
 	optionsWindow      *OptionsWindow
+	aboutWindow        *AboutWindow
 }
 
 func NewSandboxingApp(conf *config.Configuration, channels *dispatchers.Channels, list *task.TaskList) *SandboxerApp {
@@ -55,8 +57,11 @@ func NewSandboxingApp(conf *config.Configuration, channels *dispatchers.Channels
 		list,
 	)
 	a.optionsWindow = NewOptionsWindow(
-		NewModalWindow(a.app.NewWindow("Options..."), a.EnableOptionsMenuItem),
+		NewModalWindow(a.app.NewWindow("Options"), a.EnableOptionsMenuItem),
 		conf,
+	)
+	a.aboutWindow = NewAboutWindow(
+		NewModalWindow(a.app.NewWindow("About"), a.EnableOptionsMenuItem),
 	)
 	/* SUBMIT_FILE
 	a.submitMenuItem = fyne.NewMenuItem("Submit File", func() {
@@ -74,6 +79,7 @@ func NewSandboxingApp(conf *config.Configuration, channels *dispatchers.Channels
 	a.submissionMenuItem = fyne.NewMenuItem("Submissions...", a.Submissions)
 	a.quotaMenuItem = fyne.NewMenuItem("Quota...", a.Quota)
 	a.optionsMenuItem = fyne.NewMenuItem("Options...", a.Options)
+	a.aboutMenuItem = fyne.NewMenuItem("About...", a.About)
 	//	a.submissionMenuItem.Disabled = true
 	a.menu = a.Menu()
 	deskApp.SetSystemTrayIcon(a.Icon())
@@ -100,6 +106,7 @@ func (s *SandboxerApp) Menu() *fyne.Menu {
 		s.submissionMenuItem,
 		s.quotaMenuItem,
 		s.optionsMenuItem,
+		s.aboutMenuItem,
 		fyne.NewMenuItemSeparator(), //fyne.NewMenuItem("About...", nil),
 		fyne.NewMenuItem("Quit", s.Quit),
 	)
@@ -129,6 +136,10 @@ func (s *SandboxerApp) EnableOptionsMenuItem() {
 	s.optionsMenuItem.Disabled = false
 	s.menu.Refresh()
 }
+func (s *SandboxerApp) EnableAboutMenuItem() {
+	s.aboutMenuItem.Disabled = false
+	s.menu.Refresh()
+}
 
 func (s *SandboxerApp) Quota() {
 	s.quotaMenuItem.Disabled = true
@@ -140,6 +151,12 @@ func (s *SandboxerApp) Options() {
 	s.optionsMenuItem.Disabled = true
 	s.menu.Refresh()
 	s.optionsWindow.Show()
+}
+
+func (s *SandboxerApp) About() {
+	s.aboutMenuItem.Disabled = true
+	s.menu.Refresh()
+	s.aboutWindow.Show()
 }
 
 func (s *SandboxerApp) Quit() {
@@ -195,7 +212,7 @@ func main() {
 	}
 	//HandleSignals()
 
-	logging.Infof("%s Version %s Start", globals.AppName, globals.Version)
+	logging.Infof("%s Version %s Build %s Start", globals.AppName, globals.Version, globals.Build)
 	logging.Debugf("Configuration file: %s", configFilePath)
 	removePid, err := SavePid()
 	if err != nil {

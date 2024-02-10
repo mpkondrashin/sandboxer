@@ -149,20 +149,21 @@ func PidFilePath() (string, error) {
 
 func SetupLogging(logFileName string) (func(), error) {
 	logging.SetLevel(logging.DEBUG)
-	//      logFileName := fmt.Sprintf("setup_%s.log", time.Now().Format("20060102_150405"))
 	logFolder, err := LogsFolder()
 	if err != nil {
 		return nil, err
 	}
-	if err := os.MkdirAll(logFolder, 0700); err != nil {
+	if err := os.MkdirAll(logFolder, 0755); err != nil {
 		return nil, err
 	}
-	close, err := logging.NewFileLog(logFolder, logFileName)
+	logging.SetLevel(logging.DEBUG)
+	file, err := logging.OpenRotated(logFolder, logFileName, 0644, MaxLogFileSize, LogsKeep)
 	if err != nil {
 		return nil, err
 	}
+	logging.SetLogger(logging.NewFileLogger(file))
 	return func() {
 		logging.Infof("Close Logging")
-		close()
+		file.Close()
 	}, nil
 }

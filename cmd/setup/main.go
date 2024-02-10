@@ -39,7 +39,8 @@ func main() {
 		os.Exit(10)
 	}
 	defer close()
-	logging.Infof("Execute Start")
+	logging.Infof("Execute Start. Version %s Build %s", globals.Version, globals.Build)
+
 	self, err := os.Executable()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Executeable: %v", err)

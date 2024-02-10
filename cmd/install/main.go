@@ -38,7 +38,7 @@ func main() {
 			logging.Criticalf("panic: %v", err)
 		}
 	}()
-	logging.Infof("Start")
+	logging.Infof("Start. Version %s Build %s", globals.Version, globals.Build)
 	logging.Debugf("OS: %s (%s)", runtime.GOOS, runtime.GOARCH)
 	capturesFolder := ""
 	if len(os.Args) == 3 && os.Args[1] == "--capture" {
