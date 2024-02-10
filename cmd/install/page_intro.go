@@ -54,7 +54,7 @@ func (p *PageIntro) Content(win fyne.Window, installer *Installer) fyne.CanvasOb
 	titleLabel := widget.NewLabelWithStyle(globals.AppName,
 		fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 
-	version := fmt.Sprintf("Version %s", MajorMinorRevision[1:])
+	version := fmt.Sprintf("Version %s", globals.Version[1:])
 	versionLabel := widget.NewLabelWithStyle(version,
 		fyne.TextAlignCenter, fyne.TextStyle{})
 
