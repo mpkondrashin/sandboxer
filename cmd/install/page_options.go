@@ -26,7 +26,7 @@ func (p *PageOptions) Content(win fyne.Window, installer *Installer) fyne.Canvas
 	p.tokenEntry = widget.NewMultiLineEntry()
 	p.tokenEntry.Wrapping = fyne.TextWrapBreak
 	tokenFormItem := widget.NewFormItem("Token:", p.tokenEntry)
-	tokenFormItem.HintText = "Go to XXXXXXX"
+	tokenFormItem.HintText = "Go to Administrator -> API Keys"
 	optionsForm := widget.NewForm(
 		tokenFormItem,
 	)

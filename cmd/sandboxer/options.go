@@ -33,8 +33,9 @@ func NewOptionsWindow(modalWindow ModalWindow, conf *config.Configuration) *Opti
 	s.tokenEntry.Wrapping = fyne.TextWrapBreak
 	s.tokenEntry.OnChanged = s.DetectDomain
 	tokenFormItem := widget.NewFormItem("Token:", s.tokenEntry)
-	tokenFormItem.HintText = "Go to XXXXXXX"
-
+	tokenFormItem.HintText = "Go to Administrator -> API Keys"
+	//roleHint := "Go to Administration -> User Roles -> Permissions -> Threat Intelligence -> Sandbox Analysis -> \"View, filter, and search\" and\"Submit object\""
+	// apiKeyHitn := "Go to Administration -> API Keys -> Add API Key"
 	s.domainLabel = widget.NewLabel("")
 	domainFormItem := widget.NewFormItem("Domain:", s.domainLabel)
 
