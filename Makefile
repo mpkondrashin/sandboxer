@@ -49,7 +49,7 @@ cmd/setup/embed/opengl32.dll.gz: resources/opengl32.dll
 	gzip -fc resources/opengl32.dll  > cmd/setup/embed/opengl32.dll.gz
 
 cmd/install/install.exe: cmd/install/embed/opengl32.dll.gz cmd/install/embed/sandboxer.exe.gz cmd/install/embed/submit.exe.gz $(wildcard cmd/install/*.go) $(wildcard pkg/extract/*.go)  $(wildcard pkg/globals/*.go) cmd/install/resource.go
-	GOFLAGS=-ldflags="-X=sandboxer/pkg/globals.Version=$(VERSION)" fyne package --os $(GOOS) --name install --appID in.kondrash.sandboxer --appVersion 0.0.1 --icon ../../resources/icon.png --release --sourceDir ./cmd/install
+	GOFLAGS=-ldflags="-X=sandboxer/pkg/globals.Version=$(VERSION)" fyne package --os $(GOOS) --name install --appID in.kondrash.sandboxer --appVersion $(VERSION) --icon ../../resources/icon.png --release --sourceDir ./cmd/install
 
 cmd/install/resource.go: resources/icon_transparent.png 
 	fyne bundle --name ApplicationIcon --package main --output cmd/install/resource.go resources/icon_transparent.png 
