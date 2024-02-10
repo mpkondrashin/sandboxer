@@ -69,9 +69,11 @@ cmd/sandboxer/sandboxer.exe: $(wildcard cmd/sandboxer/*.go) $(wildcard pkg/globa
 cmd/sandboxer/icon.go: resources/icon.png 
 	fyne bundle --name ApplicationIcon --package main --output cmd/sandboxer/icon.go resources/icon.png 
 
-clean: tidy
-	rm -f setup.zip
+clean: cleansetup celaninstall
+	rm -f setup.zip cmd/sandboxer/sandboxer.exe cmd/submit/submit.exe preproc.exe
 
-tidy:
-	rm -f cmd/sandboxer/sandboxer.exe cmd/install/install.exe cmd/setup/setup.exe
+cleansetup:
+	rm -f cmd/setup/setup.exe cmd/setup/setup.manifest cmd/setup/setup.syso cmd/setup/sandboxer_setup_wizard.log cmd/setup/sandboxer_setup.log cmd/setup/install.exe cmd/setup/embed/install.exe.gz cmd/setup/embed/opengl32.dll.gz 
 
+celaninstall:
+	rm -f cmd/install/install.exe cmd/install/embed/opengl32.dll.gz cmd/install/embed/sandboxer.exe.gz cmd/install/embed/submit.exe.gz
