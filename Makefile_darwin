@@ -1,6 +1,19 @@
 
 .PHONY: clean
 
+
+REV=$(shell git rev-list --tags --max-count=1)
+VERSION_FULL=$(shell git describe --tags $(REV))
+VERSION_V := $(word 1,$(subst -, ,$(VERSION_FULL)))
+VERSION := $(subst v,,$(VERSION_V))
+ifeq ($(VERSION),)
+VERSION := v
+endif
+BUILD = $(shell git rev-list --all --count)
+ifeq ($(BUILD),)
+BUILD := b
+endif
+
 Sandboxer.dmg: output/sandboxer.app output/sandboxer.app/Contents/MacOS/submit
 	hdiutil create -volname "Sandboxer" -srcfolder "output" -ov -format UDZO "Sandboxer.dmg"
 
@@ -15,6 +28,9 @@ cmd/sandboxer/icon.go: resources/icon.png
 
 output/sandboxer.app/Contents/MacOS/submit: $(wildcard cmd/submit/*.go) $(wildcard pkg/*/*.go)
 	go build -o ./output/sandboxer.app/Contents/MacOS ./cmd/submit
+
+pkg/globals/version.go: cmd/genver/main.go
+	go run ./cmd/genver/main.go $(VERSION) $(BUILD) pkg/globals/version.go
 
 clean:
 	rm -rf output Sandboxer.dmg  
