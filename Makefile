@@ -36,7 +36,7 @@ cmd/setup/setup.syso: cmd/setup/setup.exe.manifest
 	rsrc -manifest ./cmd/setup/setup.exe.manifest -o ./cmd/setup/setup.syso
 
 cmd/setup/setup.exe: cmd/setup/embed/install.exe.gz cmd/setup/embed/opengl32.dll.gz $(wildcard cmd/setup/*.go) cmd/setup/setup.syso
-	GOOS=windows go build -C ./cmd/setup 
+	GOOS=windows go build -C ./cmd/setup -ldflags -H=windowsgui 
 #--icon ../../resources/icon.png
 
 cmd/setup/embed/install.exe.gz: cmd/install/install.exe
