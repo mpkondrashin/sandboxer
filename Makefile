@@ -30,7 +30,7 @@ preproc.exe:  $(wildcard cmd/preproc/*.go)
 	go build ./cmd/preproc
 
 cmd/setup/setup.exe.manifest: preproc.exe cmd/setup/manifest.template
-	GOOS=windows GOARCH=amd64 preproc.exe --version $(VERSION) --build $(BUILD) cmd/setup/manifest.template cmd/setup/setup.exe.manifest
+	GOOS=windows GOARCH=amd64 ./preproc.exe --version $(VERSION) --build $(BUILD) cmd/setup/manifest.template cmd/setup/setup.exe.manifest
 
 cmd/setup/setup.syso: cmd/setup/setup.exe.manifest
 	rsrc -manifest cmd/setup/setup.exe.manifest -o cmd/setup/setup.syso
