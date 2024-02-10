@@ -12,8 +12,7 @@ type ModalWindow struct {
 	quit           func()
 }
 
-func NewModalWindow(win fyne.Window,
-	enableMenuItem func()) ModalWindow {
+func NewModalWindow(win fyne.Window, enableMenuItem func()) ModalWindow {
 	w := ModalWindow{
 		win:            win,
 		enableMenuItem: enableMenuItem,

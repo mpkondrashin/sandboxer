@@ -16,8 +16,6 @@ import (
 
 type QuotaWindow struct {
 	ModalWindow
-	//win            fyne.Window
-	//enableMenuItem func()
 	conf       *config.Configuration
 	reserve    binding.String
 	submission binding.String
@@ -28,15 +26,13 @@ type QuotaWindow struct {
 func NewQuotaWindow(modalWindow ModalWindow, conf *config.Configuration) *QuotaWindow {
 	s := &QuotaWindow{
 		ModalWindow: modalWindow,
-		//enableMenuItem: enableMenuItem,
-		conf:       conf,
-		reserve:    binding.NewString(),
-		submission: binding.NewString(),
-		exemption:  binding.NewString(),
-		remaining:  binding.NewString(),
+		conf:        conf,
+		reserve:     binding.NewString(),
+		submission:  binding.NewString(),
+		exemption:   binding.NewString(),
+		remaining:   binding.NewString(),
 	}
 	s.Reset()
-
 	reserveCountItem := widget.NewFormItem("Daily Reserve:", widget.NewLabelWithData(s.reserve))
 	submissionCountItem := widget.NewFormItem("Files Submitted:", widget.NewLabelWithData(s.submission))
 	exemptionCountItem := widget.NewFormItem("Unsupported Files Submitted:", widget.NewLabelWithData(s.exemption))
@@ -81,41 +77,9 @@ func (s *QuotaWindow) Update() {
 	s.submission.Set(submissionCount)
 	s.exemption.Set(exemptionCount)
 	s.remaining.Set(remainingCount)
-	return
-	reserveCountItem := widget.NewFormItem("Daily Reserve:", widget.NewLabel(reserveCount))
-	submissionCountItem := widget.NewFormItem("Files Submitted:", widget.NewLabel(submissionCount))
-	exemptionCountItem := widget.NewFormItem("Unsupported Files Submitted:", widget.NewLabel(exemptionCount))
-	remainingCountItem := widget.NewFormItem("Remaining:", widget.NewLabel(remainingCount))
-	form := widget.NewForm(
-		reserveCountItem,
-		submissionCountItem,
-		exemptionCountItem,
-		remainingCountItem,
-	)
-	s.win.SetContent(form)
-	//str := binding.NewString()
-	/*
-		SubmissionReserveCount   int `json:"submissionReserveCount"`
-		SubmissionRemainingCount int `json:"submissionRemainingCount"`
-		SubmissionCount          int `json:"submissionCount"`
-		SubmissionExemptionCount int `json:"submissionExemptionCount"`
-		SubmissionCountDetail    struct {
-			FileCount          int `json:"fileCount"`
-			FileExemptionCount int `json:"fileExemptionCount"`
-			URLCount           int `json:"urlCount"`
-			URLExemptionCount  int `json:"urlExemptionCount"`
-		} `json:"submissionCountDetail"`
-	*/
 }
 
 func (s *QuotaWindow) Show(enableMenuItem func()) {
 	s.win.Show()
 	go s.Update()
 }
-
-/*
-func (s *QuotaWindow) Hide() {
-	s.win.Hide()
-}
-
-*/

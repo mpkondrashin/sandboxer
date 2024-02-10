@@ -30,10 +30,11 @@ type SandboxerApp struct {
 	quotaMenuItem      *fyne.MenuItem
 	optionsMenuItem    *fyne.MenuItem
 	aboutMenuItem      *fyne.MenuItem
-	submissionsWindow  *SubmissionsWindow
-	quotaWindow        *QuotaWindow
-	optionsWindow      *OptionsWindow
-	aboutWindow        *AboutWindow
+
+	submissionsWindow *SubmissionsWindow
+	quotaWindow       *QuotaWindow
+	optionsWindow     *OptionsWindow
+	aboutWindow       *AboutWindow
 }
 
 func NewSandboxingApp(conf *config.Configuration, channels *dispatchers.Channels, list *task.TaskList) *SandboxerApp {
@@ -44,8 +45,6 @@ func NewSandboxingApp(conf *config.Configuration, channels *dispatchers.Channels
 	}
 	a := &SandboxerApp{
 		app: fyneApp,
-		//submissionsWindow:
-
 	}
 	a.quotaWindow = NewQuotaWindow(NewModalWindow(
 		a.app.NewWindow("Quota"), a.EnableQuotaMenuItem),
@@ -61,7 +60,7 @@ func NewSandboxingApp(conf *config.Configuration, channels *dispatchers.Channels
 		conf,
 	)
 	a.aboutWindow = NewAboutWindow(
-		NewModalWindow(a.app.NewWindow("About"), a.EnableOptionsMenuItem),
+		NewModalWindow(a.app.NewWindow("About"), a.EnableAboutMenuItem),
 	)
 	/* SUBMIT_FILE
 	a.submitMenuItem = fyne.NewMenuItem("Submit File", func() {
@@ -80,7 +79,7 @@ func NewSandboxingApp(conf *config.Configuration, channels *dispatchers.Channels
 	a.quotaMenuItem = fyne.NewMenuItem("Quota...", a.Quota)
 	a.optionsMenuItem = fyne.NewMenuItem("Options...", a.Options)
 	a.aboutMenuItem = fyne.NewMenuItem("About...", a.About)
-	//	a.submissionMenuItem.Disabled = true
+
 	a.menu = a.Menu()
 	deskApp.SetSystemTrayIcon(a.Icon())
 	deskApp.SetSystemTrayMenu(a.menu)
