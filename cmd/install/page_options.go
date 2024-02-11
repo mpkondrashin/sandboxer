@@ -27,6 +27,8 @@ func (p *PageOptions) Content(win fyne.Window, installer *Installer) fyne.Canvas
 	p.tokenEntry.Wrapping = fyne.TextWrapBreak
 	tokenFormItem := widget.NewFormItem("Token:", p.tokenEntry)
 	tokenFormItem.HintText = "Go to Administrator -> API Keys"
+	// https://docs.trendmicro.com/en-US/documentation/article/trend-vision-one-configuring-user-rol
+	// https://docs.trendmicro.com/en-us/documentation/article/trend-vision-one-api-keys
 	optionsForm := widget.NewForm(
 		tokenFormItem,
 	)
