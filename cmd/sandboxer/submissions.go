@@ -18,6 +18,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/mpkondrashin/fileicon"
 
+	"sandboxer/pkg/config"
 	"sandboxer/pkg/dispatchers"
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
@@ -28,6 +29,7 @@ type SubmissionsWindow struct {
 	ModalWindow
 	stopUpdate chan struct{}
 	//enableSubmissionsMenuItem func()
+	conf       *config.Configuration
 	vbox       *fyne.Container
 	buttonNext *widget.Button
 	buttonPrev *widget.Button
@@ -40,10 +42,11 @@ type SubmissionsWindow struct {
 	channels *dispatchers.Channels
 }
 
-func NewSubmissionsWindow(modalWindow ModalWindow, channels *dispatchers.Channels, list *task.TaskList) *SubmissionsWindow {
+func NewSubmissionsWindow(modalWindow ModalWindow, channels *dispatchers.Channels, list *task.TaskList, conf *config.Configuration) *SubmissionsWindow {
 	s := &SubmissionsWindow{
 		ModalWindow: modalWindow,
 		stopUpdate:  make(chan struct{}),
+		conf:        conf,
 		//win:                       app.NewWindow("Submissions"),
 		//enableSubmissionsMenuItem: enableSubmissionsMenuItem,
 		from:      0,
@@ -115,7 +118,7 @@ func (s *SubmissionsWindow) Prev() {
 
 func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 	downloadItem := fyne.NewMenuItem("Show Report", func() {
-		s.OpenReport(tsk.Report)
+		s.RunOpen(tsk.Report)
 	})
 	downloadItem.Disabled = tsk.Report == ""
 
@@ -163,12 +166,12 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 		deleteFileItem)
 }
 
-func (s *SubmissionsWindow) OpenReport(report string) {
+func (s *SubmissionsWindow) RunOpen(path string) {
 	command := "open"
 	if runtime.GOOS == "windows" {
 		command = "start"
 	}
-	cmd := exec.Command(command, report)
+	cmd := exec.Command(command, path)
 	err := cmd.Run()
 	if err != nil {
 		dialog.ShowError(err, s.win)
@@ -176,15 +179,26 @@ func (s *SubmissionsWindow) OpenReport(report string) {
 }
 
 func (s *SubmissionsWindow) OpenInvestigation(investigation string) {
-	command := "open"
-	if runtime.GOOS == "windows" {
-		command = "start"
+	//logging.Debugf("OpenInvestigation.Showhint: %v", s.conf.ShowPasswordHint)
+	if !s.conf.ShowPasswordHint {
+		s.RunOpen(investigation)
+		return
 	}
-	cmd := exec.Command(command, investigation)
-	err := cmd.Run()
-	if err != nil {
-		dialog.ShowError(err, s.win)
-	}
+	dialog.ShowConfirm("Hint",
+		"Password for archive is \"virus\". Show this note next time?",
+		func(yes bool) {
+			//logging.Debugf("OpenInvestigation.Yes: %v", yes)
+			if !yes {
+				s.conf.ShowPasswordHint = false
+				err := s.conf.Save()
+				if err != nil {
+					dialog.ShowError(err, s.win)
+				}
+				//	logging.Debugf("OpenInvestigation.Save: %v", err)
+			}
+			s.RunOpen(investigation)
+		}, s.win)
+	//logging.Debugf("OpenInvestigation.Done")
 }
 
 func IconForFile(path string) fyne.CanvasObject {
@@ -260,8 +274,6 @@ func (s *SubmissionsWindow) Update() {
 	if to > s.list.Length() {
 		to = s.list.Length()
 	}
-	s.pageLabel.Text = fmt.Sprintf("Submissions %d - %d out of %d", s.from+1, to, s.list.Length())
-	s.pageLabel.Refresh()
 	//	logging.Debugf("XXX SubmissionsWindow.Update()")
 	s.vbox.RemoveAll()
 	s.list.Process(func(ids []task.ID) {
@@ -288,11 +300,15 @@ func (s *SubmissionsWindow) Update() {
 			s.buttonNext.Disable()
 		}
 	})
+	s.pageLabel.Text = fmt.Sprintf("Submissions %d - %d out of %d", s.from+1, to, s.list.Length())
 	if len(s.vbox.Objects) == 0 {
-		s.vbox.Add(widget.NewLabel("No submissions"))
+		s.vbox.Add(container.NewCenter(widget.NewLabel("No submissions")))
+		s.pageLabel.Text = ""
 		s.buttonNext.Disable()
 		s.buttonPrev.Disable()
 	}
+	s.pageLabel.Refresh()
+
 	s.vbox.Refresh()
 }
 

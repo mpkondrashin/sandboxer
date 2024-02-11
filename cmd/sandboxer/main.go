@@ -54,6 +54,7 @@ func NewSandboxingApp(conf *config.Configuration, channels *dispatchers.Channels
 		a.app.NewWindow("Submissions"), a.EnableSubmissionsMenuItem),
 		channels,
 		list,
+		conf,
 	)
 	a.optionsWindow = NewOptionsWindow(
 		NewModalWindow(a.app.NewWindow("Options"), a.EnableOptionsMenuItem),

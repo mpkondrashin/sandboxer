@@ -17,19 +17,21 @@ type VisionOne struct {
 }
 
 type Configuration struct {
-	filePath    string
-	VisionOne   VisionOne `yaml:"vision_one"`
-	Folder      string    `yaml:"folder"`
-	Ignore      []string  `yaml:"ignore"`
-	Periculosum string    `yaml:"periculosum"`
+	filePath         string
+	VisionOne        VisionOne `yaml:"vision_one"`
+	Folder           string    `yaml:"folder"`
+	Ignore           []string  `yaml:"ignore"`
+	Periculosum      string    `yaml:"periculosum"`
+	ShowPasswordHint bool      `yaml:"show_password_hint"`
 }
 
 func New(filePath string) *Configuration {
 	return &Configuration{
-		filePath:    filePath,
-		Folder:      globals.InstallFolder(),
-		Ignore:      []string{".DS_Store", "Thumbs.db"},
-		Periculosum: "check",
+		filePath:         filePath,
+		Folder:           globals.InstallFolder(),
+		Ignore:           []string{".DS_Store", "Thumbs.db"},
+		Periculosum:      "check",
+		ShowPasswordHint: true,
 		VisionOne: VisionOne{
 			Sleep: 5 * time.Second,
 		},

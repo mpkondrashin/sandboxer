@@ -63,7 +63,14 @@ func (p *PrefilterDispatch) InspecfFolder(folderPath string) {
 			if !info.Mode().IsRegular() {
 				return nil
 			}
-			p.Channel(ChPrefilter) <- p.list.NewTask(path)
+			tsk, err := p.list.NewTask(path)
+			if err != nil {
+				if errors.Is(err, task.ErrAlreadyExists) {
+					return nil
+				}
+				return err
+			}
+			p.Channel(ChPrefilter) <- tsk
 			return nil
 		})
 	logging.LogError(err)

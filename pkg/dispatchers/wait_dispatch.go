@@ -53,6 +53,7 @@ func (d *WaitDispatch) ProcessTask(tsk *task.Task) error {
 			tsk.SetState(task.StateDone)
 			tsk.SetRiskLevel(task.RiskLevelUnsupported)
 			tsk.SetMessage(status.Error.Message)
+			d.list.Updated()
 			return nil
 		}
 		return fmt.Errorf("%s: %s", status.Error.Code, status.Error.Message)

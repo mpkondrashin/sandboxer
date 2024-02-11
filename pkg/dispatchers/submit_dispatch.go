@@ -1,11 +1,13 @@
 package dispatchers
 
 import (
+	"errors"
 	"log"
 	"sync"
 
 	"sandboxer/pkg/fifo"
 	"sandboxer/pkg/logging"
+	"sandboxer/pkg/task"
 )
 
 const StopPath = "STOP"
@@ -38,8 +40,16 @@ func (d *SubmitDispatch) Run(wg *sync.WaitGroup) {
 			break
 		}
 		//		logging.Debugf("SEND %s to %d", s, ChPrefilter)
-		d.Channel(ChPrefilter) <- d.list.NewTask(s)
-		d.list.Updated()
+
+		tsk, err := d.list.NewTask(s)
+		if err != nil {
+			if !errors.Is(err, task.ErrAlreadyExists) {
+				logging.LogError(err)
+			}
+			continue
+		}
+		d.Channel(ChPrefilter) <- tsk
+		//d.list.Updated()
 	}
 	wg.Done()
 	logging.Debugf("Stop SubmitDispatch")

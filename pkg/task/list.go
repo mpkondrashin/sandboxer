@@ -1,9 +1,11 @@
 package task
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 	"sync"
+	"time"
 
 	"sandboxer/pkg/logging"
 )
@@ -122,14 +124,24 @@ func (l *TaskList) Changes() chan struct{} {
 	return l.changed
 }
 
-func (l *TaskList) NewTask(path string) ID {
-	defer l.lockUnlock()() //mx.Lock()
+var ErrAlreadyExists = errors.New("task already exist")
+
+func (l *TaskList) NewTask(path string) (ID, error) {
+	defer l.lockUnlock()()
+	for _, tsk := range l.Tasks {
+		if path == tsk.Path {
+			logging.Debugf("NewTask. Same path: %s", path)
+			tsk.SubmitTime = time.Now()
+			l.Updated()
+			return 0, fmt.Errorf("%s: %w", path, ErrAlreadyExists)
+		}
+	}
 	logging.Debugf("NewTask %d, %s", l.tasksCount, path)
 	tsk := NewTask(l.tasksCount, path)
 	l.Tasks[tsk.Number] = tsk
 	l.Updated()
 	l.tasksCount++
-	return tsk.Number
+	return tsk.Number, nil
 }
 
 /*
@@ -161,7 +173,8 @@ func (l *TaskList) Task(num ID, callback func(tsk *Task) error) error {
 	return callback(tsk)
 }
 
-func (l *TaskList) Iterate(callback func(*Task)) {
+/*
+func (l *TaskList) IterateSortedByNumbers(callback func(*Task)) {
 	defer l.lockUnlock()()
 	keys := make([]ID, len(l.Tasks))
 	i := 0
@@ -174,7 +187,7 @@ func (l *TaskList) Iterate(callback func(*Task)) {
 		callback(l.Tasks[k])
 	}
 }
-
+*/
 /*
 func (l *TaskList) IterateIDs(from int, count int, callback func(id ID)) {
 	defer l.lockUnlock()()
@@ -213,7 +226,6 @@ func (l *TaskList) unlock() {
 }
 
 func (l *TaskList) GetIDs() []ID {
-	defer l.lockUnlock()()
 	keys := make([]ID, len(l.Tasks))
 	logging.Debugf("keys len = %d", len(l.Tasks))
 	i := 0
@@ -225,11 +237,31 @@ func (l *TaskList) GetIDs() []ID {
 }
 
 func (l *TaskList) Process(callback func([]ID)) {
+	defer l.lockUnlock()()
 	keys := l.GetIDs()
-	sort.Slice(keys, func(i, j int) bool { return keys[i] > keys[j] })
+	sort.Slice(keys, func(i, j int) bool {
+		return l.Tasks[keys[i]].SubmitTime.After(l.Tasks[keys[j]].SubmitTime)
+	})
 	logging.Debugf("slice: %v", keys)
 	callback(keys)
 }
+
+/*
+func (l *TaskList) Iterate(callback func(*Task)) {
+	defer l.lockUnlock()()
+	keys := make([]ID, len(l.Tasks))
+	i := 0
+	for k := range l.Tasks {
+		keys[i] = k
+		i++
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		return l.Tasks[keys[i]].SubmitTime.Before(l.Tasks[keys[j]].SubmitTime)
+	})
+	for _, k := range keys {
+		callback(l.Tasks[k])
+	}
+}*/
 
 /*
 func (l *TaskList) WaitForChange() {
