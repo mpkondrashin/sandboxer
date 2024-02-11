@@ -1,8 +1,6 @@
 package main
 
 import (
-	"sandboxer/pkg/logging"
-
 	"fyne.io/fyne/v2"
 )
 
@@ -22,12 +20,10 @@ func NewModalWindow(win fyne.Window, enableMenuItem func()) ModalWindow {
 }
 
 func (w *ModalWindow) SetQuit(quit func()) {
-	logging.Debugf("ModalWindow SetQuit: %p", quit)
 	w.quit = quit
 }
 
 func (w *ModalWindow) Hide() {
-	logging.Debugf("ModalWindow Hide, q = %p", w.quit)
 	if w.quit != nil {
 		w.quit()
 	}

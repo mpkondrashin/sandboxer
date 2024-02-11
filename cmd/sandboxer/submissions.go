@@ -7,7 +7,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -329,7 +328,7 @@ func (s *SubmissionsWindow) Show() {
 				if !haveChanges {
 					break
 				}
-				logging.Debugf(strings.Repeat("*", 100))
+				//logging.Debugf(strings.Repeat("*", 100))
 				s.Update()
 				haveChanges = false
 			}

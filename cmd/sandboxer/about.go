@@ -28,7 +28,7 @@ func NewAboutWindow(modalWindow ModalWindow) *AboutWindow {
 		container.NewCenter(version),
 		container.NewCenter(repoLink),
 	)
-	s.win.SetContent(vbox)
+	s.win.SetContent(container.NewPadded(vbox))
 	return s
 }
 
