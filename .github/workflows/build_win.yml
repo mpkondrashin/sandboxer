@@ -16,6 +16,9 @@ jobs:
         with:
           go-version: 1.21.5
 
+      - name: Install Fyne
+        run: go install fyne.io/fyne/v2/cmd/fyne@latest
+
       - name: Install RSRC
         run: go install github.com/akavel/rsrc@latest
 
