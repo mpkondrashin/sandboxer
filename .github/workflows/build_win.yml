@@ -1,4 +1,6 @@
 on: [push]
+permissions:
+  contents: write
 jobs:
   Build-Release-Windows:
     runs-on: windows-latest
