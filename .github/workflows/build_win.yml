@@ -9,13 +9,13 @@ jobs:
           fetch-depth: 0
       
       - name: ls -LR
-        run: ls -lR
+        run: Get-ChildItem -Recurse | Format-Table -Property Mode, LastWriteTime, Length, FullName
 
       - name: Setup Go
         uses: actions/setup-go@v3
         with:
           go-version: 1.21.5
-          
+
       - name: Install RSRC
         run: go install github.com/akavel/rsrc@latest
 
