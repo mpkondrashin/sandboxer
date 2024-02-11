@@ -18,7 +18,7 @@ import (
 // output file for logging, providing log rotating
 // feature
 type File struct {
-	file     *os.File
+	File     *os.File
 	flag     int
 	perm     fs.FileMode
 	folder   string
@@ -53,7 +53,7 @@ func NewRotated(folder, fileName string, perm fs.FileMode, maxSize, keep int) *F
 // Open - open file
 func (r *File) Open() (err error) {
 	filePath := filepath.Join(r.folder, r.fileName)
-	r.file, err = os.OpenFile(filePath, r.flag, r.perm)
+	r.File, err = os.OpenFile(filePath, r.flag, r.perm)
 	return err
 }
 
@@ -70,7 +70,7 @@ func (r *File) Write(data []byte) (n int, err error) {
 	}
 
 	//	fmt.Printf("Write end: %v\n", r.file)
-	return r.file.Write(data)
+	return r.File.Write(data)
 }
 
 func (r *File) rotate() error {
@@ -97,8 +97,8 @@ func (r *File) rotate() error {
 
 // Close - close file
 func (r *File) Close() error {
-	if r.file == nil {
+	if r.File == nil {
 		return nil
 	}
-	return r.file.Close()
+	return r.File.Close()
 }

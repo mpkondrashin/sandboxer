@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-ole/go-ole"
 	"github.com/go-ole/go-ole/oleutil"
+	"github.com/virtuald/go-paniclog"
 )
 
 const (
@@ -161,6 +162,7 @@ func SetupLogging(logFileName string) (func(), error) {
 	if err != nil {
 		return nil, err
 	}
+	paniclog.RedirectStderr(file.File)
 	logging.SetLogger(logging.NewFileLogger(file))
 	return func() {
 		logging.Infof("Close Logging")

@@ -26,10 +26,10 @@ type SandboxerApp struct {
 	app  fyne.App
 	menu *fyne.Menu
 	// SUBMIT_FILE submitMenuItem     *fyne.MenuItem
-	submissionMenuItem *fyne.MenuItem
-	quotaMenuItem      *fyne.MenuItem
-	optionsMenuItem    *fyne.MenuItem
-	aboutMenuItem      *fyne.MenuItem
+	submissionsMenuItem *fyne.MenuItem
+	quotaMenuItem       *fyne.MenuItem
+	optionsMenuItem     *fyne.MenuItem
+	aboutMenuItem       *fyne.MenuItem
 
 	submissionsWindow *SubmissionsWindow
 	quotaWindow       *QuotaWindow
@@ -76,7 +76,7 @@ func NewSandboxingApp(conf *config.Configuration, channels *dispatchers.Channels
 		}, a.optionsWindow.win)
 	})
 	*/
-	a.submissionMenuItem = fyne.NewMenuItem("Submissions...", a.Submissions)
+	a.submissionsMenuItem = fyne.NewMenuItem("Submissions...", a.Submissions)
 	a.quotaMenuItem = fyne.NewMenuItem("Quota...", a.Quota)
 	a.optionsMenuItem = fyne.NewMenuItem("Options...", a.Options)
 	a.aboutMenuItem = fyne.NewMenuItem("About...", a.About)
@@ -93,21 +93,20 @@ func (a *SandboxerApp) Icon() fyne.Resource {
 
 func (s *SandboxerApp) Run() {
 	if len(os.Args) == 2 && os.Args[1] == "--submissions" {
-		s.submissionMenuItem.Disabled = true
+		s.submissionsMenuItem.Disabled = true
 		s.submissionsWindow.Show()
 	}
 	s.app.Run()
-	//s.quotaWindow.win.ShowAndRun()
 }
 
 func (s *SandboxerApp) Menu() *fyne.Menu {
 	return fyne.NewMenu(globals.AppName,
 		// SUBMIT_FILE s.submitMenuItem,
-		s.submissionMenuItem,
+		s.submissionsMenuItem,
 		s.quotaMenuItem,
 		s.optionsMenuItem,
 		s.aboutMenuItem,
-		fyne.NewMenuItemSeparator(), //fyne.NewMenuItem("About...", nil),
+		fyne.NewMenuItemSeparator(),
 		fyne.NewMenuItem("Quit", s.Quit),
 	)
 }
@@ -117,13 +116,13 @@ func (s *SandboxerApp) SubmitFile() {
 }
 
 func (s *SandboxerApp) Submissions() {
-	s.submissionMenuItem.Disabled = true
+	s.submissionsMenuItem.Disabled = true
 	s.menu.Refresh()
 	s.submissionsWindow.Show()
 }
 
 func (s *SandboxerApp) EnableSubmissionsMenuItem() {
-	s.submissionMenuItem.Disabled = false
+	s.submissionsMenuItem.Disabled = false
 	s.menu.Refresh()
 }
 
@@ -167,8 +166,6 @@ func IconPath(s task.State) string {
 	return fmt.Sprintf("../../resources/%s.svg", s.String())
 }
 
-//var Conf *config.Configuration
-
 func SavePid() (func(), error) {
 	pidFilePath, err := globals.PidFilePath()
 	if err != nil {
@@ -188,8 +185,8 @@ func HandleSignals() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		logging.Debugf("Got")
-		os.Exit(1)
+		logging.Debugf("Got signal")
+		os.Exit(globals.ExitGotSignal)
 	}()
 }
 
@@ -197,12 +194,12 @@ func main() {
 	configFilePath, err := globals.ConfigurationFilePath()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "globals.ConfigurationFilePath: %v", err)
-		os.Exit(10)
+		os.Exit(globals.ExitGetConfigurationFileathError)
 	}
 	conf := config.New(configFilePath)
 	if err := conf.Load(); err != nil {
 		fmt.Fprintf(os.Stderr, "conf.Load: %v", err)
-		os.Exit(20)
+		os.Exit(globals.ExitLoadConfigError)
 	}
 	close, err := globals.SetupLogging(globals.Name + ".log")
 	if err != nil {
@@ -210,7 +207,6 @@ func main() {
 	} else {
 		defer close()
 	}
-	//HandleSignals()
 
 	logging.Infof("%s Version %s Build %s Start", globals.AppName, globals.Version, globals.Build)
 	logging.Debugf("Configuration file: %s", configFilePath)
@@ -218,19 +214,14 @@ func main() {
 	if err != nil {
 		logging.Errorf("Save pid: %v", err)
 		fmt.Fprintf(os.Stderr, "Save pid: %v", err)
-		os.Exit(30)
+		os.Exit(globals.ExitSavePidError)
 	}
 	defer removePid()
 	//list := task.NewList()
 	channels := dispatchers.NewChannels()
 	list := task.NewList()
 	launcher := dispatchers.NewLauncher(conf, channels, list)
-	launcher.Run() //stop, err := submit.RunService(conf, list)
-	//if err != nil {
-	//	logging.Errorf("RunService: %v", err)
-	//	fmt.Fprintf(os.Stderr, "RunService: %v", err)
-	//	os.Exit(40)
-	//}
+	launcher.Run()
 	defer launcher.Stop()
 	app := NewSandboxingApp(conf, channels, list)
 	app.Run()

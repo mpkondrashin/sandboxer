@@ -18,7 +18,7 @@ type Writer struct {
 func NewWriter() (*Writer, error) {
 	w := &Writer{}
 	var err error
-	w.fifo, err = fifo.New(globals.FIFOName /* os.O_CREATE|*/, os.O_WRONLY|fifo.O_NONBLOCK, 0600)
+	w.fifo, err = fifo.New(globals.FIFOName, os.O_WRONLY|fifo.O_NONBLOCK, 0600)
 	if err != nil {
 		return nil, err
 	}
