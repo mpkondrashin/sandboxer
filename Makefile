@@ -42,8 +42,8 @@ cmd/setup/setup.exe: cmd/setup/embed/install.exe.gz cmd/setup/embed/opengl32.dll
 	GOOS=windows go build -C ./cmd/setup -ldflags -H=windowsgui 
 #--icon ../../resources/icon.png
 
-cmd/setup/embed/LICENSE: LICENSE
-	cp LICENSE cmd/setup/embed/
+cmd/install/embed/LICENSE: LICENSE
+	cp LICENSE cmd/install/embed/
 
 cmd/setup/embed/install.exe.gz: cmd/install/install.exe
 	gzip -fc cmd/install/install.exe > cmd/setup/embed/install.exe.gz
