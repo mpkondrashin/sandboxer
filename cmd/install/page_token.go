@@ -18,7 +18,7 @@ type PageOptions struct {
 var _ Page = &PageOptions{}
 
 func (p *PageOptions) Name() string {
-	return "Options"
+	return "Token"
 }
 
 func (p *PageOptions) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {

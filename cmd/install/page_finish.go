@@ -35,4 +35,5 @@ func (p *PageFinish) AquireData(installer *Installer) error {
 	//path := filepath.Join(installer.InstallFolder(), globals.Name+".exe")
 	//cmd := exec.Command(path, "--submissions")
 	//return cmd.Start()
+	return nil
 }
