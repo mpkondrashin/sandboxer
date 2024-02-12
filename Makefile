@@ -42,13 +42,16 @@ cmd/setup/setup.exe: cmd/setup/embed/install.exe.gz cmd/setup/embed/opengl32.dll
 	GOOS=windows go build -C ./cmd/setup -ldflags -H=windowsgui 
 #--icon ../../resources/icon.png
 
+cmd/setup/embed/LICENSE: LICENSE
+	cp LICENSE cmd/setup/embed/
+
 cmd/setup/embed/install.exe.gz: cmd/install/install.exe
 	gzip -fc cmd/install/install.exe > cmd/setup/embed/install.exe.gz
 
 cmd/setup/embed/opengl32.dll.gz: resources/opengl32.dll
 	gzip -fc resources/opengl32.dll  > cmd/setup/embed/opengl32.dll.gz
 
-cmd/install/install.exe: cmd/install/embed/opengl32.dll.gz cmd/install/embed/sandboxer.exe.gz cmd/install/embed/submit.exe.gz $(wildcard cmd/install/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go cmd/install/resource.go
+cmd/install/install.exe: cmd/install/embed/LICENSE cmd/install/embed/opengl32.dll.gz cmd/install/embed/sandboxer.exe.gz cmd/install/embed/submit.exe.gz $(wildcard cmd/install/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go cmd/install/resource.go
 	fyne package --os $(GOOS) --name install --appID in.kondrash.sandboxer --appVersion $(VERSION) --appBuild $(BUILD) --icon ../../resources/icon.png --release --sourceDir ./cmd/install
 
 cmd/install/resource.go: resources/icon_transparent.png 

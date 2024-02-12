@@ -110,7 +110,7 @@ func (i *Installer) Stages() []InstallStage {
 		{"Stop " + globals.AppName, i.StageStopProgram},
 		{"Wait for service to stop", i.StageWaitServiceToStop},
 		//{"Uninstall service", i.StageUninstallService},
-		{"Extract executables", i.StageExtractExecutable},
+		{"Extract executables", i.StageExtractFiles},
 		{"Extend Send To menu", i.StageExtendSendTo},
 		{"Install service", i.StageAutostart},
 		{"Stop runnin " + globals.AppName, i.StageUninstall},
@@ -227,17 +227,18 @@ func (i *Installer) StageWaitServiceToStop() error {
 	return fmt.Errorf("stop Submissions and run setup again")
 }
 
-func (i *Installer) StageExtractExecutable() error {
+func (i *Installer) StageExtractFiles() error {
 	logging.Debugf("Install: StageExtractExecutable")
 	toExtract := []string{
 		"embed/" + globals.Name + ".exe.gz",
 		"embed/submit.exe.gz",
+		"embed/LICENSE",
 	}
 	if IsWindows() {
 		toExtract = append(toExtract, "embed/opengl32.dll.gz")
 	}
 	for _, path := range toExtract {
-		newPath, err := extract.FileGZ(embedFS, i.InstallFolder(), path)
+		newPath, err := extract.ExtractFile(embedFS, i.InstallFolder(), path)
 		if err != nil {
 			return err
 		}
