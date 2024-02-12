@@ -20,7 +20,7 @@ import (
 	"sandboxer/pkg/script"
 )
 
-//go:embed embed/*.gz
+//go:embed embed/*.gz embed/LICENSE
 var embedFS embed.FS
 
 type Installer struct {
