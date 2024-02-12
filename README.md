@@ -1,5 +1,6 @@
 # Sandboxer
 <img src="resources/icon_transparent.png" width="200"/>
+
 ## Inspect files using Trend Micro Vision One sandbox service
 
 ### Installation for Windows
