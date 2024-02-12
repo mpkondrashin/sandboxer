@@ -1,3 +1,11 @@
+/*
+Sandboxer (c) 2024 by Mikhail Kondrashin (mkondrashin@gmail.com)
+Software is distributed under MIT license as stated in LICENSE file
+
+globals.go
+
+Global values
+*/
 package globals
 
 const (
@@ -9,8 +17,4 @@ const (
 	FIFOName       = Name + "_submit_fifo"
 	MaxLogFileSize = 10_000_000
 	LogsKeep       = 1
-	//SvcFileName    = "exam-ensvc.exe" // XXX only windows?
-	//SvcName        = Name
-	//SvcDisplayName = "Ex-amen Sandbox Submission Tool"
-	//SvcDescription = "Submit files to Vision One sandbox"
 )

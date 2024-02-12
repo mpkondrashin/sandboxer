@@ -1,3 +1,11 @@
+/*
+Sandboxer (c) 2024 by Mikhail Kondrashin (mkondrashin@gmail.com)
+Software is distributed under MIT license as stated in LICENSE file
+
+channels.go
+
+Channels to dispatchers to communicate
+*/
 package dispatchers
 
 import (
@@ -5,12 +13,6 @@ import (
 	"sandboxer/pkg/task"
 	"strings"
 )
-
-/*
-
-[Submit] --- inbox ---> Prefilter ----> [Prefilter] --- Submit ---> [Submit] --- Result ---> [Result] --- meta ---> [Pull virus name]
-
-*/
 
 const (
 	ChannelSize = 1000

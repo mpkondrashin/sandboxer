@@ -1,3 +1,11 @@
+/*
+Sandboxer (c) 2024 by Mikhail Kondrashin (mkondrashin@gmail.com)
+Software is distributed under MIT license as stated in LICENSE file
+
+fifo.go
+
+Create FIFO for reading and for writing
+*/
 package fifo
 
 import (
@@ -18,7 +26,7 @@ type Writer struct {
 func NewWriter() (*Writer, error) {
 	w := &Writer{}
 	var err error
-	w.fifo, err = fifo.New(globals.FIFOName, os.O_WRONLY|fifo.O_NONBLOCK, 0600)
+	w.fifo, err = fifo.New(globals.FIFOName, os.O_WRONLY|fifo.O_NONBLOCK, 0666)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +47,7 @@ type Reader struct {
 func NewReader() (*Reader, error) {
 	r := &Reader{}
 	var err error
-	r.fifo, err = fifo.New(globals.FIFOName, os.O_CREATE|os.O_RDONLY, 0600)
+	r.fifo, err = fifo.New(globals.FIFOName, os.O_CREATE|os.O_RDONLY, 0666)
 	if err != nil {
 		return nil, err
 	}

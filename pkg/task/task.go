@@ -1,3 +1,11 @@
+/*
+Sandboxer (c) 2024 by Mikhail Kondrashin (mkondrashin@gmail.com)
+Software is distributed under MIT license as stated in LICENSE file
+
+task.go
+
+Inspection task
+*/
 package task
 
 import (
@@ -12,19 +20,7 @@ import (
 
 type ID int64
 
-/*
-var (
-
-	count ID
-
-)
-
-	func TaskNumber() ID {
-		return (ID)(atomic.AddInt64((*int64)(&count), 1))
-	}
-*/
 type Task struct {
-	//	mx         sync.Mutex
 	Number        ID
 	SubmitTime    time.Time
 	Path          string

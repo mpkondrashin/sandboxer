@@ -1,3 +1,11 @@
+/*
+Sandboxer (c) 2024 by Mikhail Kondrashin (mkondrashin@gmail.com)
+Software is distributed under MIT license as stated in LICENSE file
+
+submit_dispatch.go
+
+Send files from FIFO to prefilter channel
+*/
 package dispatchers
 
 import (

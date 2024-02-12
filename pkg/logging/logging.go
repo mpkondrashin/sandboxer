@@ -1,11 +1,10 @@
 /*
-TunnelEffect (c) 2022 by Mikhail Kondrashin (mkondrashin@gmail.com)
+Sandboxer (c) 2024 by Mikhail Kondrashin (mkondrashin@gmail.com)
+Software is distributed under MIT license as stated in LICENSE file
 
 logging.go
 
-TunnelEffect logging module.
-
-logging.Debugf()
+Logging functions
 */
 package logging
 

@@ -1,4 +1,11 @@
-// Copyright
+/*
+Sandboxer (c) 2024 by Mikhail Kondrashin (mkondrashin@gmail.com)
+Software is distributed under MIT license as stated in LICENSE file
+
+main.go
+
+Setup - extract opengl32.dll and run install.exe
+*/
 package main
 
 import (
