@@ -1,7 +1,16 @@
+/*
+TunnelEffect (c) 2024 by Mikhail Kondrashin (mkondrashin@gmail.com)
+Software is distributed under MIT license as stated in LICENSE file
+
+page_intro.go
+
+Verdict for file.
+*/
 package main
 
 import (
 	"fmt"
+	"io"
 	"net/url"
 
 	"fyne.io/fyne/v2"
@@ -18,7 +27,7 @@ const (
 
 	NoteText = "Please close all MMC windows before continuing."
 
-	License = `MIT License
+	_License = `MIT License
 
 Copyright (c) 2024 Michael Kondrashin (mkondrashin@gmail.com)
 
@@ -70,7 +79,7 @@ func (p *PageIntro) Content(win fyne.Window, installer *Installer) fyne.CanvasOb
 	repoLink := widget.NewHyperlink(globals.AppName+" repository on GitHub", repoURL)
 
 	licensePopUp := func() {
-		licenseLabel := widget.NewLabel(License)
+		licenseLabel := widget.NewLabel(LicenseText())
 		sc := container.NewScroll(licenseLabel)
 		popup := dialog.NewCustom("Show License Information", "Close", sc, win)
 		popup.Resize(fyne.NewSize(800, 600))
@@ -93,4 +102,21 @@ func (p *PageIntro) Run(win fyne.Window, installer *Installer) {
 
 func (p *PageIntro) AquireData(installer *Installer) error {
 	return nil
+}
+
+func LicenseText() string {
+	filePath := "embed/LICENSE"
+	licFile, err := embedFS.Open(filePath)
+	if err != nil {
+		return "reading error"
+	}
+	defer func() {
+		licFile.Close()
+	}()
+	licBytes, err := io.ReadAll(licFile)
+	if err != nil {
+		return "reading error"
+	}
+	return string(licBytes)
+
 }
