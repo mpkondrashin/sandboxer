@@ -1,3 +1,11 @@
+/*
+TunnelEffect (c) 2024 by Mikhail Kondrashin (mkondrashin@gmail.com)
+This software is distributed under MIT license as stated in LICENSE file
+
+page_domain.go
+
+Pick Vision One domain
+*/
 package main
 
 import (

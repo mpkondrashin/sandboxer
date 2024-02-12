@@ -1,3 +1,11 @@
+/*
+TunnelEffect (c) 2024 by Mikhail Kondrashin (mkondrashin@gmail.com)
+This software is distributed under MIT license as stated in LICENSE file
+
+genver.go
+
+Generate version.go file
+*/
 package main
 
 import (

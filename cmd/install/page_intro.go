@@ -4,7 +4,7 @@ Software is distributed under MIT license as stated in LICENSE file
 
 page_intro.go
 
-Verdict for file.
+First installer page
 */
 package main
 
