@@ -1,5 +1,5 @@
 /*
-TunnelEffect (c) 2024 by Mikhail Kondrashin (mkondrashin@gmail.com)
+Sandboxer (c) 2024 by Mikhail Kondrashin (mkondrashin@gmail.com)
 This software is distributed under MIT license as stated in LICENSE file
 
 page_domain.go
