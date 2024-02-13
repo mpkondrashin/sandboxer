@@ -9,7 +9,11 @@ Risk level values
 package task
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
 	"image/color"
+	"strings"
 )
 
 type RiskLevel int
@@ -50,4 +54,29 @@ var RiskLevelColor = [...]color.Color{
 
 func (r RiskLevel) Color() color.Color {
 	return RiskLevelColor[r]
+}
+
+var ErrUnknownRiskLevel = errors.New("unknown risk level")
+
+// UnmarshalJSON implements the Unmarshaler interface of the json package for RiskLevel.
+func (r *RiskLevel) UnmarshalJSON(data []byte) error {
+	var v string
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+	for i, s := range RiskLevelString {
+		if strings.EqualFold(s, v) {
+			*r = RiskLevel(i)
+			return nil
+		}
+	}
+	return fmt.Errorf("%w: %s", ErrUnknownRiskLevel, v)
+}
+
+// MarshalJSON implements the Marshaler interface of the json package for RiskLevel.
+func (r RiskLevel) MarshalJSON() ([]byte, error) {
+	if r < 0 || r >= RiskLevelError {
+		return nil, ErrUnknownRiskLevel
+	}
+	return []byte(r.String()), nil
 }

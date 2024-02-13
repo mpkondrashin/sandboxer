@@ -50,7 +50,7 @@ func (d *InvestigationDispatch) ProcessTask(tsk *task.Task) error {
 	tsk.SetInvestigation(zipFilePath)
 	tsk.SetState(task.StateDone)
 	d.list.Updated()
-	taskFileName := "task.yaml"
+	taskFileName := "task.json"
 	taskFilePath := filepath.Join(tasksFolder, taskFileName)
 	return tsk.Save(taskFilePath)
 }

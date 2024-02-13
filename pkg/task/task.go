@@ -9,13 +9,12 @@ Inspection task
 package task
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
 
 	"sandboxer/pkg/logging"
-
-	"gopkg.in/yaml.v2"
 )
 
 type ID int64
@@ -115,7 +114,7 @@ func (t *Task) SetDigest(MD5, SHA1, SHA256 string) {
 }
 
 func (t *Task) Save(filePath string) error {
-	data, err := yaml.Marshal(t)
+	data, err := json.Marshal(t)
 	if err != nil {
 		return err
 	}
