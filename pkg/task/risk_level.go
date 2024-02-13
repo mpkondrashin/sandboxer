@@ -78,5 +78,5 @@ func (r RiskLevel) MarshalJSON() ([]byte, error) {
 	if r < 0 || r >= RiskLevelError {
 		return nil, ErrUnknownRiskLevel
 	}
-	return []byte(r.String()), nil
+	return []byte(fmt.Sprintf("\"%s\"", r.String())), nil
 }
