@@ -178,6 +178,7 @@ func (s *SubmissionsWindow) RunOpen(path string) {
 	if runtime.GOOS == "windows" {
 		command = "start"
 	}
+	logging.Debugf("RunOpen %s %s", command, path)
 	cmd := exec.Command(command, path)
 	err := cmd.Run()
 	if err != nil {
