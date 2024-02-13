@@ -174,12 +174,13 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 }
 
 func (s *SubmissionsWindow) RunOpen(path string) {
-	command := "open"
+	name := "open"
+	args := []string{path}
 	if runtime.GOOS == "windows" {
-		command = "start"
+		name = "cmd"
+		args = []string{"/C", "start", path}
 	}
-	logging.Debugf("RunOpen %s %s", command, path)
-	cmd := exec.Command(command, path)
+	cmd := exec.Command(name, args...)
 	err := cmd.Run()
 	if err != nil {
 		dialog.ShowError(err, s.win)
