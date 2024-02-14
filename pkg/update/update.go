@@ -66,12 +66,18 @@ func DownloadRelease(version, filename, folder string, progress func(float32) er
 		return err
 	}
 	defer file.Close()
-	return Download(file, resp.Body, resp.ContentLength, filePath, progress)
+	var progressInt func(c int64) error
+	if progress != nil {
+		progressInt = func(c int64) error {
+			return progress(float32(c) / float32(resp.ContentLength))
+		}
+	}
+	return Download(file, resp.Body, progressInt)
 }
 
 var ErrInvalidWrite = errors.New("invalid write result")
 
-func Download(dst io.Writer, src io.Reader, totalSize int64, fileName string, progress func(float32) error) (err error) {
+func Download(dst io.Writer, src io.Reader, progress func(int64) error) (err error) {
 	size := 32 * 1024
 	buf := make([]byte, size)
 	var written int64
@@ -96,7 +102,7 @@ func Download(dst io.Writer, src io.Reader, totalSize int64, fileName string, pr
 			}
 		}
 		if progress != nil {
-			progress(float32(written) / float32(totalSize))
+			progress(written)
 		}
 		if er != nil {
 			if er != io.EOF {

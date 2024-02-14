@@ -9,6 +9,7 @@ Quota window
 package main
 
 import (
+	"fmt"
 	"path/filepath"
 	"runtime"
 
@@ -23,41 +24,28 @@ import (
 
 type UpdateWindow struct {
 	ModalWindow
-	//conf    *config.Configuration
-	//version        binding.String
 	version        string
 	versionLabel   *widget.Label
 	progressBar    *widget.ProgressBar
 	downloadButton *widget.Button
 }
 
-func NewUpdateWindow(modalWindow ModalWindow /*, conf *config.Configuration*/) *UpdateWindow {
+func NewUpdateWindow(modalWindow ModalWindow) *UpdateWindow {
 	s := &UpdateWindow{
-		ModalWindow: modalWindow,
-		//	conf:        conf,
-		//version:     binding.NewString(),
+		ModalWindow:  modalWindow,
 		versionLabel: widget.NewLabel("                                 "),
 		progressBar:  widget.NewProgressBar(),
 	}
 	s.downloadButton = widget.NewButton("Download", s.Download)
-	//s.progressBar
 	s.downloadButton.Disable()
 	s.Reset()
-	//versionCountItem := widget.NewFormItem("Latest Available Version:", widget.NewLabelWithData(s.version))
-	//form := widget.NewForm(
-	//versionCountItem,
-	//)
-	s.win.SetContent(container.NewVBox(s.versionLabel, s.progressBar, s.downloadButton))
+	s.win.SetContent(container.NewPadded(container.NewVBox(s.versionLabel, s.progressBar, s.downloadButton)))
 	return s
 }
 
 func (s *UpdateWindow) Download() {
 	s.downloadButton.Disable()
-	fileName := "Setup.zip"
-	if runtime.GOOS == "darwin" {
-		fileName = "Setup_macos.zip"
-	}
-
+	fileName := fmt.Sprintf("setup_%s_%s.zip", runtime.GOOS, runtime.GOARCH)
 	update.DownloadRelease(s.version, fileName, globals.DownloadsFolder(), func(p float32) error {
 		s.progressBar.SetValue(float64(p))
 		return nil
@@ -69,21 +57,18 @@ func (s *UpdateWindow) Download() {
 }
 
 func (s *UpdateWindow) Reset() {
-	//s.version.Set("?         ")
 	s.versionLabel.SetText("Checking...")
 	s.version = ""
 }
 
 func (s *UpdateWindow) Update() {
 	s.Reset()
-	//exemptionCount := fmt.Sprintf("%d (Number of samples submitted but marked as \"not analyzed\". This number does not count toward the daily reserve)", result.SubmissionExemptionCount)
 	var err error
 	s.version, err = update.LatestVersion(globals.Name)
 	if err != nil {
 		dialog.ShowError(err, s.win)
 		return
 	}
-	//s.version.Set(version)
 	switch semver.Compare(s.version, globals.Version) {
 	case -1:
 	case 0:
