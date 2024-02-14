@@ -11,7 +11,8 @@
 
 #GOOPTS := -ldflags="-extldflags=-static"
 # -tags sqlite_omit_load_extension
-GOOS=windows
+GOOS=$(shell go env GOOS)
+GOARCH=$(shell go env GOARCH)
 
 REV=$(shell git rev-list --tags --max-count=1)
 VERSION_FULL=$(shell git describe --tags $(REV))
@@ -32,8 +33,8 @@ define zip
 	powershell Compress-Archive  -Force "$(2)" "$(1)"
 endef
 
-setup.zip: cmd/setup/setup.exe
-	$(call zip, "setup.zip" , "cmd/setup/setup.exe")
+setup_$(GOOS)_$(GOARCH).zip: cmd/setup/setup.exe
+	$(call zip, setup_$(GOOS)_$(GOARCH).zip , "cmd/setup/setup.exe")
 
 preproc.exe:  $(wildcard cmd/preproc/*.go)
 	go build ./cmd/preproc

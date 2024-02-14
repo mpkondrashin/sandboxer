@@ -37,11 +37,13 @@ type SandboxerApp struct {
 	submissionsMenuItem *fyne.MenuItem
 	quotaMenuItem       *fyne.MenuItem
 	optionsMenuItem     *fyne.MenuItem
+	updateMenuItem      *fyne.MenuItem
 	aboutMenuItem       *fyne.MenuItem
 
 	submissionsWindow *SubmissionsWindow
 	quotaWindow       *QuotaWindow
 	optionsWindow     *OptionsWindow
+	updateWindow      *UpdateWindow
 	aboutWindow       *AboutWindow
 }
 
@@ -68,6 +70,9 @@ func NewSandboxingApp(conf *config.Configuration, channels *dispatchers.Channels
 		NewModalWindow(a.app.NewWindow("Options"), a.EnableOptionsMenuItem),
 		conf,
 	)
+	a.updateWindow = NewUpdateWindow(
+		NewModalWindow(a.app.NewWindow("Update"), a.EnableUpdateMenuItem),
+	)
 	a.aboutWindow = NewAboutWindow(
 		NewModalWindow(a.app.NewWindow("About"), a.EnableAboutMenuItem),
 	)
@@ -87,6 +92,7 @@ func NewSandboxingApp(conf *config.Configuration, channels *dispatchers.Channels
 	a.submissionsMenuItem = fyne.NewMenuItem("Submissions...", a.Submissions)
 	a.quotaMenuItem = fyne.NewMenuItem("Quota...", a.Quota)
 	a.optionsMenuItem = fyne.NewMenuItem("Options...", a.Options)
+	a.updateMenuItem = fyne.NewMenuItem("Check Update...", a.Update)
 	a.aboutMenuItem = fyne.NewMenuItem("About...", a.About)
 
 	a.menu = a.Menu()
@@ -113,6 +119,8 @@ func (s *SandboxerApp) Menu() *fyne.Menu {
 		s.submissionsMenuItem,
 		s.quotaMenuItem,
 		s.optionsMenuItem,
+		fyne.NewMenuItemSeparator(),
+		s.updateMenuItem,
 		s.aboutMenuItem,
 		fyne.NewMenuItemSeparator(),
 		fyne.NewMenuItem("Quit", s.Quit),
@@ -143,6 +151,10 @@ func (s *SandboxerApp) EnableOptionsMenuItem() {
 	s.optionsMenuItem.Disabled = false
 	s.menu.Refresh()
 }
+func (s *SandboxerApp) EnableUpdateMenuItem() {
+	s.updateMenuItem.Disabled = false
+	s.menu.Refresh()
+}
 func (s *SandboxerApp) EnableAboutMenuItem() {
 	s.aboutMenuItem.Disabled = false
 	s.menu.Refresh()
@@ -158,6 +170,12 @@ func (s *SandboxerApp) Options() {
 	s.optionsMenuItem.Disabled = true
 	s.menu.Refresh()
 	s.optionsWindow.Show()
+}
+
+func (s *SandboxerApp) Update() {
+	s.updateMenuItem.Disabled = true
+	s.menu.Refresh()
+	s.updateWindow.Show()
 }
 
 func (s *SandboxerApp) About() {

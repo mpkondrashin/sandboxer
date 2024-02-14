@@ -174,6 +174,13 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 }
 
 func (s *SubmissionsWindow) RunOpen(path string) {
+	err := RunOpen(path)
+	if err != nil {
+		dialog.ShowError(err, s.win)
+	}
+}
+
+func RunOpen(path string) error {
 	name := "open"
 	args := []string{path}
 	if runtime.GOOS == "windows" {
@@ -181,10 +188,7 @@ func (s *SubmissionsWindow) RunOpen(path string) {
 		args = []string{"/C", "start", path}
 	}
 	cmd := exec.Command(name, args...)
-	err := cmd.Run()
-	if err != nil {
-		dialog.ShowError(err, s.win)
-	}
+	return cmd.Run()
 }
 
 func (s *SubmissionsWindow) OpenInvestigation(investigation string) {

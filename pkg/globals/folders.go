@@ -177,3 +177,10 @@ func SetupLogging(logFileName string) (func(), error) {
 		file.Close()
 	}, nil
 }
+
+func DownloadsFolder() string {
+	if runtime.GOOS == "windows" {
+		return filepath.Join(os.Getenv("USERPROFILE"), "Downloads")
+	}
+	return filepath.Join(os.Getenv("HOME"), "Downloads")
+}
