@@ -37,7 +37,7 @@ output/Sandboxer.app/Contents/MacOS/submit: $(wildcard cmd/submit/*.go) $(wildca
 	go build -o ./output/Sandboxer.app/Contents/MacOS ./cmd/submit
 
 pkg/globals/version.go: cmd/genver/main.go
-	go run ./cmd/genver/main.go $(VERSION) $(BUILD) pkg/globals/version.go
+	go run ./cmd/genver/main.go $(VERSION_V) $(BUILD) pkg/globals/version.go
 
 clean:
 	rm -rf output Sandboxer.dmg  

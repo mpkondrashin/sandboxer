@@ -85,7 +85,7 @@ cmd/sandboxer/icon.go: resources/icon.png
 	fyne bundle --name ApplicationIcon --package main --output cmd/sandboxer/icon.go resources/icon.png 
 
 pkg/globals/version.go: cmd/genver/main.go
-	go run ./cmd/genver/main.go $(VERSION) $(BUILD) pkg/globals/version.go
+	go run ./cmd/genver/main.go $(VERSION_V) $(BUILD) pkg/globals/version.go
 
 clean: cleansetup celaninstall
 	rm -f setup.zip cmd/sandboxer/sandboxer.exe cmd/submit/submit.exe preproc.exe

@@ -19,6 +19,7 @@ import (
 	"golang.org/x/mod/semver"
 
 	"sandboxer/pkg/globals"
+	"sandboxer/pkg/logging"
 	"sandboxer/pkg/update"
 )
 
@@ -69,7 +70,9 @@ func (s *UpdateWindow) Update() {
 		dialog.ShowError(err, s.win)
 		return
 	}
-	switch semver.Compare(s.version, globals.Version) {
+	cmp := semver.Compare(s.version, globals.Version)
+	logging.Debugf("Compare %s vs %s: %d", s.version, globals.Version, cmp)
+	switch cmp {
 	case -1:
 	case 0:
 		s.versionLabel.SetText("You have the newest version")
