@@ -11,6 +11,7 @@ package main
 import (
 	"context"
 	"log"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -61,7 +62,7 @@ func NewOptionsWindow(modalWindow ModalWindow, conf *config.Configuration) *Opti
 }
 
 func (s *OptionsWindow) Save() {
-	s.conf.VisionOne.Token = s.tokenEntry.Text
+	s.conf.VisionOne.Token = strings.TrimSpace(s.tokenEntry.Text)
 	if s.domainLabel.Text != ErrorDomain {
 		s.conf.VisionOne.Domain = s.domainLabel.Text
 	}

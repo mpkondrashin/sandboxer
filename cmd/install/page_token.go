@@ -10,6 +10,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -57,6 +58,6 @@ func (p *PageOptions) AquireData(installer *Installer) error {
 	if p.tokenEntry.Text == "" {
 		return fmt.Errorf("token field is empty")
 	}
-	installer.config.VisionOne.Token = p.tokenEntry.Text
+	installer.config.VisionOne.Token = strings.TrimSpace(p.tokenEntry.Text)
 	return nil
 }
