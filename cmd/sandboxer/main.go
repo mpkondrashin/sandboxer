@@ -110,7 +110,16 @@ func (s *SandboxerApp) Run() {
 		s.submissionsMenuItem.Disabled = true
 		s.submissionsWindow.Show()
 	}
+	go s.CheckUpdate()
 	s.app.Run()
+}
+
+func (s *SandboxerApp) CheckUpdate() {
+	version, _ := CheckUpdate()
+	if version != "" {
+		s.updateMenuItem.Disabled = true
+		s.updateWindow.Show()
+	}
 }
 
 func (s *SandboxerApp) Menu() *fyne.Menu {

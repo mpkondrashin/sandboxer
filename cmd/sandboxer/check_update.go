@@ -82,21 +82,30 @@ func (s *UpdateWindow) Reset() {
 func (s *UpdateWindow) Update() {
 	s.Reset()
 	var err error
-	s.version, err = update.LatestVersion(globals.Name)
+	s.version, err = CheckUpdate()
 	if err != nil {
 		dialog.ShowError(err, s.win)
 		return
 	}
-	cmp := semver.Compare(s.version, globals.Version)
-	logging.Debugf("Compare %s vs %s: %d", s.version, globals.Version, cmp)
-	switch cmp {
-	case -1:
-	case 0:
+	if s.version == "" {
 		s.versionLabel.SetText("You have the newest version")
-	case 1:
+	} else {
 		s.versionLabel.SetText("New version available: " + s.version)
 		s.downloadButton.Enable()
 	}
+}
+
+func CheckUpdate() (string, error) {
+	version, err := update.LatestVersion(globals.Name)
+	if err != nil {
+		return "", err
+	}
+	cmp := semver.Compare(version, globals.Version)
+	logging.Debugf("Compare %s vs %s: %d", version, globals.Version, cmp)
+	if cmp == 1 {
+		return version, nil
+	}
+	return "", nil
 }
 
 func (s *UpdateWindow) Show() {
