@@ -52,12 +52,17 @@ func LatestVersion(repo string) (string, error) {
 	return ver, nil
 }
 
+var ErrNotFound = errors.New("not found")
+
 func DownloadRelease(version, filename, folder string, progress func(float32) error) error {
 	url := fmt.Sprintf("https://github.com/mpkondrashin/sandboxer/releases/download/%s/%s", version, filename)
 	client := http.Client{}
 	resp, err := client.Get(url)
 	if err != nil {
 		return err
+	}
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("%s: %w", url, ErrNotFound)
 	}
 	defer resp.Body.Close()
 	filePath := filepath.Join(folder, filename)

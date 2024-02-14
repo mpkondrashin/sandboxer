@@ -9,9 +9,13 @@ Quota window
 package main
 
 import (
+	"archive/zip"
 	"fmt"
+	"io"
+	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
@@ -47,13 +51,26 @@ func NewUpdateWindow(modalWindow ModalWindow) *UpdateWindow {
 func (s *UpdateWindow) Download() {
 	s.downloadButton.Disable()
 	fileName := fmt.Sprintf("setup_%s_%s.zip", runtime.GOOS, runtime.GOARCH)
-	update.DownloadRelease(s.version, fileName, globals.DownloadsFolder(), func(p float32) error {
+	logging.Debugf("Download: %s", fileName)
+	err := update.DownloadRelease(s.version, fileName, globals.DownloadsFolder(), func(p float32) error {
 		s.progressBar.SetValue(float64(p))
 		return nil
 	})
-	err := RunOpen(filepath.Join(globals.DownloadsFolder(), fileName))
 	if err != nil {
 		dialog.ShowError(err, s.win)
+		logging.LogError(err)
+		return
+	}
+	zipFilePath := filepath.Join(globals.DownloadsFolder(), fileName)
+	if err := Unzip(zipFilePath); err != nil {
+		dialog.ShowError(err, s.win)
+		return
+	}
+	folder := strings.TrimSuffix(zipFilePath, filepath.Ext(zipFilePath))
+	if err := RunOpen(folder); err != nil {
+		dialog.ShowError(err, s.win)
+		logging.LogError(err)
+		return
 	}
 }
 
@@ -85,4 +102,49 @@ func (s *UpdateWindow) Update() {
 func (s *UpdateWindow) Show() {
 	s.win.Show()
 	go s.Update()
+}
+
+func Unzip(zipFilePath string) error {
+	reader, err := zip.OpenReader(zipFilePath)
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+	folder := strings.TrimSuffix(zipFilePath, filepath.Ext(zipFilePath))
+	for _, f := range reader.File {
+		err := unzipFile(f, folder)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func unzipFile(f *zip.File, destination string) error {
+	// Check if file paths are not vulnerable to Zip Slip
+	filePath := filepath.Join(destination, f.Name)
+	if !strings.HasPrefix(filePath, filepath.Clean(destination)+string(os.PathSeparator)) {
+		return fmt.Errorf("invalid file path: %s", filePath)
+	}
+	if f.FileInfo().IsDir() {
+		if err := os.MkdirAll(filePath, os.ModePerm); err != nil {
+			return err
+		}
+		return nil
+	}
+	if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
+		return err
+	}
+	destinationFile, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+	if err != nil {
+		return err
+	}
+	defer destinationFile.Close()
+	zippedFile, err := f.Open()
+	if err != nil {
+		return err
+	}
+	defer zippedFile.Close()
+	_, err = io.Copy(destinationFile, zippedFile)
+	return err
 }

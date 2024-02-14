@@ -85,10 +85,10 @@ cmd/sandboxer/icon.go: resources/icon.png
 	fyne bundle --name ApplicationIcon --package main --output cmd/sandboxer/icon.go resources/icon.png 
 
 pkg/globals/version.go: cmd/genver/main.go
-	go run ./cmd/genver/main.go $(VERSION_V) $(BUILD) pkg/globals/version.go
+	go run ./cmd/genver/main.go $(VERSION_FULL) $(BUILD) pkg/globals/version.go
 
 clean: cleansetup celaninstall
-	rm -f setup.zip cmd/sandboxer/sandboxer.exe cmd/submit/submit.exe preproc.exe
+	rm -f setup.zip cmd/sandboxer/sandboxer.exe cmd/submit/submit.exe preproc.exe pkg/globals/version.go
 
 cleansetup:
 	rm -f cmd/setup/setup.exe cmd/setup/setup.exe.manifest cmd/setup/setup.syso cmd/setup/sandboxer_setup_wizard.log cmd/setup/sandboxer_setup.log cmd/setup/install.exe cmd/setup/embed/install.exe.gz cmd/setup/embed/opengl32.dll.gz 
