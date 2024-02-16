@@ -78,15 +78,15 @@ func NewSandboxingApp(conf *config.Configuration, channels *dispatchers.Channels
 		}, a.optionsWindow.win)
 	})
 	*/
-	options2 := NewModalWindow(NewOptionsWindow2(conf), &a.TrayApp)
+	optionsWindow := NewModalWindow(NewOptionsWindow(conf), &a.TrayApp)
 
 	a.menu = fyne.NewMenu(globals.AppName,
 		// SUBMIT_FILE s.submitMenuItem,
-		submissionsWindow.MenuItem, // a.submissionsMenuItem,
-		quotaWindow.MenuItem,       // a.quotaMenuItem,
-		options2.MenuItem,
+		submissionsWindow.MenuItem,
+		quotaWindow.MenuItem,
+		optionsWindow.MenuItem,
 		fyne.NewMenuItemSeparator(),
-		a.updateWindow.MenuItem, //.updateMenuItem,
+		a.updateWindow.MenuItem,
 		aboutWindow.MenuItem,
 		fyne.NewMenuItemSeparator(),
 		fyne.NewMenuItem("Quit", a.Quit),
@@ -102,7 +102,6 @@ func (a *SandboxerApp) Icon() fyne.Resource {
 
 func (s *SandboxerApp) Run() {
 	if len(os.Args) == 2 && os.Args[1] == "--submissions" {
-		//s.submissionsMenuItem.Disabled = true
 		s.submissionsWindow.Show()
 	}
 	go s.CheckUpdate()
@@ -118,7 +117,6 @@ func (s *SandboxerApp) CheckUpdate() {
 }
 
 func (s *SandboxerApp) Menu() *fyne.Menu {
-
 	return nil
 }
 

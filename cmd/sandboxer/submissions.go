@@ -54,15 +54,12 @@ func NewSubmissionsWindow(channels *dispatchers.Channels, list *task.TaskList, c
 	s := &SubmissionsWindow{
 		stopUpdate: make(chan struct{}),
 		conf:       conf,
-		//win:                       app.NewWindow("Submissions"),
-		//enableSubmissionsMenuItem: enableSubmissionsMenuItem,
-		from:      0,
-		count:     10,
-		pageLabel: canvas.NewText("", color.Black),
-		list:      list,
-		channels:  channels,
-		vbox:      container.NewVBox(widget.NewLabel("No Sumbissions")),
-		//vbox:     container.NewVBox(widget.NewLabel("No Sumbissions")),
+		from:       0,
+		count:      10,
+		pageLabel:  canvas.NewText("", color.Black),
+		list:       list,
+		channels:   channels,
+		vbox:       container.NewVBox(widget.NewLabel("No Sumbissions")),
 	}
 	s.buttonPrev = widget.NewButton("<", s.Prev)
 	s.buttonPrev.Disable()
@@ -70,16 +67,6 @@ func NewSubmissionsWindow(channels *dispatchers.Channels, list *task.TaskList, c
 	s.buttonNext.Disable()
 
 	s.pageLabel.TextSize = 12
-	//stateText := canvas.NewText(tsk.GetState(), tsk.RiskLevel.Color())
-
-	//f := widget.NewLabel("a")
-
-	//s.win.SetContent(s.Content())
-	//	s.win.SetCloseIntercept(func() {
-	//		s.Hide()
-	//	})
-
-	//logging.Debugf("s = %v", s.ModalWindow)
 	return s
 }
 
@@ -121,7 +108,6 @@ func (s *SubmissionsWindow) Prev() {
 	if s.from < 0 {
 		s.from = 0
 	}
-	//f.SetText(fmt.Sprintf("%d", s.from))
 	s.Update()
 }
 
@@ -194,7 +180,6 @@ func RunOpen(path string) error {
 }
 
 func (s *SubmissionsWindow) OpenInvestigation(investigation string) {
-	//logging.Debugf("OpenInvestigation.Showhint: %v", s.conf.ShowPasswordHint)
 	if !s.conf.ShowPasswordHint {
 		s.RunOpen(investigation)
 		return
@@ -202,18 +187,15 @@ func (s *SubmissionsWindow) OpenInvestigation(investigation string) {
 	dialog.ShowConfirm("Hint",
 		"Password for archive is \"virus\". Show this note next time?",
 		func(yes bool) {
-			//logging.Debugf("OpenInvestigation.Yes: %v", yes)
 			if !yes {
 				s.conf.ShowPasswordHint = false
 				err := s.conf.Save()
 				if err != nil {
 					dialog.ShowError(err, s.win)
 				}
-				//	logging.Debugf("OpenInvestigation.Save: %v", err)
 			}
 			s.RunOpen(investigation)
 		}, s.win)
-	//logging.Debugf("OpenInvestigation.Done")
 }
 
 func IconForFile(path string) fyne.CanvasObject {
@@ -255,18 +237,14 @@ func IconForFile(path string) fyne.CanvasObject {
 func (s *SubmissionsWindow) CardWidget(tsk *task.Task) fyne.CanvasObject {
 	path := tsk.Path
 	icon := IconForFile(path)
-	//uri := storage.NewFileURI(path)
-	//icon := container.NewPadded(widget.NewFileIcon(uri))
-	//icon.Resize(fyne.Size{Width: 100, Height: 100})
 	fileNameText := canvas.NewText(filepath.Base(path), color.Black)
 	fileNameText.TextStyle = fyne.TextStyle{Bold: true}
 	stateText := canvas.NewText(tsk.GetState(), tsk.RiskLevel.Color())
-	//stateText.Color = clr
-	//logging.Debugf("XXX MESSAGE GET: %v", tsk)
+
 	messageText := canvas.NewText(tsk.Message, tsk.RiskLevel.Color())
 	messageText.TextStyle = fyne.TextStyle{Italic: true}
 	messageText.TextSize = 10
-	//messageText.Color = StateColor(tsk.State)
+
 	stateVBox := container.NewHBox(stateText, messageText)
 	vbox := container.NewPadded(container.NewVBox(
 		fileNameText,
@@ -278,10 +256,6 @@ func (s *SubmissionsWindow) CardWidget(tsk *task.Task) fyne.CanvasObject {
 		s.PopUpMenu(tsk),
 	)
 	return container.NewHBox(menuIcon, container.NewPadded(icon), vbox)
-	//container.NewBorder(
-	//	nil, nil, container.NewHBox(menuIcon, container.NewPadded(icon)), nil, //menuIcon,
-	//		vbox,
-	//	)
 }
 
 func (s *SubmissionsWindow) Update() {
@@ -289,7 +263,6 @@ func (s *SubmissionsWindow) Update() {
 	if to > s.list.Length() {
 		to = s.list.Length()
 	}
-	//	logging.Debugf("XXX SubmissionsWindow.Update()")
 	s.vbox.RemoveAll()
 	s.list.Process(func(ids []task.ID) {
 		for i := s.from; i < s.from+s.count && i < len(ids); i++ {
@@ -334,8 +307,7 @@ func (s *SubmissionsWindow) Show() {
 		for {
 			select {
 			case <-s.stopUpdate:
-				logging.Debugf("Stop Update")
-				//				s.Hide() // s.enableSubmissionsMenuItem()
+				logging.Debugf("Got Stop Update")
 				return
 			case <-s.list.Changes():
 				haveChanges = true
@@ -343,7 +315,6 @@ func (s *SubmissionsWindow) Show() {
 				if !haveChanges {
 					break
 				}
-				//logging.Debugf(strings.Repeat("*", 100))
 				s.Update()
 				haveChanges = false
 			}
@@ -352,6 +323,6 @@ func (s *SubmissionsWindow) Show() {
 }
 
 func (s *SubmissionsWindow) Hide() {
-	logging.Debugf("stopUpdate")
+	logging.Debugf("Send Stop Update")
 	s.stopUpdate <- struct{}{}
 }

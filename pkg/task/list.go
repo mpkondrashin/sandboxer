@@ -9,8 +9,10 @@ List of tasks
 package task
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"sort"
 	"sync"
 	"time"
@@ -27,7 +29,7 @@ type TaskList struct {
 	//changeMX sync.Mutex
 	changed    chan struct{}
 	Tasks      map[ID]*Task
-	tasksCount ID
+	TasksCount ID
 }
 
 func NewList() *TaskList {
@@ -68,11 +70,11 @@ func (l *TaskList) NewTask(path string) (ID, error) {
 			return 0, fmt.Errorf("%s: %w", path, ErrAlreadyExists)
 		}
 	}
-	logging.Debugf("NewTask %d, %s", l.tasksCount, path)
-	tsk := NewTask(l.tasksCount, path)
+	logging.Debugf("NewTask %d, %s", l.TasksCount, path)
+	tsk := NewTask(l.TasksCount, path)
 	l.Tasks[tsk.Number] = tsk
 	l.Updated()
-	l.tasksCount++
+	l.TasksCount++
 	return tsk.Number, nil
 }
 
@@ -127,4 +129,12 @@ func (l *TaskList) Process(callback func([]ID)) {
 	})
 	logging.Debugf("slice: %v", keys)
 	callback(keys)
+}
+
+func (l *TaskList) Save(filePath string) error {
+	data, err := json.Marshal(l)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filePath, data, 0644)
 }

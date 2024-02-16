@@ -24,20 +24,16 @@ import (
 )
 
 type OptionsWindow struct {
-	//ModalWindow2
 	conf         *config.Configuration
 	tokenEntry   *widget.Entry
 	domainLabel  *widget.Label
 	cancelDetect context.CancelFunc
 }
 
-func NewOptionsWindow2(conf *config.Configuration) *OptionsWindow {
-	s := &OptionsWindow{
-		//ModalWindow2: modalWindow,
+func NewOptionsWindow(conf *config.Configuration) *OptionsWindow {
+	return &OptionsWindow{
 		conf: conf,
 	}
-	//s.ModalWindow2.SetShow(s.Update)
-	return s
 }
 
 func (s *OptionsWindow) Show() {
@@ -61,12 +57,10 @@ func (s *OptionsWindow) Content(w *ModalWindow) fyne.CanvasObject {
 	// apiKeyHitn := "Go to Administration -> API Keys -> Add API Key"
 	s.domainLabel = widget.NewLabel("")
 	domainFormItem := widget.NewFormItem("Domain:", s.domainLabel)
-
 	optionsForm := widget.NewForm(
 		tokenFormItem,
 		domainFormItem,
 	)
-
 	saveButton := widget.NewButton("Save", func() { s.Save(w) })
 	cancelButton := widget.NewButton("Cancel", w.Hide)
 	bottons := container.NewHBox(cancelButton, saveButton)
@@ -87,11 +81,6 @@ func (s *OptionsWindow) Save(w *ModalWindow) {
 	w.Hide()
 }
 
-/*
-	func (s *OptionsWindow) Cancel() {
-		s.Hide()
-	}
-*/
 const ErrorDomain = "Error"
 
 func (s *OptionsWindow) Update() {

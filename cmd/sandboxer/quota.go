@@ -88,7 +88,6 @@ func (s *QuotaWindow) Update() {
 	submissionCount := fmt.Sprintf("%d", result.SubmissionCount)
 	exemptionCount := fmt.Sprintf("%d", result.SubmissionExemptionCount)
 	remainingCount := fmt.Sprintf("%d                            ", result.SubmissionRemainingCount)
-	//exemptionCount := fmt.Sprintf("%d (Number of samples submitted but marked as \"not analyzed\". This number does not count toward the daily reserve)", result.SubmissionExemptionCount)
 
 	s.reserve.Set(reserveCount)
 	s.submission.Set(submissionCount)
