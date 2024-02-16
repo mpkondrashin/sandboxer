@@ -138,7 +138,6 @@ func NeedUpdateWindow() (bool, error) {
 	}
 	cmp := semver.Compare(version, globals.Version)
 	logging.Debugf("NeedUpdateWindow:semver.Compare(%s, %s): %v", version, globals.Version, cmp)
-	//logging.Debugf("Compare %s vs %s: %d", version, globals.Version, cmp)
 	if cmp != 1 {
 		return false, nil
 	}
@@ -183,8 +182,8 @@ func NeedUpdateWindow() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	err = os.WriteFile(fileName, data, 0644)
-	logging.Debugf("NeedUpdateWindow:WriteFile(%s, %s): %d", fileName, data, err)
+	err = os.WriteFile(filePath, data, 0644)
+	logging.Debugf("NeedUpdateWindow:WriteFile(%s, %s): %v", fileName, data, err)
 	if err != nil {
 		return false, err
 	}
