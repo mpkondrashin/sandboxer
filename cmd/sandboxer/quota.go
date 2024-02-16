@@ -12,6 +12,7 @@ import (
 	"context"
 	"fmt"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
@@ -23,7 +24,7 @@ import (
 )
 
 type QuotaWindow struct {
-	ModalWindow
+	win        fyne.Window
 	conf       *config.Configuration
 	reserve    binding.String
 	submission binding.String
@@ -31,22 +32,25 @@ type QuotaWindow struct {
 	remaining  binding.String
 }
 
-func NewQuotaWindow(modalWindow ModalWindow, conf *config.Configuration) *QuotaWindow {
-	s := &QuotaWindow{
-		ModalWindow: modalWindow,
-		conf:        conf,
-		reserve:     binding.NewString(),
-		submission:  binding.NewString(),
-		exemption:   binding.NewString(),
-		remaining:   binding.NewString(),
+func NewQuotaWindow(conf *config.Configuration) *QuotaWindow {
+	w := &QuotaWindow{
+		conf:       conf,
+		reserve:    binding.NewString(),
+		submission: binding.NewString(),
+		exemption:  binding.NewString(),
+		remaining:  binding.NewString(),
 	}
-	s.Reset()
-	reserveCountItem := widget.NewFormItem("Daily Reserve:", widget.NewLabelWithData(s.reserve))
-	submissionCountItem := widget.NewFormItem("Files Submitted:", widget.NewLabelWithData(s.submission))
-	exemptionCountItem := widget.NewFormItem("Unsupported Files Submitted:", widget.NewLabelWithData(s.exemption))
-	remainingCountItem := widget.NewFormItem("Remaining:", widget.NewLabelWithData(s.remaining))
+	return w
+}
+
+func (w *QuotaWindow) Content(modal *ModalWindow) fyne.CanvasObject {
+	w.win = modal.win
+	reserveCountItem := widget.NewFormItem("Daily Reserve:", widget.NewLabelWithData(w.reserve))
+	submissionCountItem := widget.NewFormItem("Files Submitted:", widget.NewLabelWithData(w.submission))
+	exemptionCountItem := widget.NewFormItem("Unsupported Files Submitted:", widget.NewLabelWithData(w.exemption))
+	remainingCountItem := widget.NewFormItem("Remaining:", widget.NewLabelWithData(w.remaining))
 	updateItem := widget.NewFormItem("", widget.NewButton("Update", func() {
-		s.Update()
+		w.Update()
 	}))
 	form := widget.NewForm(
 		reserveCountItem,
@@ -55,8 +59,13 @@ func NewQuotaWindow(modalWindow ModalWindow, conf *config.Configuration) *QuotaW
 		remainingCountItem,
 		updateItem,
 	)
-	s.win.SetContent(form)
-	return s
+	w.Reset()
+	return form
+
+}
+
+func (w *QuotaWindow) Name() string {
+	return "Quota"
 }
 
 func (s *QuotaWindow) Reset() {
@@ -87,7 +96,8 @@ func (s *QuotaWindow) Update() {
 	s.remaining.Set(remainingCount)
 }
 
-func (s *QuotaWindow) Show(enableMenuItem func()) {
-	s.win.Show()
+func (s *QuotaWindow) Show() {
 	go s.Update()
 }
+
+func (s *QuotaWindow) Hide() {}

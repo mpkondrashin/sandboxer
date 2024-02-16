@@ -12,29 +12,43 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-type ModalWindow struct {
-	win            fyne.Window
-	enableMenuItem func()
-	quit           func()
+type ModalWindowContent interface {
+	Name() string
+	Content(w *ModalWindow) fyne.CanvasObject
+	Show()
+	Hide()
 }
 
-func NewModalWindow(win fyne.Window, enableMenuItem func()) ModalWindow {
-	w := ModalWindow{
-		win:            win,
-		enableMenuItem: enableMenuItem,
+type ModalWindow struct {
+	win      fyne.Window
+	trayApp  *TrayApp
+	MenuItem *fyne.MenuItem
+	content  ModalWindowContent
+}
+
+func NewModalWindow(content ModalWindowContent, trayApp *TrayApp) *ModalWindow {
+	w := &ModalWindow{
+		content: content,
+		win:     trayApp.app.NewWindow(content.Name()),
+		trayApp: trayApp,
 	}
+
+	w.MenuItem = fyne.NewMenuItem(content.Name()+"...", w.Show)
 	w.win.SetCloseIntercept(w.Hide)
+	w.win.SetContent(content.Content(w))
 	return w
 }
 
-func (w *ModalWindow) SetQuit(quit func()) {
-	w.quit = quit
+func (w *ModalWindow) Show() {
+	w.content.Show()
+	w.MenuItem.Disabled = true
+	w.win.Show()
+	w.trayApp.menu.Refresh()
 }
 
 func (w *ModalWindow) Hide() {
-	if w.quit != nil {
-		w.quit()
-	}
-	w.enableMenuItem()
+	w.content.Hide()
+	w.MenuItem.Disabled = false
 	w.win.Hide()
+	w.trayApp.menu.Refresh()
 }

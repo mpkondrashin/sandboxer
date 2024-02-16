@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"net/url"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 
@@ -19,27 +20,28 @@ import (
 )
 
 type AboutWindow struct {
-	ModalWindow
 }
 
-func NewAboutWindow(modalWindow ModalWindow) *AboutWindow {
-	s := &AboutWindow{
-		ModalWindow: modalWindow,
-	}
+func NewAboutWindow() *AboutWindow {
+	return &AboutWindow{}
+}
+
+func (w *AboutWindow) Content(modal *ModalWindow) fyne.CanvasObject {
 	name := widget.NewLabel(globals.AppName)
 	version := widget.NewLabel(fmt.Sprintf("Version %s Build %s", globals.Version, globals.Build))
 	repoURL, _ := url.Parse("https://github.com/mpkondrashin/" + globals.Name)
 	repoLink := widget.NewHyperlink("Repository on GitHub", repoURL)
-
 	vbox := container.NewVBox(
 		container.NewCenter(name),
 		container.NewCenter(version),
 		container.NewCenter(repoLink),
 	)
-	s.win.SetContent(container.NewPadded(vbox))
-	return s
+	return container.NewPadded(vbox)
 }
 
-func (s *AboutWindow) Show() {
-	s.win.Show()
+func (s *AboutWindow) Name() string {
+	return "About"
 }
+
+func (s *AboutWindow) Show() {}
+func (s *AboutWindow) Hide() {}

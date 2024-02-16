@@ -26,25 +26,25 @@ import (
 	"sandboxer/pkg/task"
 )
 
-type Status interface {
-	Get(from int, count int)
+type TrayApp struct {
+	app  fyne.App
+	menu *fyne.Menu
 }
 
 type SandboxerApp struct {
-	app  fyne.App
-	menu *fyne.Menu
+	TrayApp
 	// SUBMIT_FILE submitMenuItem     *fyne.MenuItem
-	submissionsMenuItem *fyne.MenuItem
-	quotaMenuItem       *fyne.MenuItem
-	optionsMenuItem     *fyne.MenuItem
-	updateMenuItem      *fyne.MenuItem
-	aboutMenuItem       *fyne.MenuItem
+	//submissionsMenuItem *fyne.MenuItem
+	//quotaMenuItem *fyne.MenuItem
+	//optionsMenuItem     *fyne.MenuItem
+	//updateMenuItem *fyne.MenuItem
+	//aboutMenuItem *fyne.MenuItem
 
-	submissionsWindow *SubmissionsWindow
-	quotaWindow       *QuotaWindow
-	optionsWindow     *OptionsWindow
-	updateWindow      *UpdateWindow
-	aboutWindow       *AboutWindow
+	submissionsWindow *ModalWindow
+	//quotaWindow       *QuotaWindow
+	//optionsWindow     *OptionsWindow
+	updateWindow *ModalWindow
+	//aboutWindow  *AboutWindow
 }
 
 func NewSandboxingApp(conf *config.Configuration, channels *dispatchers.Channels, list *task.TaskList) *SandboxerApp {
@@ -54,28 +54,17 @@ func NewSandboxingApp(conf *config.Configuration, channels *dispatchers.Channels
 		panic("only desktop supported")
 	}
 	a := &SandboxerApp{
-		app: fyneApp,
+		TrayApp: TrayApp{app: fyneApp},
 	}
-	a.quotaWindow = NewQuotaWindow(NewModalWindow(
-		a.app.NewWindow("Quota"), a.EnableQuotaMenuItem),
-		conf,
-	)
-	a.submissionsWindow = NewSubmissionsWindow(NewModalWindow(
-		a.app.NewWindow("Submissions"), a.EnableSubmissionsMenuItem),
+	quotaWindow := NewModalWindow(NewQuotaWindow(conf), &a.TrayApp)
+	submissionsWindow := NewModalWindow(NewSubmissionsWindow(
 		channels,
 		list,
 		conf,
-	)
-	a.optionsWindow = NewOptionsWindow(
-		NewModalWindow(a.app.NewWindow("Options"), a.EnableOptionsMenuItem),
-		conf,
-	)
-	a.updateWindow = NewUpdateWindow(
-		NewModalWindow(a.app.NewWindow("Update"), a.EnableUpdateMenuItem),
-	)
-	a.aboutWindow = NewAboutWindow(
-		NewModalWindow(a.app.NewWindow("About"), a.EnableAboutMenuItem),
-	)
+	), &a.TrayApp)
+
+	a.updateWindow = NewModalWindow(NewUpdateWindow(), &a.TrayApp)
+	aboutWindow := NewModalWindow(NewAboutWindow(), &a.TrayApp)
 	/* SUBMIT_FILE
 	a.submitMenuItem = fyne.NewMenuItem("Submit File", func() {
 		fmt.Println("Submit file")
@@ -89,13 +78,19 @@ func NewSandboxingApp(conf *config.Configuration, channels *dispatchers.Channels
 		}, a.optionsWindow.win)
 	})
 	*/
-	a.submissionsMenuItem = fyne.NewMenuItem("Submissions...", a.Submissions)
-	a.quotaMenuItem = fyne.NewMenuItem("Quota...", a.Quota)
-	a.optionsMenuItem = fyne.NewMenuItem("Options...", a.Options)
-	a.updateMenuItem = fyne.NewMenuItem("Check Update...", a.Update)
-	a.aboutMenuItem = fyne.NewMenuItem("About...", a.About)
+	options2 := NewModalWindow(NewOptionsWindow2(conf), &a.TrayApp)
 
-	a.menu = a.Menu()
+	a.menu = fyne.NewMenu(globals.AppName,
+		// SUBMIT_FILE s.submitMenuItem,
+		submissionsWindow.MenuItem, // a.submissionsMenuItem,
+		quotaWindow.MenuItem,       // a.quotaMenuItem,
+		options2.MenuItem,
+		fyne.NewMenuItemSeparator(),
+		a.updateWindow.MenuItem, //.updateMenuItem,
+		aboutWindow.MenuItem,
+		fyne.NewMenuItemSeparator(),
+		fyne.NewMenuItem("Quit", a.Quit),
+	)
 	deskApp.SetSystemTrayIcon(a.Icon())
 	deskApp.SetSystemTrayMenu(a.menu)
 	return a
@@ -107,7 +102,7 @@ func (a *SandboxerApp) Icon() fyne.Resource {
 
 func (s *SandboxerApp) Run() {
 	if len(os.Args) == 2 && os.Args[1] == "--submissions" {
-		s.submissionsMenuItem.Disabled = true
+		//s.submissionsMenuItem.Disabled = true
 		s.submissionsWindow.Show()
 	}
 	go s.CheckUpdate()
@@ -117,80 +112,18 @@ func (s *SandboxerApp) Run() {
 func (s *SandboxerApp) CheckUpdate() {
 	version, _ := CheckUpdate()
 	if version != "" {
-		s.updateMenuItem.Disabled = true
+		//s.updateMenuItem.Disabled = true
 		s.updateWindow.Show()
 	}
 }
 
 func (s *SandboxerApp) Menu() *fyne.Menu {
-	return fyne.NewMenu(globals.AppName,
-		// SUBMIT_FILE s.submitMenuItem,
-		s.submissionsMenuItem,
-		s.quotaMenuItem,
-		s.optionsMenuItem,
-		fyne.NewMenuItemSeparator(),
-		s.updateMenuItem,
-		s.aboutMenuItem,
-		fyne.NewMenuItemSeparator(),
-		fyne.NewMenuItem("Quit", s.Quit),
-	)
+
+	return nil
 }
 
 func (s *SandboxerApp) SubmitFile() {
 
-}
-
-func (s *SandboxerApp) Submissions() {
-	s.submissionsMenuItem.Disabled = true
-	s.menu.Refresh()
-	s.submissionsWindow.Show()
-}
-
-func (s *SandboxerApp) EnableSubmissionsMenuItem() {
-	s.submissionsMenuItem.Disabled = false
-	s.menu.Refresh()
-}
-
-func (s *SandboxerApp) EnableQuotaMenuItem() {
-	s.quotaMenuItem.Disabled = false
-	s.menu.Refresh()
-}
-
-func (s *SandboxerApp) EnableOptionsMenuItem() {
-	s.optionsMenuItem.Disabled = false
-	s.menu.Refresh()
-}
-func (s *SandboxerApp) EnableUpdateMenuItem() {
-	s.updateMenuItem.Disabled = false
-	s.menu.Refresh()
-}
-func (s *SandboxerApp) EnableAboutMenuItem() {
-	s.aboutMenuItem.Disabled = false
-	s.menu.Refresh()
-}
-
-func (s *SandboxerApp) Quota() {
-	s.quotaMenuItem.Disabled = true
-	s.menu.Refresh()
-	s.quotaWindow.Show(s.EnableQuotaMenuItem)
-}
-
-func (s *SandboxerApp) Options() {
-	s.optionsMenuItem.Disabled = true
-	s.menu.Refresh()
-	s.optionsWindow.Show()
-}
-
-func (s *SandboxerApp) Update() {
-	s.updateMenuItem.Disabled = true
-	s.menu.Refresh()
-	s.updateWindow.Show()
-}
-
-func (s *SandboxerApp) About() {
-	s.aboutMenuItem.Disabled = true
-	s.menu.Refresh()
-	s.aboutWindow.Show()
 }
 
 func (s *SandboxerApp) Quit() {

@@ -24,19 +24,33 @@ import (
 )
 
 type OptionsWindow struct {
-	ModalWindow
+	//ModalWindow2
 	conf         *config.Configuration
 	tokenEntry   *widget.Entry
 	domainLabel  *widget.Label
 	cancelDetect context.CancelFunc
 }
 
-func NewOptionsWindow(modalWindow ModalWindow, conf *config.Configuration) *OptionsWindow {
+func NewOptionsWindow2(conf *config.Configuration) *OptionsWindow {
 	s := &OptionsWindow{
-		ModalWindow: modalWindow,
-		conf:        conf,
+		//ModalWindow2: modalWindow,
+		conf: conf,
 	}
+	//s.ModalWindow2.SetShow(s.Update)
+	return s
+}
 
+func (s *OptionsWindow) Show() {
+	s.Update()
+}
+
+func (s *OptionsWindow) Hide() {}
+
+func (s *OptionsWindow) Name() string {
+	return "Options"
+}
+
+func (s *OptionsWindow) Content(w *ModalWindow) fyne.CanvasObject {
 	labelTop := widget.NewLabel("Please open Vision One console to get all nessesary parameters")
 	s.tokenEntry = widget.NewMultiLineEntry()
 	s.tokenEntry.Wrapping = fyne.TextWrapBreak
@@ -53,25 +67,24 @@ func NewOptionsWindow(modalWindow ModalWindow, conf *config.Configuration) *Opti
 		domainFormItem,
 	)
 
-	saveButton := widget.NewButton("Save", s.Save)
-	cancelButton := widget.NewButton("Cancel", s.Hide)
+	saveButton := widget.NewButton("Save", func() { s.Save(w) })
+	cancelButton := widget.NewButton("Cancel", w.Hide)
 	bottons := container.NewHBox(cancelButton, saveButton)
 	// add link to open v1 console(?)
-	s.win.SetContent(container.NewVBox(labelTop, optionsForm, bottons))
-	return s
+	return container.NewVBox(labelTop, optionsForm, bottons)
 }
 
-func (s *OptionsWindow) Save() {
+func (s *OptionsWindow) Save(w *ModalWindow) {
 	s.conf.VisionOne.Token = strings.TrimSpace(s.tokenEntry.Text)
 	if s.domainLabel.Text != ErrorDomain {
 		s.conf.VisionOne.Domain = s.domainLabel.Text
 	}
 	if err := s.conf.Save(); err != nil {
 		logging.Errorf("Save Config: %v", err)
-		dialog.ShowError(err, s.win)
+		dialog.ShowError(err, w.win)
 		return
 	}
-	s.Hide()
+	w.Hide()
 }
 
 /*
@@ -115,9 +128,4 @@ func (s *OptionsWindow) DetectDomain(token string) {
 			s.domainLabel.SetText(ErrorDomain)
 		}
 	}()
-}
-
-func (s *OptionsWindow) Show() {
-	s.win.Show()
-	s.Update()
 }

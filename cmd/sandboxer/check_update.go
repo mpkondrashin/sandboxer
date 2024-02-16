@@ -17,6 +17,7 @@ import (
 	"runtime"
 	"strings"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
@@ -28,27 +29,34 @@ import (
 )
 
 type UpdateWindow struct {
-	ModalWindow
+	win            fyne.Window
 	version        string
 	versionLabel   *widget.Label
 	progressBar    *widget.ProgressBar
 	downloadButton *widget.Button
 }
 
-func NewUpdateWindow(modalWindow ModalWindow) *UpdateWindow {
+func NewUpdateWindow() *UpdateWindow {
 	s := &UpdateWindow{
-		ModalWindow:  modalWindow,
 		versionLabel: widget.NewLabel("                                 "),
 		progressBar:  widget.NewProgressBar(),
 	}
-	s.downloadButton = widget.NewButton("Download", s.Download)
-	s.downloadButton.Disable()
-	s.Reset()
-	s.win.SetContent(container.NewPadded(container.NewVBox(s.versionLabel, s.progressBar, s.downloadButton)))
 	return s
 }
 
-func (s *UpdateWindow) Download() {
+func (s *UpdateWindow) Name() string {
+	return "Check for Updates"
+}
+
+func (s *UpdateWindow) Content(w *ModalWindow) fyne.CanvasObject {
+	s.win = w.win
+	s.downloadButton = widget.NewButton("Download", func() { s.Download(w.win) })
+	s.downloadButton.Disable()
+	s.Reset()
+	return container.NewPadded(container.NewVBox(s.versionLabel, s.progressBar, s.downloadButton))
+}
+
+func (s *UpdateWindow) Download(win fyne.Window) {
 	s.downloadButton.Disable()
 	fileName := fmt.Sprintf("setup_%s_%s.zip", runtime.GOOS, runtime.GOARCH)
 	logging.Debugf("Download: %s", fileName)
@@ -57,18 +65,18 @@ func (s *UpdateWindow) Download() {
 		return nil
 	})
 	if err != nil {
-		dialog.ShowError(err, s.win)
+		dialog.ShowError(err, win)
 		logging.LogError(err)
 		return
 	}
 	zipFilePath := filepath.Join(globals.DownloadsFolder(), fileName)
 	if err := Unzip(zipFilePath); err != nil {
-		dialog.ShowError(err, s.win)
+		dialog.ShowError(err, win)
 		return
 	}
 	folder := strings.TrimSuffix(zipFilePath, filepath.Ext(zipFilePath))
 	if err := RunOpen(folder); err != nil {
-		dialog.ShowError(err, s.win)
+		dialog.ShowError(err, win)
 		logging.LogError(err)
 		return
 	}
@@ -109,8 +117,10 @@ func CheckUpdate() (string, error) {
 }
 
 func (s *UpdateWindow) Show() {
-	s.win.Show()
 	go s.Update()
+}
+
+func (s *UpdateWindow) Hide() {
 }
 
 func Unzip(zipFilePath string) error {

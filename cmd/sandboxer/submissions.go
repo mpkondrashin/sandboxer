@@ -33,7 +33,8 @@ import (
 )
 
 type SubmissionsWindow struct {
-	ModalWindow
+	//ModalWindow
+	win        fyne.Window
 	stopUpdate chan struct{}
 	//enableSubmissionsMenuItem func()
 	conf       *config.Configuration
@@ -49,11 +50,10 @@ type SubmissionsWindow struct {
 	channels *dispatchers.Channels
 }
 
-func NewSubmissionsWindow(modalWindow ModalWindow, channels *dispatchers.Channels, list *task.TaskList, conf *config.Configuration) *SubmissionsWindow {
+func NewSubmissionsWindow(channels *dispatchers.Channels, list *task.TaskList, conf *config.Configuration) *SubmissionsWindow {
 	s := &SubmissionsWindow{
-		ModalWindow: modalWindow,
-		stopUpdate:  make(chan struct{}),
-		conf:        conf,
+		stopUpdate: make(chan struct{}),
+		conf:       conf,
 		//win:                       app.NewWindow("Submissions"),
 		//enableSubmissionsMenuItem: enableSubmissionsMenuItem,
 		from:      0,
@@ -72,22 +72,24 @@ func NewSubmissionsWindow(modalWindow ModalWindow, channels *dispatchers.Channel
 	s.pageLabel.TextSize = 12
 	//stateText := canvas.NewText(tsk.GetState(), tsk.RiskLevel.Color())
 
-	s.ModalWindow.SetQuit(func() {
-		logging.Debugf("stopUpdate")
-		s.stopUpdate <- struct{}{}
-	})
 	//f := widget.NewLabel("a")
 
-	s.win.SetContent(s.Content())
+	//s.win.SetContent(s.Content())
 	//	s.win.SetCloseIntercept(func() {
 	//		s.Hide()
 	//	})
-	s.win.Resize(fyne.Size{Width: 400, Height: 300})
+
 	//logging.Debugf("s = %v", s.ModalWindow)
 	return s
 }
 
-func (s *SubmissionsWindow) Content() fyne.CanvasObject {
+func (s *SubmissionsWindow) Name() string {
+	return "Submissions"
+}
+
+func (s *SubmissionsWindow) Content(w *ModalWindow) fyne.CanvasObject {
+	s.win = w.win
+	s.win.Resize(fyne.Size{Width: 400, Height: 300})
 	navigationHBox := container.NewHBox(
 		s.buttonPrev,
 		s.buttonNext,
@@ -326,7 +328,6 @@ func (s *SubmissionsWindow) Update() {
 }
 
 func (s *SubmissionsWindow) Show() {
-	s.win.Show()
 	fps := time.Millisecond * 300
 	go func() {
 		haveChanges := true
@@ -350,10 +351,7 @@ func (s *SubmissionsWindow) Show() {
 	}()
 }
 
-/*
 func (s *SubmissionsWindow) Hide() {
-	//s.hidden = true
-
-	s.ModalWindow.Hide() // s.win.Hide()
+	logging.Debugf("stopUpdate")
+	s.stopUpdate <- struct{}{}
 }
-*/
