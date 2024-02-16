@@ -24,6 +24,7 @@ import (
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
 	"sandboxer/pkg/task"
+	"sandboxer/pkg/update"
 )
 
 type TrayApp struct {
@@ -57,7 +58,7 @@ func NewSandboxingApp(conf *config.Configuration, channels *dispatchers.Channels
 		TrayApp: TrayApp{app: fyneApp},
 	}
 	quotaWindow := NewModalWindow(NewQuotaWindow(conf), &a.TrayApp)
-	submissionsWindow := NewModalWindow(NewSubmissionsWindow(
+	a.submissionsWindow = NewModalWindow(NewSubmissionsWindow(
 		channels,
 		list,
 		conf,
@@ -82,7 +83,7 @@ func NewSandboxingApp(conf *config.Configuration, channels *dispatchers.Channels
 
 	a.menu = fyne.NewMenu(globals.AppName,
 		// SUBMIT_FILE s.submitMenuItem,
-		submissionsWindow.MenuItem,
+		a.submissionsWindow.MenuItem,
 		quotaWindow.MenuItem,
 		optionsWindow.MenuItem,
 		fyne.NewMenuItemSeparator(),
@@ -109,9 +110,12 @@ func (s *SandboxerApp) Run() {
 }
 
 func (s *SandboxerApp) CheckUpdate() {
-	version, _ := CheckUpdate()
-	if version != "" {
-		//s.updateMenuItem.Disabled = true
+	need, err := update.NeedUpdateWindow()
+	if err != nil {
+		logging.LogError(err)
+		return
+	}
+	if need {
 		s.updateWindow.Show()
 	}
 }

@@ -1,13 +1,19 @@
 package update
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"sandboxer/pkg/globals"
+	"sandboxer/pkg/logging"
 	"strings"
+	"time"
+
+	"golang.org/x/mod/semver"
 )
 
 const (
@@ -117,4 +123,70 @@ func Download(dst io.Writer, src io.Reader, progress func(int64) error) (err err
 		}
 	}
 	return err
+}
+
+type Update struct {
+	Version string
+	Date    time.Time
+}
+
+func NeedUpdateWindow() (bool, error) {
+	version, err := LatestVersion(globals.Name)
+	logging.Debugf("NeedUpdateWindow:LatestVersion(%s): %s, %v", globals.Name, version, err)
+	if err != nil {
+		return false, err
+	}
+	cmp := semver.Compare(version, globals.Version)
+	logging.Debugf("NeedUpdateWindow:semver.Compare(%s, %s): %v", version, globals.Version, cmp)
+	//logging.Debugf("Compare %s vs %s: %d", version, globals.Version, cmp)
+	if cmp != 1 {
+		return false, nil
+	}
+	folder, err := globals.UserDataFolder()
+	logging.Debugf("NeedUpdateWindow:globals.UserDataFolder(): %s %v", folder, err)
+	if err != nil {
+		return false, err
+	}
+	fileName := "check_update.json"
+	filePath := filepath.Join(folder, fileName)
+	logging.Debugf("NeedUpdateWindow:filePath: %s", filePath)
+	data, err := os.ReadFile(filePath)
+	logging.Debugf("NeedUpdateWindow:ReadFile(%s): %s, %v", filePath, string(data), err)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			u := Update{
+				Version: version,
+				Date:    time.Now(),
+			}
+			data, err = json.MarshalIndent(u, "", "    ")
+			er := os.WriteFile(filePath, data, 0644)
+			logging.Debugf("NeedUpdateWindow:WriteFile(%s, %s): %v", filePath, string(data), er)
+			if er != nil {
+				return false, er
+			}
+			return true, err
+		}
+		return false, err
+	}
+	var u Update
+	err = json.Unmarshal(data, &u)
+	if err != nil {
+		return false, err
+	}
+	cmp = semver.Compare(version, u.Version)
+	logging.Debugf("NeedUpdateWindow:Compare(%s, %s): %d", version, u.Version, cmp)
+	if cmp == 0 {
+		return false, nil
+	}
+	u.Version = version
+	data, err = json.MarshalIndent(u, "", "    ")
+	if err != nil {
+		return false, err
+	}
+	err = os.WriteFile(fileName, data, 0644)
+	logging.Debugf("NeedUpdateWindow:WriteFile(%s, %s): %d", fileName, data, err)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

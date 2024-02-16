@@ -131,6 +131,15 @@ func (l *TaskList) Process(callback func([]ID)) {
 	callback(keys)
 }
 
+func (l *TaskList) CountActiveTasks() (count int) {
+	for _, t := range l.Tasks {
+		if t.State != StateDone {
+			count++
+		}
+	}
+	return
+}
+
 func (l *TaskList) Save(filePath string) error {
 	data, err := json.Marshal(l)
 	if err != nil {

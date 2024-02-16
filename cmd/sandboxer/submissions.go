@@ -42,9 +42,10 @@ type SubmissionsWindow struct {
 	buttonNext *widget.Button
 	buttonPrev *widget.Button
 	//pageLabel *widget.Label
-	pageLabel *canvas.Text
-	from      int
-	count     int
+	pageLabel   *canvas.Text
+	statusLabel *widget.Label
+	from        int
+	count       int
 	//icons []fyne.Resource
 	list     *task.TaskList
 	channels *dispatchers.Channels
@@ -52,14 +53,15 @@ type SubmissionsWindow struct {
 
 func NewSubmissionsWindow(channels *dispatchers.Channels, list *task.TaskList, conf *config.Configuration) *SubmissionsWindow {
 	s := &SubmissionsWindow{
-		stopUpdate: make(chan struct{}),
-		conf:       conf,
-		from:       0,
-		count:      10,
-		pageLabel:  canvas.NewText("", color.Black),
-		list:       list,
-		channels:   channels,
-		vbox:       container.NewVBox(widget.NewLabel("No Sumbissions")),
+		stopUpdate:  make(chan struct{}),
+		conf:        conf,
+		from:        0,
+		count:       10,
+		pageLabel:   canvas.NewText("", color.Black),
+		statusLabel: widget.NewLabel(""),
+		list:        list,
+		channels:    channels,
+		vbox:        container.NewVBox(widget.NewLabel("No Sumbissions")),
 	}
 	s.buttonPrev = widget.NewButton("<", s.Prev)
 	s.buttonPrev.Disable()
@@ -84,7 +86,7 @@ func (s *SubmissionsWindow) Content(w *ModalWindow) fyne.CanvasObject {
 	buttons := container.NewBorder(
 		nil,
 		nil,
-		nil,
+		s.statusLabel,
 		navigationHBox,
 	)
 	return container.NewBorder(
@@ -265,6 +267,8 @@ func (s *SubmissionsWindow) Update() {
 	}
 	s.vbox.RemoveAll()
 	s.list.Process(func(ids []task.ID) {
+		activeTasks := fmt.Sprintf("Active tasks: %d", s.list.CountActiveTasks())
+		s.statusLabel.SetText(activeTasks)
 		for i := s.from; i < s.from+s.count && i < len(ids); i++ {
 			idx := ids[i]
 			_ = s.list.Task(idx, func(tsk *task.Task) error {
@@ -292,6 +296,7 @@ func (s *SubmissionsWindow) Update() {
 	if len(s.vbox.Objects) == 0 {
 		s.vbox.Add(container.NewCenter(widget.NewLabel("No submissions")))
 		s.pageLabel.Text = ""
+		s.statusLabel.SetText("")
 		s.buttonNext.Disable()
 		s.buttonPrev.Disable()
 	}
