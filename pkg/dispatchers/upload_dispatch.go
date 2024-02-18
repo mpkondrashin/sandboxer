@@ -46,7 +46,7 @@ func (d *UploadDispatch) ProcessTask(tsk *task.Task) error {
 	}
 	tsk.SetSandboxID(response.ID)
 	logging.Infof("Accepted: %v", response.ID)
-	tsk.SetState(task.StateInspected)
+	tsk.SetState(task.StateAccepted)
 	d.list.Updated()
 	d.Channel(ChWait) <- tsk.Number
 	return nil

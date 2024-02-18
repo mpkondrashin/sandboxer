@@ -9,14 +9,15 @@ List of tasks
 package task
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"sync"
 	"time"
 
+	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
 )
 
@@ -25,8 +26,7 @@ type TaskListInterface interface {
 }
 
 type TaskList struct {
-	mx sync.RWMutex
-	//changeMX sync.Mutex
+	mx         sync.RWMutex
 	changed    chan struct{}
 	Tasks      map[ID]*Task
 	TasksCount ID
@@ -38,7 +38,6 @@ func NewList() *TaskList {
 		changed: make(chan struct{}, 1000),
 	}
 	logging.Debugf("%p XXX List Lock (in New List)", l)
-	//l.changeMX.Lock()
 	l.changed <- struct{}{}
 	return l
 }
@@ -140,6 +139,38 @@ func (l *TaskList) CountActiveTasks() (count int) {
 	return
 }
 
+func (l *TaskList) LoadTasks() error {
+	folder, err := globals.TasksFolder()
+	if err != nil {
+		return err
+	}
+	dir, err := os.ReadDir(folder)
+	if err != nil {
+		return err
+	}
+	oldest := time.Now().Add(-globals.TasksKeep)
+	for _, d := range dir {
+		if !d.IsDir() {
+			continue
+		}
+		path := filepath.Join(folder, d.Name(), taskFileName)
+		tsk, err := LoadTask(path)
+		if err != nil {
+			logging.LogError(err)
+			continue
+		}
+		if tsk.SubmitTime.Before(oldest) {
+			logging.Debugf("To delete %v", tsk)
+			logging.LogError(tsk.Delete())
+		}
+		tsk.Number = l.TasksCount
+		l.TasksCount++
+		l.Tasks[tsk.Number] = tsk
+	}
+	return nil
+}
+
+/*
 func (l *TaskList) Save(filePath string) error {
 	data, err := json.Marshal(l)
 	if err != nil {
@@ -147,3 +178,4 @@ func (l *TaskList) Save(filePath string) error {
 	}
 	return os.WriteFile(filePath, data, 0644)
 }
+*/

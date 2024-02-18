@@ -47,9 +47,13 @@ func (d *PrefilterDispatch) ProcessTask(tsk *task.Task) error {
 		return errors.New("not regular file")
 	}
 	if d.ShouldIgnore(tsk.Path) {
+		tsk.SetState(task.StateDone)
 		tsk.SetRiskLevel(task.RiskLevelUnsupported)
 		d.list.Updated()
 		return nil
+	}
+	if err := tsk.CalculateHash(); err != nil {
+		return err
 	}
 	logging.Debugf("Send Task #%d to %d", tsk.Number, ChUpload)
 	d.Channel(ChUpload) <- tsk.Number

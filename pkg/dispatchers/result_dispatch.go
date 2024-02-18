@@ -44,8 +44,10 @@ func (d *ResultDispatch) ProcessTask(tsk *task.Task) error {
 	if err != nil {
 		return err
 	}
-	tsk.SetDigest(results.Digest.MD5, results.Digest.SHA1, results.Digest.SHA256)
+	//tsk.SetDigest(results.Digest.MD5, results.Digest.SHA1, results.Digest.SHA256)
+	// Should WE CHECK whenever hash was changed?
 	//logging.Debugf("XXX MESSAGE SET: %v", tsk)
+	tsk.SetState(task.StateReport)
 	switch results.RiskLevel {
 	case vone.RiskLevelHigh:
 		tsk.SetRiskLevel(task.RiskLevelHigh)

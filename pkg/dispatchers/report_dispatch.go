@@ -10,10 +10,6 @@ package dispatchers
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"path/filepath"
-	"sandboxer/pkg/globals"
 	"sandboxer/pkg/task"
 )
 
@@ -36,9 +32,9 @@ func (d *ReportDispatch) ProcessTask(tsk *task.Task) error {
 	if err != nil {
 		return err
 	}
-	tsk.SetState(task.StateReport)
+	tsk.SetState(task.StateReport) // Duplicated in result_dispatch
 	d.list.Updated()
-	filePath, err := d.ReportPath(tsk)
+	filePath, err := tsk.ReportPath()
 	if err != nil {
 		return err
 	}
@@ -46,12 +42,13 @@ func (d *ReportDispatch) ProcessTask(tsk *task.Task) error {
 		return err
 	}
 	tsk.SetReport(filePath)
-	tsk.SetState(task.StateDone)
+	tsk.SetState(task.StateInvestigation)
 	d.list.Updated()
 	d.Channel(ChInvestigation) <- tsk.Number
 	return nil
 }
 
+/*
 func (d *ReportDispatch) ReportPath(tsk *task.Task) (string, error) {
 	baseFolder, err := globals.UserDataFolder()
 	if err != nil {
@@ -64,3 +61,4 @@ func (d *ReportDispatch) ReportPath(tsk *task.Task) (string, error) {
 	fileName := fmt.Sprintf("%s.pdf", tsk.SHA256)
 	return filepath.Join(folder, fileName), nil
 }
+*/

@@ -62,7 +62,44 @@ func (l *Launcher) Run() {
 	submit := NewSubmitDispatch(base)
 	wg.Add(1)
 	go submit.Run(&wg)
+	l.LoadTasks()
 	//wg.Wait()
+}
+
+func (l *Launcher) LoadTasks() {
+	logging.Debugf("LoadTasks")
+	err := l.list.LoadTasks()
+	if err != nil {
+		logging.LogError(err)
+		return
+	}
+	logging.Debugf("LoadTasks %d", len(l.list.Tasks))
+	l.list.Process(func(ids []task.ID) {
+		for _, id := range ids {
+			err := l.list.Task(id, func(tsk *task.Task) error {
+				logging.Debugf("Process task: %v", tsk)
+				ch := ChPrefilter
+				//	case StateUpload, StateAccepted, StateDone:
+				switch tsk.State {
+				case task.StateUpload:
+					ch = ChUpload
+				case task.StateAccepted:
+					ch = ChWait
+				case task.StateReport:
+					ch = ChReport
+				case task.StateInspected:
+					ch = ChInvestigation
+				case task.StateDone:
+					return nil
+				}
+				logging.Debugf("To channel %d", ch)
+				l.channels.TaskChannel[ch] <- tsk.Number
+				return nil
+			})
+			logging.LogError(err)
+		}
+	})
+
 }
 
 func (l *Launcher) RunDispatcher(disp Dispatcher, wg *sync.WaitGroup) {

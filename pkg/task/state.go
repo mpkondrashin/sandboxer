@@ -22,6 +22,7 @@ type State int
 const (
 	StateNew State = iota
 	StateUpload
+	StateAccepted
 	StateInspected
 	StateCheck
 	StateWaitForResult
@@ -36,6 +37,7 @@ func (v State) String() string {
 	s, ok := map[State]string{
 		StateNew:           "New",
 		StateUpload:        "Upload",
+		StateAccepted:      "Accepted",
 		StateInspected:     "Inspected",
 		StateCheck:         "Check",
 		StateWaitForResult: "Wait For Result",
@@ -57,12 +59,13 @@ var ErrUnknownState = errors.New("unknown State")
 var mapStateFromString = map[string]State{
 	"new":             StateNew,
 	"upload":          StateUpload,
+	"accepted":        StateAccepted,
 	"inspected":       StateInspected,
 	"check":           StateCheck,
 	"wait for result": StateWaitForResult,
 	"report":          StateReport,
 	"investigation":   StateInvestigation,
-	"finished":        StateDone,
+	"done":            StateDone,
 	"count":           StateCount,
 }
 

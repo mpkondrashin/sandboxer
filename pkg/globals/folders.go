@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	TasksFolder = "tasks"
+	tasksFolder = "tasks"
 	logsFolder  = "logs"
 )
 
@@ -74,6 +74,14 @@ func LogsFolder() (string, error) {
 		return "", err
 	}
 	return filepath.Join(folder, logsFolder), nil
+}
+
+func TasksFolder() (string, error) {
+	folder, err := UserDataFolder()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(folder, tasksFolder), nil
 }
 
 func ExtendContextMenu(appPath string) (string, error) {
@@ -146,6 +154,27 @@ func AutoStartWindows(appPath string) (string, error) {
 		return "", err
 	}
 	return startupLinkPath, nil
+}
+
+func AutoStartDarwin(appPath string) (string, error) {
+
+	appleScript := `set theScript to "/Applications/Sandboxer.app/Contents/MacOS/submit $1" -- the shell script
+
+tell application "Automator"
+   set actionID to Automator action id "com.apple.RunShellScript"
+   tell (make new workflow)
+      add actionID to it -- add to the end of the workflow
+      tell last Automator action
+         set value of setting "inputMethod" to 1 -- arguments menu
+         set value of setting "COMMAND_STRING" to theScript
+      end tell
+   end tell
+   activate
+   # tell application "System Events" to keystroke return -- default workflow
+end tell
+`
+	_ = appleScript
+	return "", nil
 }
 
 func PidFilePath() (string, error) {

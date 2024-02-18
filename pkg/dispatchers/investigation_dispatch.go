@@ -10,10 +10,6 @@ package dispatchers
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"path/filepath"
-	"sandboxer/pkg/globals"
 	"sandboxer/pkg/task"
 )
 
@@ -36,25 +32,26 @@ func (d *InvestigationDispatch) ProcessTask(tsk *task.Task) error {
 	if err != nil {
 		return err
 	}
-	tsk.SetState(task.StateInspected)
+	tsk.SetState(task.StateInvestigation)
 	d.list.Updated()
-	tasksFolder, err := d.TasksPath(tsk)
+	zipFilePath, err := tsk.InvestigationPath()
 	if err != nil {
 		return err
 	}
-	zipFileName := fmt.Sprintf("%s.zip", tsk.SHA256)
-	zipFilePath := filepath.Join(tasksFolder, zipFileName)
+	//zipFileName := fmt.Sprintf("%s.zip", tsk.SHA256)
+	//zipFilePath := filepath.Join(tasksFolder, zipFileName)
 	if err := vOne.SandboxInvestigationPackage(tsk.SandboxID).Store(context.TODO(), zipFilePath); err != nil {
 		return err
 	}
 	tsk.SetInvestigation(zipFilePath)
 	tsk.SetState(task.StateDone)
 	d.list.Updated()
-	taskFileName := "task.json"
-	taskFilePath := filepath.Join(tasksFolder, taskFileName)
-	return tsk.Save(taskFilePath)
+	//taskFileName := "task.json"
+	//taskFilePath := filepath.Join(tasksFolder, taskFileName)
+	return nil // tsk.SaveToFile(taskFilePath)
 }
 
+/*
 func (d *InvestigationDispatch) TasksPath(tsk *task.Task) (string, error) {
 	baseFolder, err := globals.UserDataFolder()
 	if err != nil {
@@ -66,3 +63,4 @@ func (d *InvestigationDispatch) TasksPath(tsk *task.Task) (string, error) {
 	}
 	return folder, nil
 }
+*/

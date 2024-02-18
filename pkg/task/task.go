@@ -9,11 +9,19 @@ Inspection task
 package task
 
 import (
+	"crypto/md5"
+	"crypto/sha1"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"os"
+	"path/filepath"
 	"time"
 
+	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
 )
 
@@ -46,6 +54,20 @@ func NewTask(id ID, path string) *Task {
 	}
 }
 
+func LoadTask(filePath string) (*Task, error) {
+	t := &Task{}
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	err = json.NewDecoder(file).Decode(t)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
+}
+
 //func (t *Task) lockUnlock() func() {
 //		t.mx.Lock()
 //		return t.mx.Unlock
@@ -54,10 +76,11 @@ func NewTask(id ID, path string) *Task {
 func (t *Task) SetState(newState State) {
 	logging.Debugf("SetState(%v)", newState)
 	t.State = newState
+	t.SaveIfNeeded()
 }
 
 func (t *Task) GetState() string {
-	if t.State == StateDone {
+	if t.RiskLevel != RiskLevelUnknown {
 		return t.RiskLevel.String()
 	}
 	return t.State.String()
@@ -79,7 +102,7 @@ func (t *Task) String() string {
 	return fmt.Sprintf("Task %d; submitted on: %v; state: %v; id: %s; message: %s, path: %s", t.Number, t.SubmitTime, t.State, t.SandboxID, t.Message, t.Path)
 }
 func (t *Task) SetRiskLevel(riskLevel RiskLevel) {
-	t.State = StateDone
+	//t.State = StateDone
 	t.RiskLevel = riskLevel
 }
 
@@ -101,22 +124,107 @@ func (t *Task) SetInvestigation(investigation string) {
 	t.Investigation = investigation
 }
 
-func (t *Task) SetDigest(MD5, SHA1, SHA256 string) {
-	if MD5 != "" {
-		t.MD5 = MD5
+/*
+	func (t *Task) SetDigest(MD5, SHA1, SHA256 string) {
+		if MD5 != "" {
+			t.MD5 = MD5
+		}
+		if SHA1 != "" {
+			t.SHA1 = SHA1
+		}
+		if SHA256 != "" {
+			t.SHA256 = SHA256
+		}
 	}
-	if SHA1 != "" {
-		t.SHA1 = SHA1
-	}
-	if SHA256 != "" {
-		t.SHA256 = SHA256
+*/
+func (t *Task) SaveIfNeeded() error {
+	switch t.State {
+	case StateUpload, StateAccepted, StateReport, StateInspected, StateDone:
+		return t.Save()
+	default:
+		return nil
 	}
 }
 
-func (t *Task) Save(filePath string) error {
+const taskFileName = "task.json"
+
+func (t *Task) Save() error {
+	tasksFolder, err := t.Folder()
+	if err != nil {
+		return err
+	}
+	taskFilePath := filepath.Join(tasksFolder, taskFileName)
+	return t.SaveToFile(taskFilePath)
+}
+
+func (t *Task) SaveToFile(filePath string) error {
 	data, err := json.Marshal(t)
 	if err != nil {
 		return err
 	}
 	return os.WriteFile(filePath, data, 0644)
+}
+
+var ErrMissingHash = errors.New("missing hash")
+
+func (t *Task) Folder() (string, error) {
+	if t.SHA256 == "" {
+		return "", ErrMissingHash
+	}
+	tasksFolder, err := globals.TasksFolder()
+	if err != nil {
+		return "", err
+	}
+	folder := filepath.Join(tasksFolder, t.SHA256)
+	if err := os.MkdirAll(folder, 0755); err != nil {
+		return "", err
+	}
+	return folder, nil
+}
+
+func (t *Task) ReportPath() (string, error) {
+	folder, err := t.Folder()
+	if err != nil {
+		return "", err
+	}
+	fileName := fmt.Sprintf("report_%s.pdf", t.SHA256)
+	return filepath.Join(folder, fileName), nil
+}
+
+func (t *Task) InvestigationPath() (string, error) {
+	folder, err := t.Folder()
+	if err != nil {
+		return "", err
+	}
+	fileName := fmt.Sprintf("investigation_%s.zip", t.SHA256)
+	return filepath.Join(folder, fileName), nil
+}
+
+func (t *Task) CalculateHash() error {
+	src, err := os.Open(t.Path)
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+	SHA256 := sha256.New()
+	srcWithSHA256 := io.TeeReader(src, SHA256)
+	SHA1 := sha1.New()
+	srcWithSHA256andSHA1 := io.TeeReader(srcWithSHA256, SHA1)
+	MD5 := md5.New()
+	if _, err := io.Copy(MD5, srcWithSHA256andSHA1); err != nil {
+		return err
+	}
+	t.SHA256 = hex.EncodeToString(SHA256.Sum(nil))
+	t.SHA1 = hex.EncodeToString(SHA1.Sum(nil))
+	t.MD5 = hex.EncodeToString(MD5.Sum(nil))
+	return nil
+}
+
+func (t *Task) Delete() error {
+	folder, err := t.Folder()
+	if err != nil {
+		return err
+
+	}
+	return os.RemoveAll(folder)
 }

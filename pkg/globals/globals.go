@@ -8,6 +8,8 @@ Global values
 */
 package globals
 
+import "time"
+
 const (
 	AppName        = "Sandboxer"
 	AppFolderName  = AppName
@@ -17,4 +19,5 @@ const (
 	FIFOName       = Name + "_submit_fifo"
 	MaxLogFileSize = 10_000_000
 	LogsKeep       = 1
+	TasksKeep      = time.Hour * 24 * 60
 )
