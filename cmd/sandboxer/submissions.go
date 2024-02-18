@@ -23,10 +23,10 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+
 	"github.com/mpkondrashin/fileicon"
 
 	"sandboxer/pkg/config"
-	"sandboxer/pkg/dispatchers"
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
 	"sandboxer/pkg/task"
@@ -48,10 +48,10 @@ type SubmissionsWindow struct {
 	count       int
 	//icons []fyne.Resource
 	list     *task.TaskList
-	channels *dispatchers.Channels
+	channels *task.Channels
 }
 
-func NewSubmissionsWindow(channels *dispatchers.Channels, list *task.TaskList, conf *config.Configuration) *SubmissionsWindow {
+func NewSubmissionsWindow(channels *task.Channels, list *task.TaskList, conf *config.Configuration) *SubmissionsWindow {
 	s := &SubmissionsWindow{
 		stopUpdate:  make(chan struct{}),
 		conf:        conf,
@@ -146,8 +146,9 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 		tsk.RiskLevel != task.RiskLevelMedium &&
 		tsk.RiskLevel != task.RiskLevelLow
 	recheckAction := func() {
-		tsk.SetState(task.StateNew)
-		s.channels.TaskChannel[dispatchers.ChPrefilter] <- tsk.Number
+		// l.Update
+		tsk.SetChannel(task.ChPrefilter)
+		s.channels.TaskChannel[task.ChPrefilter] <- tsk.Number
 	}
 	recheckItem := fyne.NewMenuItem("Recheck File", recheckAction)
 	if tsk.RiskLevel != task.RiskLevelError {
@@ -158,9 +159,19 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 		downloadInvestigation,
 		recheckItem,
 		fyne.NewMenuItem("Delete Task", func() {
-			s.list.DelByID(tsk.Number)
+			s.DeleteTask(tsk)
 		}),
 		deleteFileItem)
+}
+
+func (s *SubmissionsWindow) DeleteTask(tsk *task.Task) {
+	err := tsk.Delete()
+	if err != nil {
+		dialog.ShowError(err, s.win)
+		logging.LogError(err)
+		return
+	}
+	s.list.DelByID(tsk.Number)
 }
 
 func (s *SubmissionsWindow) RunOpen(path string) {
@@ -241,7 +252,8 @@ func (s *SubmissionsWindow) CardWidget(tsk *task.Task) fyne.CanvasObject {
 	icon := IconForFile(path)
 	fileNameText := canvas.NewText(filepath.Base(path), color.Black)
 	fileNameText.TextStyle = fyne.TextStyle{Bold: true}
-	stateText := canvas.NewText(tsk.GetState(), tsk.RiskLevel.Color())
+	stateText := canvas.NewText(tsk.GetChannel(), tsk.RiskLevel.Color())
+	stateText.TextStyle = fyne.TextStyle{Bold: tsk.Active}
 
 	messageText := canvas.NewText(tsk.Message, tsk.RiskLevel.Color())
 	messageText.TextStyle = fyne.TextStyle{Italic: true}

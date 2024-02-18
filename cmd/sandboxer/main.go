@@ -48,7 +48,7 @@ type SandboxerApp struct {
 	//aboutWindow  *AboutWindow
 }
 
-func NewSandboxingApp(conf *config.Configuration, channels *dispatchers.Channels, list *task.TaskList) *SandboxerApp {
+func NewSandboxingApp(conf *config.Configuration, channels *task.Channels, list *task.TaskList) *SandboxerApp {
 	fyneApp := app.New()
 	deskApp, ok := fyneApp.(desktop.App)
 	if !ok {
@@ -188,7 +188,7 @@ func main() {
 	}
 	defer removePid()
 	//list := task.NewList()
-	channels := dispatchers.NewChannels()
+	channels := task.NewChannels()
 	list := task.NewList()
 	launcher := dispatchers.NewLauncher(conf, channels, list)
 	launcher.Run()

@@ -17,21 +17,21 @@ import (
 )
 
 type Dispatcher interface {
-	InboundChannel() int
+	InboundChannel() task.Channel
 	ProcessTask(tsk *task.Task) error
 }
 
 type BaseDispatcher struct {
 	conf     *config.Configuration
-	channels *Channels
+	channels *task.Channels
 	list     *task.TaskList
 }
 
-func NewBaseDispatcher(conf *config.Configuration, channels *Channels, list *task.TaskList) BaseDispatcher {
+func NewBaseDispatcher(conf *config.Configuration, channels *task.Channels, list *task.TaskList) BaseDispatcher {
 	return BaseDispatcher{conf, channels, list}
 }
 
-func (d *BaseDispatcher) Channel(ch int) IDChannel {
+func (d *BaseDispatcher) Channel(ch task.Channel) task.IDChannel {
 	return d.channels.TaskChannel[ch]
 }
 

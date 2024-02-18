@@ -31,8 +31,9 @@ type Task struct {
 	Number        ID
 	SubmitTime    time.Time
 	Path          string
-	State         State
+	Channel       Channel
 	RiskLevel     RiskLevel
+	Active        bool
 	Message       string
 	SandboxID     string
 	MD5           string
@@ -47,8 +48,9 @@ func NewTask(id ID, path string) *Task {
 		Number:     id,
 		SubmitTime: time.Now(),
 		Path:       path,
-		State:      StateNew,
+		Channel:    ChPrefilter,
 		RiskLevel:  RiskLevelUnknown,
+		Active:     false,
 		Message:    "",
 		SandboxID:  "",
 	}
@@ -73,21 +75,17 @@ func LoadTask(filePath string) (*Task, error) {
 //		return t.mx.Unlock
 //}
 
-func (t *Task) SetState(newState State) {
-	logging.Debugf("SetState(%v)", newState)
-	t.State = newState
+func (t *Task) SetChannel(newChannel Channel) {
+	logging.Debugf("SetChannel(%v)", newChannel)
+	t.Channel = newChannel
 	t.SaveIfNeeded()
 }
 
-func (t *Task) GetState() string {
-	if t.RiskLevel != RiskLevelUnknown {
+func (t *Task) GetChannel() string {
+	if t.Channel == ChDone && t.RiskLevel != RiskLevelUnknown {
 		return t.RiskLevel.String()
 	}
-	return t.State.String()
-}
-
-func (t *Task) SetID(id string) {
-	t.SandboxID = id
+	return t.Channel.String()
 }
 
 func (t *Task) VOneID() string {
@@ -99,7 +97,7 @@ func (t *Task) SetSandboxID(sandboxID string) {
 }
 
 func (t *Task) String() string {
-	return fmt.Sprintf("Task %d; submitted on: %v; state: %v; id: %s; message: %s, path: %s", t.Number, t.SubmitTime, t.State, t.SandboxID, t.Message, t.Path)
+	return fmt.Sprintf("Task %d; submitted on: %v; channel: %v; id: %s; message: %s, path: %s", t.Number, t.SubmitTime, t.Channel, t.SandboxID, t.Message, t.Path)
 }
 func (t *Task) SetRiskLevel(riskLevel RiskLevel) {
 	//t.State = StateDone
@@ -107,7 +105,7 @@ func (t *Task) SetRiskLevel(riskLevel RiskLevel) {
 }
 
 func (t *Task) SetError(err error) {
-	t.State = StateDone
+	t.Channel = ChDone
 	t.RiskLevel = RiskLevelError
 	t.Message = err.Error()
 }
@@ -124,6 +122,14 @@ func (t *Task) SetInvestigation(investigation string) {
 	t.Investigation = investigation
 }
 
+func (t *Task) Activate() {
+	t.Active = true
+}
+
+func (t *Task) Deactivate() {
+	t.Active = false
+}
+
 /*
 	func (t *Task) SetDigest(MD5, SHA1, SHA256 string) {
 		if MD5 != "" {
@@ -138,12 +144,7 @@ func (t *Task) SetInvestigation(investigation string) {
 	}
 */
 func (t *Task) SaveIfNeeded() error {
-	switch t.State {
-	case StateUpload, StateAccepted, StateReport, StateInspected, StateDone:
-		return t.Save()
-	default:
-		return nil
-	}
+	return t.Save()
 }
 
 const taskFileName = "task.json"

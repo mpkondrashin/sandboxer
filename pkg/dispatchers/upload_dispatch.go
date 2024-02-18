@@ -18,8 +18,8 @@ type UploadDispatch struct {
 	BaseDispatcher
 }
 
-func (*UploadDispatch) InboundChannel() int {
-	return ChUpload
+func (*UploadDispatch) InboundChannel() task.Channel {
+	return task.ChSubmit
 }
 
 func NewUploadDispatch(d BaseDispatcher) *UploadDispatch {
@@ -29,9 +29,8 @@ func NewUploadDispatch(d BaseDispatcher) *UploadDispatch {
 }
 
 func (d *UploadDispatch) ProcessTask(tsk *task.Task) error {
-	tsk.SetState(task.StateUpload)
-	d.list.Updated()
-
+	//tsk.SetState(task.StateUpload)
+	//d.list.Updated()
 	vOne, err := d.vOne()
 	if err != nil {
 		return err
@@ -46,8 +45,9 @@ func (d *UploadDispatch) ProcessTask(tsk *task.Task) error {
 	}
 	tsk.SetSandboxID(response.ID)
 	logging.Infof("Accepted: %v", response.ID)
-	tsk.SetState(task.StateAccepted)
+	//tsk.SetState(task.StateAccepted)
+	tsk.SetChannel(task.ChWait)
 	d.list.Updated()
-	d.Channel(ChWait) <- tsk.Number
+	//d.Channel(ChWait) <- tsk.Number
 	return nil
 }

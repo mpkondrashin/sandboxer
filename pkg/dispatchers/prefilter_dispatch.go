@@ -27,8 +27,8 @@ func NewPrefilterDispatch(d BaseDispatcher) *PrefilterDispatch {
 	}
 }
 
-func (*PrefilterDispatch) InboundChannel() int {
-	return ChPrefilter
+func (*PrefilterDispatch) InboundChannel() task.Channel {
+	return task.ChPrefilter
 }
 
 func (d *PrefilterDispatch) ProcessTask(tsk *task.Task) error {
@@ -47,7 +47,7 @@ func (d *PrefilterDispatch) ProcessTask(tsk *task.Task) error {
 		return errors.New("not regular file")
 	}
 	if d.ShouldIgnore(tsk.Path) {
-		tsk.SetState(task.StateDone)
+		tsk.SetChannel(task.ChDone)
 		tsk.SetRiskLevel(task.RiskLevelUnsupported)
 		d.list.Updated()
 		return nil
@@ -55,8 +55,8 @@ func (d *PrefilterDispatch) ProcessTask(tsk *task.Task) error {
 	if err := tsk.CalculateHash(); err != nil {
 		return err
 	}
-	logging.Debugf("Send Task #%d to %d", tsk.Number, ChUpload)
-	d.Channel(ChUpload) <- tsk.Number
+	//	logging.Debugf("Send Task #%d to %d", tsk.Number, ChUpload)
+	tsk.SetChannel(task.ChSubmit)
 	return nil
 }
 
@@ -82,7 +82,7 @@ func (p *PrefilterDispatch) InspecfFolder(folderPath string) {
 				}
 				return err
 			}
-			p.Channel(ChPrefilter) <- tsk
+			p.Channel(task.ChPrefilter) <- tsk
 			return nil
 		})
 	logging.LogError(err)

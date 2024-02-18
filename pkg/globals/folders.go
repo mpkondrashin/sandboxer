@@ -172,6 +172,26 @@ tell application "Automator"
    activate
    # tell application "System Events" to keystroke return -- default workflow
 end tell
+
+set theScript to "/Applications/Sandboxer.app/Contents/MacOS/submit $1" -- the shell script
+
+tell application "Automator"
+	set actionID to Automator action id "com.apple.RunShellScript"
+	tell (make new workflow)
+		add actionID to it -- add to the end of the workflow
+		tell last Automator action
+			set value of setting "inputMethod" to 1 -- arguments menu
+			set value of setting "COMMAND_STRING" to theScript
+		end tell
+		set receives to make new receive workflow item at beginning of workflows
+		tell receives
+			set receives to {alias}
+		end tell
+	end tell
+	activate
+	# tell application "System Events" to keystroke return -- default workflow
+end tell
+
 `
 	_ = appleScript
 	return "", nil

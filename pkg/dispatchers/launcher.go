@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	PrefilterDispatchers    = 1
+	PrefilterDispatchers    = 5
 	UploadDispatchers       = 5
 	WaitDispatchers         = 5
 	ResultDispatchers       = 5
@@ -27,11 +27,11 @@ const (
 
 type Launcher struct {
 	conf     *config.Configuration
-	channels *Channels
+	channels *task.Channels
 	list     *task.TaskList
 }
 
-func NewLauncher(conf *config.Configuration, channels *Channels, list *task.TaskList) *Launcher {
+func NewLauncher(conf *config.Configuration, channels *task.Channels, list *task.TaskList) *Launcher {
 	return &Launcher{
 		conf:     conf,
 		channels: channels,
@@ -78,22 +78,10 @@ func (l *Launcher) LoadTasks() {
 		for _, id := range ids {
 			err := l.list.Task(id, func(tsk *task.Task) error {
 				logging.Debugf("Process task: %v", tsk)
-				ch := ChPrefilter
-				//	case StateUpload, StateAccepted, StateDone:
-				switch tsk.State {
-				case task.StateUpload:
-					ch = ChUpload
-				case task.StateAccepted:
-					ch = ChWait
-				case task.StateReport:
-					ch = ChReport
-				case task.StateInspected:
-					ch = ChInvestigation
-				case task.StateDone:
+				if tsk.Channel == task.ChDone {
 					return nil
 				}
-				logging.Debugf("To channel %d", ch)
-				l.channels.TaskChannel[ch] <- tsk.Number
+				l.channels.TaskChannel[tsk.Channel] <- tsk.Number
 				return nil
 			})
 			logging.LogError(err)
@@ -108,13 +96,27 @@ func (l *Launcher) RunDispatcher(disp Dispatcher, wg *sync.WaitGroup) {
 	ch := disp.InboundChannel()
 	for id := range l.channels.TaskChannel[ch] {
 		_ = l.list.Task(id, func(tsk *task.Task) error {
+			logging.Debugf("Got from %v task %v", ch, tsk)
 			//tsk := l.list.Get(id)
+			tsk.Activate()
+			logging.Debugf("Activate")
+			l.list.Updated()
+			//defer func() {
+			//}()
 			err := disp.ProcessTask(tsk)
+			logging.Debugf("Deactivate")
+			tsk.Deactivate()
+			l.list.Updated()
 			if err != nil {
 				tsk.SetError(err)
-				l.list.Updated()
+				//l.list.Updated()
 				logging.Errorf("Task #%d: %v (%T)", id, err, disp)
+				return nil
 			}
+			if tsk.Channel == task.ChDone {
+				return nil
+			}
+			l.channels.TaskChannel[tsk.Channel] <- tsk.Number
 			return nil
 		})
 	}

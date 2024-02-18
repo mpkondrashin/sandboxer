@@ -48,7 +48,6 @@ func (d *SubmitDispatch) Run(wg *sync.WaitGroup) {
 			break
 		}
 		//		logging.Debugf("SEND %s to %d", s, ChPrefilter)
-
 		tsk, err := d.list.NewTask(s)
 		if err != nil {
 			if !errors.Is(err, task.ErrAlreadyExists) {
@@ -56,7 +55,7 @@ func (d *SubmitDispatch) Run(wg *sync.WaitGroup) {
 			}
 			continue
 		}
-		d.Channel(ChPrefilter) <- tsk
+		d.Channel(task.ChPrefilter) <- tsk
 		//d.list.Updated()
 	}
 	wg.Done()

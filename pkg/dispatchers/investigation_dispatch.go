@@ -23,8 +23,8 @@ func NewInvestigationDispatch(d BaseDispatcher) *InvestigationDispatch {
 	}
 }
 
-func (d *InvestigationDispatch) InboundChannel() int {
-	return ChInvestigation
+func (d *InvestigationDispatch) InboundChannel() task.Channel {
+	return task.ChInvestigation
 }
 
 func (d *InvestigationDispatch) ProcessTask(tsk *task.Task) error {
@@ -32,8 +32,8 @@ func (d *InvestigationDispatch) ProcessTask(tsk *task.Task) error {
 	if err != nil {
 		return err
 	}
-	tsk.SetState(task.StateInvestigation)
-	d.list.Updated()
+	//tsk.SetState(task.StateInvestigation)
+	//d.list.Updated()
 	zipFilePath, err := tsk.InvestigationPath()
 	if err != nil {
 		return err
@@ -44,7 +44,7 @@ func (d *InvestigationDispatch) ProcessTask(tsk *task.Task) error {
 		return err
 	}
 	tsk.SetInvestigation(zipFilePath)
-	tsk.SetState(task.StateDone)
+	tsk.SetChannel(task.ChDone)
 	d.list.Updated()
 	//taskFileName := "task.json"
 	//taskFilePath := filepath.Join(tasksFolder, taskFileName)

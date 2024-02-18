@@ -43,6 +43,7 @@ func NewList() *TaskList {
 }
 
 func (l *TaskList) Updated() {
+	logging.Debugf("Updated")
 	if len(l.changed) > 0 {
 		return
 	}
@@ -132,7 +133,7 @@ func (l *TaskList) Process(callback func([]ID)) {
 
 func (l *TaskList) CountActiveTasks() (count int) {
 	for _, t := range l.Tasks {
-		if t.State != StateDone {
+		if t.Channel != ChDone {
 			count++
 		}
 	}

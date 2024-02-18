@@ -28,8 +28,8 @@ func NewResultDispatch(d BaseDispatcher) *ResultDispatch {
 	}
 }
 
-func (d *ResultDispatch) InboundChannel() int {
-	return ChResult
+func (d *ResultDispatch) InboundChannel() task.Channel {
+	return task.ChResult
 }
 
 func (d *ResultDispatch) ProcessTask(tsk *task.Task) error {
@@ -38,8 +38,8 @@ func (d *ResultDispatch) ProcessTask(tsk *task.Task) error {
 		return err
 	}
 	//	time.Sleep(10 * time.Second)
-	tsk.SetState(task.StateCheck)
-	d.list.Updated()
+	//tsk.SetState(task.StateCheck)
+	//d.list.Updated()
 	results, err := vOne.SandboxAnalysisResults(tsk.SandboxID).Do(context.TODO())
 	if err != nil {
 		return err
@@ -47,7 +47,7 @@ func (d *ResultDispatch) ProcessTask(tsk *task.Task) error {
 	//tsk.SetDigest(results.Digest.MD5, results.Digest.SHA1, results.Digest.SHA256)
 	// Should WE CHECK whenever hash was changed?
 	//logging.Debugf("XXX MESSAGE SET: %v", tsk)
-	tsk.SetState(task.StateReport)
+	//tsk.SetState(task.StateReport)
 	switch results.RiskLevel {
 	case vone.RiskLevelHigh:
 		tsk.SetRiskLevel(task.RiskLevelHigh)
@@ -61,7 +61,8 @@ func (d *ResultDispatch) ProcessTask(tsk *task.Task) error {
 	default:
 		return fmt.Errorf("unknown risk level: %d", results.RiskLevel)
 	}
-	d.Channel(ChReport) <- tsk.Number
+	tsk.SetChannel(task.ChReport)
+	//d.Channel(ChReport) <- tsk.Number
 	detectionName := strings.Join(results.DetectionNames, ", ")
 	threatType := strings.Join(results.ThreatTypes, ", ")
 	tsk.SetMessage(detectionName + threatType)

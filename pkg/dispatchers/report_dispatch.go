@@ -23,8 +23,8 @@ func NewReportDispatch(d BaseDispatcher) *ReportDispatch {
 	}
 }
 
-func (d *ReportDispatch) InboundChannel() int {
-	return ChReport
+func (d *ReportDispatch) InboundChannel() task.Channel {
+	return task.ChReport
 }
 
 func (d *ReportDispatch) ProcessTask(tsk *task.Task) error {
@@ -32,8 +32,6 @@ func (d *ReportDispatch) ProcessTask(tsk *task.Task) error {
 	if err != nil {
 		return err
 	}
-	tsk.SetState(task.StateReport) // Duplicated in result_dispatch
-	d.list.Updated()
 	filePath, err := tsk.ReportPath()
 	if err != nil {
 		return err
@@ -42,9 +40,8 @@ func (d *ReportDispatch) ProcessTask(tsk *task.Task) error {
 		return err
 	}
 	tsk.SetReport(filePath)
-	tsk.SetState(task.StateInvestigation)
 	d.list.Updated()
-	d.Channel(ChInvestigation) <- tsk.Number
+	tsk.SetChannel(task.ChInvestigation)
 	return nil
 }
 

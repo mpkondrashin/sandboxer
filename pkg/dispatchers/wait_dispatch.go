@@ -28,13 +28,13 @@ func NewWaitDispatch(d BaseDispatcher) *WaitDispatch {
 	}
 }
 
-func (*WaitDispatch) InboundChannel() int {
-	return ChWait
+func (*WaitDispatch) InboundChannel() task.Channel {
+	return task.ChWait
 }
 
 func (d *WaitDispatch) ProcessTask(tsk *task.Task) error {
-	tsk.SetState(task.StateCheck)
-	d.list.Updated()
+	//tsk.SetState(task.StateCheck)
+
 	vOne, err := d.vOne()
 	if err != nil {
 		return err
@@ -44,21 +44,22 @@ func (d *WaitDispatch) ProcessTask(tsk *task.Task) error {
 	if err != nil {
 		return fmt.Errorf("SandboxSubmissionStatus: %w", err)
 	}
+	tsk.Deactivate()
 	logging.Debugf("%s Status: %v", tsk.SandboxID, status.Status)
 	switch status.Status {
 	case vone.StatusSucceeded:
-		tsk.SetState(task.StateWaitForResult)
-		d.list.Updated()
-		d.Channel(ChResult) <- tsk.Number
+		//tsk.SetState(task.StateWaitForResult)
+		//d.list.Updated()
+		tsk.SetChannel(task.ChResult)
 		return nil
 	case vone.StatusRunning:
-		tsk.SetState(task.StateInspected)
-		d.list.Updated()
+		//		tsk.SetState(task.StateInspected)
+		//		d.list.Updated()
 		time.Sleep(d.conf.VisionOne.Sleep)
-		d.Channel(ChWait) <- tsk.Number
+		tsk.SetChannel(task.ChWait)
 	case vone.StatusFailed:
 		if status.Error.Code == "Unsupported" {
-			tsk.SetState(task.StateDone)
+			tsk.SetChannel(task.ChDone)
 			tsk.SetRiskLevel(task.RiskLevelUnsupported)
 			tsk.SetMessage(status.Error.Message)
 			d.list.Updated()
