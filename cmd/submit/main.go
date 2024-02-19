@@ -87,8 +87,10 @@ func main() {
 	}
 	conf := config.New(configFilePath)
 	if err := conf.Load(); err != nil {
-		fmt.Fprintf(os.Stderr, "conf.Load: %v", err)
-		os.Exit(20)
+		if runtime.GOOS == "windows" {
+			fmt.Fprintf(os.Stderr, "conf.Load: %v", err)
+			os.Exit(20)
+		}
 	}
 	//close := logging.NewFileLog(conf.LogFolder(), submitLog)
 	closeLogging, err := globals.SetupLogging(submitLog)

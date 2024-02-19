@@ -33,8 +33,6 @@ func (*WaitDispatch) InboundChannel() task.Channel {
 }
 
 func (d *WaitDispatch) ProcessTask(tsk *task.Task) error {
-	//tsk.SetState(task.StateCheck)
-
 	vOne, err := d.vOne()
 	if err != nil {
 		return err
@@ -45,6 +43,7 @@ func (d *WaitDispatch) ProcessTask(tsk *task.Task) error {
 		return fmt.Errorf("SandboxSubmissionStatus: %w", err)
 	}
 	tsk.Deactivate()
+	d.list.Updated()
 	logging.Debugf("%s Status: %v", tsk.SandboxID, status.Status)
 	switch status.Status {
 	case vone.StatusSucceeded:

@@ -9,6 +9,7 @@ Sandboxer main file
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -43,8 +44,8 @@ type SandboxerApp struct {
 
 	submissionsWindow *ModalWindow
 	//quotaWindow       *QuotaWindow
-	//optionsWindow     *OptionsWindow
-	updateWindow *ModalWindow
+	optionsWindow *ModalWindow
+	updateWindow  *ModalWindow
 	//aboutWindow  *AboutWindow
 }
 
@@ -79,13 +80,13 @@ func NewSandboxingApp(conf *config.Configuration, channels *task.Channels, list 
 		}, a.optionsWindow.win)
 	})
 	*/
-	optionsWindow := NewModalWindow(NewOptionsWindow(conf), &a.TrayApp)
+	a.optionsWindow = NewModalWindow(NewOptionsWindow(conf), &a.TrayApp)
 
 	a.menu = fyne.NewMenu(globals.AppName,
 		// SUBMIT_FILE s.submitMenuItem,
 		a.submissionsWindow.MenuItem,
 		quotaWindow.MenuItem,
-		optionsWindow.MenuItem,
+		a.optionsWindow.MenuItem,
 		fyne.NewMenuItemSeparator(),
 		a.updateWindow.MenuItem,
 		aboutWindow.MenuItem,
@@ -101,10 +102,23 @@ func (a *SandboxerApp) Icon() fyne.Resource {
 	return ApplicationIcon
 }
 
+func (s *SandboxerApp) ShowOptions() {
+	confPath, err := globals.ConfigurationFilePath()
+	if err != nil {
+		logging.Errorf("ConfigurationFilePath: %v", err)
+		return
+	}
+	if _, err := os.Stat(confPath); errors.Is(err, os.ErrNotExist) {
+		logging.Errorf("Configuration is missing: %v", err)
+		s.optionsWindow.Show()
+	}
+}
+
 func (s *SandboxerApp) Run() {
 	if len(os.Args) == 2 && os.Args[1] == "--submissions" {
 		s.submissionsWindow.Show()
 	}
+	s.ShowOptions()
 	go s.CheckUpdate()
 	s.app.Run()
 }
@@ -167,7 +181,7 @@ func main() {
 		os.Exit(globals.ExitGetConfigurationFileathError)
 	}
 	conf := config.New(configFilePath)
-	if err := conf.Load(); err != nil {
+	if err := conf.Load(); err != nil && !errors.Is(err, os.ErrNotExist) {
 		fmt.Fprintf(os.Stderr, "conf.Load: %v", err)
 		os.Exit(globals.ExitLoadConfigError)
 	}
