@@ -9,6 +9,9 @@
 .PHONY: clean
 
 
+GOOS=$(shell go env GOOS)
+GOARCH=$(shell go env GOARCH)
+
 REV=$(shell git rev-list --tags --max-count=1)
 VERSION_FULL=$(shell git describe --tags $(REV))
 VERSION_V := $(word 1,$(subst -, ,$(VERSION_FULL)))
@@ -21,14 +24,21 @@ ifeq ($(BUILD),)
 BUILD := b
 endif
 
+
+setup_$(GOOS)_$(GOARCH).zip: Sandboxer.dmg
+	zip setup_$(GOOS)_$(GOARCH).zip Sandboxer.dmg
+
 Sandboxer.dmg: output/Sandboxer.app output/Sandboxer.app/Contents/MacOS/submit
 	hdiutil create -volname "Sandboxer" -srcfolder "output" -ov -format UDZO "Sandboxer.dmg"
 
-output/Sandboxer.app: $(wildcard cmd/sandboxer/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go cmd/sandboxer/icon.go
+output/Sandboxer.app: $(wildcard cmd/sandboxer/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go cmd/sandboxer/icon.go cmd/sandboxer/embed/Sandboxer.tar.gz
 	fyne package --os darwin --name Sandboxer --appID in.kondrash.sandboxer --appVersion $(VERSION) --appBuild $(BUILD) --icon ../../resources/icon.png --release --sourceDir ./cmd/sandboxer
 	rm -rf output
 	mkdir -p output
 	mv Sandboxer.app output
+
+cmd/sandboxer/embed/Sandboxer.tar.gz: resources/Sandboxer.tar.gz
+	cp  resources/Sandboxer.tar.gz cmd/sandboxer/embed/Sandboxer.tar.gz
 
 cmd/sandboxer/icon.go: resources/icon.png 
 	fyne bundle --name ApplicationIcon --package main --output cmd/sandboxer/icon.go resources/icon.png 

@@ -33,3 +33,66 @@ jobs:
         with:
           files: |
             setup_windows_amd64.zip
+  Build-Release-Darwin-amd64:
+    runs-on: macos-13
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: ls -lR
+        run: ls -lR
+
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.21.5
+
+      - name: Install Fyne
+        run: go install fyne.io/fyne/v2/cmd/fyne@latest
+
+      - name: Install RSRC
+        run: go install github.com/akavel/rsrc@latest
+
+      - name: Build Darwin
+        run: make -f Makefile_darwin 
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            setup_darwin_amd64.zip
+  
+  Build-Release-Darwin-arm64:
+    runs-on: macos-13-xlarge
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: ls -lR
+        run: ls -lR
+
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.21.5
+
+      - name: Install Fyne
+        run: go install fyne.io/fyne/v2/cmd/fyne@latest
+
+      - name: Install RSRC
+        run: go install github.com/akavel/rsrc@latest
+
+      - name: Build Darwin
+        run: make -f Makefile_darwin 
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            setup_darwin_arm64.zip
