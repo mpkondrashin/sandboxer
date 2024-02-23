@@ -58,6 +58,7 @@ func NewSandboxingApp(conf *config.Configuration, channels *task.Channels, list 
 	a := &SandboxerApp{
 		TrayApp: TrayApp{app: fyneApp},
 	}
+	submitWindow := NewModalWindow(NewSubmitURLWindow(list, channels), &a.TrayApp)
 	quotaWindow := NewModalWindow(NewQuotaWindow(conf), &a.TrayApp)
 	a.submissionsWindow = NewModalWindow(NewSubmissionsWindow(
 		channels,
@@ -84,6 +85,7 @@ func NewSandboxingApp(conf *config.Configuration, channels *task.Channels, list 
 
 	a.menu = fyne.NewMenu(globals.AppName,
 		// SUBMIT_FILE s.submitMenuItem,
+		submitWindow.MenuItem,
 		a.submissionsWindow.MenuItem,
 		quotaWindow.MenuItem,
 		a.optionsWindow.MenuItem,

@@ -17,7 +17,7 @@ func TestHashes(t *testing.T) {
 	if err := os.WriteFile(filePath, []byte(text), 0644); err != nil {
 		t.Fatal(err)
 	}
-	tsk := NewTask(0, filePath)
+	tsk := NewTask(0, FileTask, filePath)
 	if err := tsk.CalculateHash(); err != nil {
 		t.Fatal(err)
 	}

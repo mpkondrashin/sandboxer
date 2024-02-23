@@ -48,7 +48,7 @@ func (d *SubmitDispatch) Run(wg *sync.WaitGroup) {
 			break
 		}
 		//		logging.Debugf("SEND %s to %d", s, ChPrefilter)
-		tsk, err := d.list.NewTask(s)
+		tsk, err := d.list.NewTask(task.FileTask, s)
 		if err != nil {
 			if !errors.Is(err, task.ErrAlreadyExists) {
 				logging.LogError(err)

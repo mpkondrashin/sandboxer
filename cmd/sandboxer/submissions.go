@@ -146,7 +146,8 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 		tsk.RiskLevel != task.RiskLevelMedium &&
 		tsk.RiskLevel != task.RiskLevelLow
 	recheckAction := func() {
-		// l.Update
+		tsk.SetMessage("")
+		tsk.SetRiskLevel(task.RiskLevelUnknown)
 		tsk.SetChannel(task.ChPrefilter)
 		s.channels.TaskChannel[task.ChPrefilter] <- tsk.Number
 	}
@@ -250,7 +251,7 @@ func IconForFile(path string) fyne.CanvasObject {
 func (s *SubmissionsWindow) CardWidget(tsk *task.Task) fyne.CanvasObject {
 	path := tsk.Path
 	icon := IconForFile(path)
-	fileNameText := canvas.NewText(filepath.Base(path), color.Black)
+	fileNameText := canvas.NewText(tsk.Title(), color.Black)
 	fileNameText.TextStyle = fyne.TextStyle{Bold: true}
 	stateText := canvas.NewText(tsk.GetChannel(), tsk.RiskLevel.Color())
 	stateText.TextStyle = fyne.TextStyle{Bold: tsk.Active}

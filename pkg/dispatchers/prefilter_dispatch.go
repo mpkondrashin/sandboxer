@@ -33,24 +33,26 @@ func (*PrefilterDispatch) InboundChannel() task.Channel {
 
 func (d *PrefilterDispatch) ProcessTask(tsk *task.Task) error {
 	logging.Debugf("Prefilter %s", tsk.Path)
-	info, err := os.Lstat(tsk.Path)
-	if err != nil {
-		return err
-	}
-	if info.IsDir() {
-		d.list.DelByID(tsk.Number)
-		go d.InspecfFolder(tsk.Path)
-		d.list.Updated()
-		return nil
-	}
-	if !info.Mode().IsRegular() {
-		return errors.New("not regular file")
-	}
-	if d.ShouldIgnore(tsk.Path) {
-		tsk.SetChannel(task.ChDone)
-		tsk.SetRiskLevel(task.RiskLevelUnsupported)
-		d.list.Updated()
-		return nil
+	if tsk.Type == task.FileTask {
+		info, err := os.Lstat(tsk.Path)
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			d.list.DelByID(tsk.Number)
+			go d.InspecfFolder(tsk.Path)
+			d.list.Updated()
+			return nil
+		}
+		if !info.Mode().IsRegular() {
+			return errors.New("not regular file")
+		}
+		if d.ShouldIgnore(tsk.Path) {
+			tsk.SetChannel(task.ChDone)
+			tsk.SetRiskLevel(task.RiskLevelUnsupported)
+			d.list.Updated()
+			return nil
+		}
 	}
 	if err := tsk.CalculateHash(); err != nil {
 		return err
@@ -75,7 +77,7 @@ func (p *PrefilterDispatch) InspecfFolder(folderPath string) {
 			if !info.Mode().IsRegular() {
 				return nil
 			}
-			tsk, err := p.list.NewTask(path)
+			tsk, err := p.list.NewTask(task.FileTask, path)
 			if err != nil {
 				if errors.Is(err, task.ErrAlreadyExists) {
 					return nil

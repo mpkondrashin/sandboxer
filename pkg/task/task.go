@@ -19,6 +19,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"sandboxer/pkg/globals"
@@ -27,8 +28,30 @@ import (
 
 type ID int64
 
+type TaskInter interface {
+	SetChannel(newChannel Channel)
+	GetChannel() string
+	VOneID() string
+	SetSandboxID(sandboxID string)
+	String() string
+	SetRiskLevel(riskLevel RiskLevel)
+	Title() string
+	SetError(err error)
+	SetMessage(message string)
+	SetReport(report string)
+	SetInvestigation(investigation string)
+	Activate()
+	Deactivate()
+	Save()
+	ReportPath() (string, error)
+	InvestigationPath() (string, error)
+	CalculateHash() error
+	Delete() error
+}
+
 type Task struct {
 	Number        ID
+	Type          TaskType
 	SubmitTime    time.Time
 	Path          string
 	Channel       Channel
@@ -43,9 +66,10 @@ type Task struct {
 	Investigation string
 }
 
-func NewTask(id ID, path string) *Task {
+func NewTask(id ID, taskType TaskType, path string) *Task {
 	return &Task{
 		Number:     id,
+		Type:       taskType,
 		SubmitTime: time.Now(),
 		Path:       path,
 		Channel:    ChPrefilter,
@@ -102,6 +126,16 @@ func (t *Task) String() string {
 func (t *Task) SetRiskLevel(riskLevel RiskLevel) {
 	//t.State = StateDone
 	t.RiskLevel = riskLevel
+}
+
+func (t *Task) Title() string {
+	if t.Type == URLTask {
+		logging.Debugf("Title url: %s", t.Path)
+		return t.Path
+	} else {
+		logging.Debugf("Title file: %s", t.Path)
+		return filepath.Base(t.Path)
+	}
 }
 
 func (t *Task) SetError(err error) {
@@ -202,13 +236,19 @@ func (t *Task) InvestigationPath() (string, error) {
 }
 
 func (t *Task) CalculateHash() error {
-	src, err := os.Open(t.Path)
-	if err != nil {
-		return err
+	var source io.Reader
+	if t.Type == FileTask {
+		src, err := os.Open(t.Path)
+		if err != nil {
+			return err
+		}
+		defer src.Close()
+		source = src
+	} else {
+		source = strings.NewReader(t.Path)
 	}
-	defer src.Close()
 	SHA256 := sha256.New()
-	srcWithSHA256 := io.TeeReader(src, SHA256)
+	srcWithSHA256 := io.TeeReader(source, SHA256)
 	SHA1 := sha1.New()
 	srcWithSHA256andSHA1 := io.TeeReader(srcWithSHA256, SHA1)
 	MD5 := md5.New()

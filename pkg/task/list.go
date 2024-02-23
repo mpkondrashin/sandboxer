@@ -60,7 +60,7 @@ func (l *TaskList) Changes() chan struct{} {
 
 var ErrAlreadyExists = errors.New("task already exist")
 
-func (l *TaskList) NewTask(path string) (ID, error) {
+func (l *TaskList) NewTask(taskType TaskType, path string) (ID, error) {
 	defer l.lockUnlock()()
 	for _, tsk := range l.Tasks {
 		if path == tsk.Path {
@@ -71,7 +71,7 @@ func (l *TaskList) NewTask(path string) (ID, error) {
 		}
 	}
 	logging.Debugf("NewTask %d, %s", l.TasksCount, path)
-	tsk := NewTask(l.TasksCount, path)
+	tsk := NewTask(l.TasksCount, taskType, path)
 	l.Tasks[tsk.Number] = tsk
 	l.Updated()
 	l.TasksCount++

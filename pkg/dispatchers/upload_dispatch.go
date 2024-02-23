@@ -10,6 +10,7 @@ package dispatchers
 
 import (
 	"context"
+	"fmt"
 	"sandboxer/pkg/logging"
 	"sandboxer/pkg/task"
 )
@@ -35,16 +36,29 @@ func (d *UploadDispatch) ProcessTask(tsk *task.Task) error {
 	if err != nil {
 		return err
 	}
-	f, err := vOne.SandboxSubmitFile().SetFilePath(tsk.Path)
-	if err != nil {
-		return err
+	if tsk.Type == task.URLTask {
+		f := vOne.SandboxSubmitURLs().AddURL(tsk.Path)
+		response, _, err := f.Do(context.TODO())
+		if err != nil {
+			return err
+		}
+		if len(response) != 1 {
+			return fmt.Errorf("wrong response length: %v", response)
+		}
+		tsk.SetSandboxID(response[0].Body.ID)
+		logging.Infof("Accepted: %v", response[0].Body.ID)
+	} else {
+		f, err := vOne.SandboxSubmitFile().SetFilePath(tsk.Path)
+		if err != nil {
+			return err
+		}
+		response, _, err := f.Do(context.TODO())
+		if err != nil {
+			return err
+		}
+		tsk.SetSandboxID(response.ID)
+		logging.Infof("Accepted: %v", response.ID)
 	}
-	response, _, err := f.Do(context.TODO())
-	if err != nil {
-		return err
-	}
-	tsk.SetSandboxID(response.ID)
-	logging.Infof("Accepted: %v", response.ID)
 	//tsk.SetState(task.StateAccepted)
 	tsk.SetChannel(task.ChWait)
 	d.list.Updated()
