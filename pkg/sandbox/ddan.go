@@ -2,6 +2,8 @@ package sandbox
 
 import (
 	"context"
+	"crypto/sha1"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -23,10 +25,59 @@ func NewDDAnSandbox(analyzer *ddan.Client) *DDAnSandbox {
 	}
 }
 
-func (s *DDAnSandbox) Submit(filePath string) (string, error) {
+func (s *DDAnSandbox) SubmitURL(filePath string) (string, error) {
+	return s.Submit(false, filePath)
+}
+
+func (s *DDAnSandbox) SubmitFile(filePath string) (string, error) {
 	sha1, err := ddan.Hash(filePath)
 	if err != nil {
 		return "", err
+	}
+	sha1List, err := s.analyzer.CheckDuplicateSample(context.TODO(), []string{sha1}, 0)
+	if err != nil {
+		var apiErr *ddan.APIError
+		if !errors.As(err, &apiErr) {
+			return "", err
+		}
+		if apiErr.Response != ddan.ResponseNotRegistered {
+			return "", err
+		}
+		err := s.analyzer.Register(context.TODO())
+		if err != nil {
+			return "", err
+		}
+		sha1List, err = s.analyzer.CheckDuplicateSample(context.TODO(), []string{sha1}, 0)
+		if err != nil {
+			return "", err
+		}
+	}
+	if len(sha1List) == 1 {
+		return sha1, err
+	}
+	err = s.analyzer.UploadSampleEx(context.TODO(), filePath, filepath.Base(filePath), sha1)
+	if err != nil {
+		return "", err
+	}
+	return sha1, nil
+}
+
+func CalculateStringHash(input string) string {
+	hash := sha1.New()
+	hash.Write([]byte(input))
+	return hex.EncodeToString(hash.Sum(nil))
+}
+
+func (s *DDAnSandbox) Submit(file bool, filePath string) (string, error) {
+	var sha1 string
+	var err error
+	if file {
+		sha1, err = ddan.Hash(filePath)
+		if err != nil {
+			return "", err
+		}
+	} else {
+		sha1 = CalculateStringHash(filePath)
 	}
 	sha1List, err := s.analyzer.CheckDuplicateSample(context.TODO(), []string{sha1}, 0)
 	if err != nil {

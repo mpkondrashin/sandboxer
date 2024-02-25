@@ -54,7 +54,7 @@ func (d *WaitDispatch) ProcessTask(tsk *task.Task) error {
 	case vone.StatusRunning:
 		//		tsk.SetState(task.StateInspected)
 		//		d.list.Updated()
-		time.Sleep(d.conf.VisionOne.Sleep)
+		time.Sleep(d.conf.Sleep)
 		tsk.SetChannel(task.ChWait)
 	case vone.StatusFailed:
 		if status.Error.Code == "Unsupported" {

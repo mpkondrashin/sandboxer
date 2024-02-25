@@ -27,7 +27,8 @@ var (
 )
 
 type Sandbox interface {
-	Submit(filePath string) (string, error)
+	SubmitURL(url string) (string, error)
+	SubmitFile(filePath string) (string, error)
 	//HaveFinished(id string) (bool, error)
 	GetResult(id string) (RiskLevel, string, error)
 	GetReport(id string, filePath string) error

@@ -19,30 +19,65 @@ import (
 )
 
 type VisionOne struct {
-	Token  string        `yaml:"token"`
-	Domain string        `yaml:"aws_region"`
-	Sleep  time.Duration `yaml:"sleep"`
+	Token  string `yaml:"token"`
+	Domain string `yaml:"aws_region"`
+}
+
+type DDAn struct {
+	ProtocolVersion string `yaml:"protocol_version"`
+	UserAgent       string `yaml:"user_agent"`
+	ProductName     string `yaml:"product_name"`
+	Hostname        string `yaml:"hostname"`
+	TempFolder      string `yaml:"temp_folder"`
+	SourceID        string `yaml:"source_id"`
+	SourceName      string `yaml:"source_name"`
+	APIKey          string `yaml:"api_key"`
+	IgnoreTLSErrors bool   `yaml:"ignore_tls_errors"`
+	ClientUUID      string `yaml:"client_uuid"`
+}
+
+func NewDefaultDDAn() DDAn {
+	hostname, err := os.Hostname()
+	if err != nil {
+		hostname = err.Error()
+	}
+	return DDAn{
+		ProtocolVersion: "2.0",
+		UserAgent:       globals.Name + "/" + globals.Version,
+		ProductName:     globals.AppName,
+		Hostname:        hostname,
+		TempFolder:      os.TempDir(),
+		SourceID:        "303",
+		SourceName:      globals.Name,
+		//		APIKey          string `yaml:"api_key"`
+		IgnoreTLSErrors: false,
+		//ClientUUID      string `yaml:"client_uuid"`
+	}
 }
 
 type Configuration struct {
 	filePath         string
-	VisionOne        VisionOne `yaml:"vision_one"`
-	Folder           string    `yaml:"folder"`
-	Ignore           []string  `yaml:"ignore"`
-	Periculosum      string    `yaml:"periculosum"`
-	ShowPasswordHint bool      `yaml:"show_password_hint"`
+	SandboxType      SandboxType   `yaml:"sandbox_type"`
+	VisionOne        VisionOne     `yaml:"vision_one"`
+	DDAn             DDAn          `yaml:"analyzer"`
+	Folder           string        `yaml:"folder"`
+	Ignore           []string      `yaml:"ignore"`
+	Sleep            time.Duration `yaml:"sleep"`
+	Periculosum      string        `yaml:"periculosum"`
+	ShowPasswordHint bool          `yaml:"show_password_hint"`
 }
 
 func New(filePath string) *Configuration {
 	return &Configuration{
 		filePath:         filePath,
+		SandboxType:      SandboxVisionOne,
 		Folder:           globals.InstallFolder(),
 		Ignore:           []string{".DS_Store", "Thumbs.db"},
 		Periculosum:      "check",
 		ShowPasswordHint: true,
-		VisionOne: VisionOne{
-			Sleep: 5 * time.Second,
-		},
+		Sleep:            5 * time.Second,
+		VisionOne:        VisionOne{},
+		DDAn:             NewDefaultDDAn(),
 	}
 }
 

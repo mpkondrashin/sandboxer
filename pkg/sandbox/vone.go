@@ -20,7 +20,19 @@ func NewVOneSandbox(vOne *vone.VOne) *VOneSandbox {
 	}
 }
 
-func (s *VOneSandbox) Submit(filePath string) (string, error) {
+func (s *VOneSandbox) SubmitURL(url string) (string, error) {
+	f := s.vOne.SandboxSubmitURLs().AddURL(url)
+	response, _, err := f.Do(context.TODO())
+	if err != nil {
+		return "", err
+	}
+
+	if len(response) != 1 {
+		return "", fmt.Errorf("%s: %w: wrong response length: %v", url, ErrError, response)
+	}
+	return response[0].Body.ID, nil
+}
+func (s *VOneSandbox) SubmitFile(filePath string) (string, error) {
 	f, err := s.vOne.SandboxSubmitFile().SetFilePath(filePath)
 	if err != nil {
 		return "", err
