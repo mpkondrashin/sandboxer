@@ -68,16 +68,16 @@ func CalculateStringHash(input string) string {
 	return hex.EncodeToString(hash.Sum(nil))
 }
 
-func (s *DDAnSandbox) Submit(file bool, filePath string) (string, error) {
+func (s *DDAnSandbox) Submit(file bool, content string) (string, error) {
 	var sha1 string
 	var err error
 	if file {
-		sha1, err = ddan.Hash(filePath)
+		sha1, err = ddan.Hash(content)
 		if err != nil {
 			return "", err
 		}
 	} else {
-		sha1 = CalculateStringHash(filePath)
+		sha1 = CalculateStringHash(content)
 	}
 	sha1List, err := s.analyzer.CheckDuplicateSample(context.TODO(), []string{sha1}, 0)
 	if err != nil {
@@ -100,7 +100,11 @@ func (s *DDAnSandbox) Submit(file bool, filePath string) (string, error) {
 	if len(sha1List) == 1 {
 		return sha1, err
 	}
-	err = s.analyzer.UploadSampleEx(context.TODO(), filePath, filepath.Base(filePath), sha1)
+	if file {
+		err = s.analyzer.UploadSampleEx(context.TODO(), content, filepath.Base(content), sha1)
+	} else {
+		err = s.analyzer.UploadSampleURLs(context.TODO(), []string{content})
+	}
 	if err != nil {
 		return "", err
 	}

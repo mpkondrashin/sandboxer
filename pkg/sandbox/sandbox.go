@@ -6,24 +6,10 @@ var (
 	ErrUnsupported = errors.New("unsupported")
 )
 
-type RiskLevel int
-
-const (
-	RiskLevelUnknown RiskLevel = iota
-	RiskLevelNotReady
-	RiskLevelUnsupported
-	RiskLevelNoRisk
-	RiskLevelLow
-	RiskLevelMedium
-	RiskLevelHigh
-	RiskLevelError
-)
-
 var (
 	//ErrNotReady = errors.New("not ready")
-	ErrNotFound         = errors.New("not found")
-	ErrError            = errors.New("error")
-	ErrUnknownRiskLevel = errors.New("unknown risk level")
+	ErrNotFound = errors.New("not found")
+	ErrError    = errors.New("error")
 )
 
 type Sandbox interface {

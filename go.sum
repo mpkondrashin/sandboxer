@@ -192,6 +192,8 @@ github.com/google/renameio v0.1.0/go.mod h1:KWCgfxg9yswjAJkECMjeO8J8rahYeXnNhOm4
 github.com/google/uuid v1.1.2/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
 github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
+github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/googleapis/gax-go/v2 v2.0.4/go.mod h1:0Wqv26UfaUD9n4G6kQubkQ+KchISgw+vpHVxEJEs9eg=
 github.com/googleapis/gax-go/v2 v2.0.5/go.mod h1:DWXyrwAJ9X0FpwwEdw+IPEYBICEFu5mhpdKc/us6bOk=
 github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1/go.mod h1:wJfORRmW1u3UXTncJ5qlYoELFm8eSnnEO6hX4iZ3EWY=
@@ -258,6 +260,8 @@ github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742/go.mod h1:bx2lN
 github.com/modern-go/reflect2 v1.0.1/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
 github.com/mpkondrashin/ddan v0.0.78 h1:AmZpRWKOabyKX1YAenfWTRNAxt0/cGlYo0Ux9vKsyfE=
 github.com/mpkondrashin/ddan v0.0.78/go.mod h1:cgzsCG6L+45K74pEJUy8qOMQZY9gw0nMSDozCTqK2qw=
+github.com/mpkondrashin/ddan v0.0.79 h1:bYtuzzjcDFOnH5e+R9DK037AlAm61dJNHBHEZCiFkcA=
+github.com/mpkondrashin/ddan v0.0.79/go.mod h1:cgzsCG6L+45K74pEJUy8qOMQZY9gw0nMSDozCTqK2qw=
 github.com/mpkondrashin/fileicon v0.0.6 h1:XmK6kb5duUORBhNLiP6SEuUBpA3NY/GnouCSvGTRPWI=
 github.com/mpkondrashin/fileicon v0.0.6/go.mod h1:0E0/m5tR/RcAE75Luu/XTeJG4vU8uxMowb0iOfRG92c=
 github.com/mpkondrashin/fileicon v0.0.7 h1:AGpjvj2VHujW2cKXlK/zKCQzjy9gynPeNpKmqgwesgg=
