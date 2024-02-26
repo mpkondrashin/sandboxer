@@ -26,6 +26,7 @@ import (
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
 	"sandboxer/pkg/update"
+	"sandboxer/pkg/xplatform"
 )
 
 type UpdateWindow struct {
@@ -60,7 +61,7 @@ func (s *UpdateWindow) Download(win fyne.Window) {
 	s.downloadButton.Disable()
 	fileName := fmt.Sprintf("setup_%s_%s.zip", runtime.GOOS, runtime.GOARCH)
 	logging.Debugf("Download: %s", fileName)
-	err := update.DownloadRelease(s.version, fileName, globals.DownloadsFolder(), func(p float32) error {
+	err := update.DownloadRelease(s.version, fileName, xplatform.DownloadsFolder(), func(p float32) error {
 		s.progressBar.SetValue(float64(p))
 		return nil
 	})
@@ -69,13 +70,13 @@ func (s *UpdateWindow) Download(win fyne.Window) {
 		logging.LogError(err)
 		return
 	}
-	zipFilePath := filepath.Join(globals.DownloadsFolder(), fileName)
+	zipFilePath := filepath.Join(xplatform.DownloadsFolder(), fileName)
 	if err := Unzip(zipFilePath); err != nil {
 		dialog.ShowError(err, win)
 		return
 	}
 	folder := strings.TrimSuffix(zipFilePath, filepath.Ext(zipFilePath))
-	if err := RunOpen(folder); err != nil {
+	if err := xplatform.RunOpen(folder); err != nil {
 		dialog.ShowError(err, win)
 		logging.LogError(err)
 		return

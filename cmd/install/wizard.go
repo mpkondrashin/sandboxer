@@ -14,6 +14,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -67,11 +68,15 @@ func NewWizard(capturesFolder string) *Wizard {
 		&PageIntro{},
 		&PageOptions{},
 		&PageDomain{},
-		&PageFolder{},
+	}
+	if IsWindows() {
+		c.pages = append(c.pages, &PageFolder{})
+	}
+	c.pages = append(c.pages,
 		&PageAutostart{},
 		&PageInstallation{},
 		&PageFinish{},
-	}
+	)
 	prtScr := &desktop.CustomShortcut{KeyName: fyne.KeyI, Modifier: fyne.KeyModifierControl}
 	c.win.Canvas().AddShortcut(prtScr, c.captureWindowContents)
 	c.win.SetContent(c.Window(c.pages[0]))
@@ -191,4 +196,8 @@ func (c *Wizard) Prev() {
 
 func (c *Wizard) Run() {
 	c.win.ShowAndRun()
+}
+
+func IsWindows() bool {
+	return runtime.GOOS == "windows"
 }

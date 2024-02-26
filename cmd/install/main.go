@@ -20,10 +20,6 @@ import (
 
 const installWizardLog = globals.Name + "_setup_wizard.log"
 
-func IsWindows() bool {
-	return runtime.GOOS == "windows"
-}
-
 func InstallLogFolder() string {
 	path, err := os.Executable()
 	if err != nil {

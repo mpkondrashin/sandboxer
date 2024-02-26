@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
+	"sandboxer/pkg/xplatform"
 	"strings"
 	"time"
 
@@ -141,7 +142,7 @@ func NeedUpdateWindow() (bool, error) {
 	if cmp != 1 {
 		return false, nil
 	}
-	folder, err := globals.UserDataFolder()
+	folder, err := xplatform.UserDataFolder(globals.AppID)
 	logging.Debugf("NeedUpdateWindow:globals.UserDataFolder(): %s %v", folder, err)
 	if err != nil {
 		return false, err

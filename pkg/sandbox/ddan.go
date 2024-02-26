@@ -14,12 +14,12 @@ import (
 )
 
 type DDAnSandbox struct {
-	analyzer *ddan.Client
+	analyzer ddan.ClientInterface
 }
 
 var _ Sandbox = &DDAnSandbox{}
 
-func NewDDAnSandbox(analyzer *ddan.Client) *DDAnSandbox {
+func NewDDAnSandbox(analyzer ddan.ClientInterface) *DDAnSandbox {
 	return &DDAnSandbox{
 		analyzer: analyzer,
 	}
@@ -30,36 +30,7 @@ func (s *DDAnSandbox) SubmitURL(filePath string) (string, error) {
 }
 
 func (s *DDAnSandbox) SubmitFile(filePath string) (string, error) {
-	sha1, err := ddan.Hash(filePath)
-	if err != nil {
-		return "", err
-	}
-	sha1List, err := s.analyzer.CheckDuplicateSample(context.TODO(), []string{sha1}, 0)
-	if err != nil {
-		var apiErr *ddan.APIError
-		if !errors.As(err, &apiErr) {
-			return "", err
-		}
-		if apiErr.Response != ddan.ResponseNotRegistered {
-			return "", err
-		}
-		err := s.analyzer.Register(context.TODO())
-		if err != nil {
-			return "", err
-		}
-		sha1List, err = s.analyzer.CheckDuplicateSample(context.TODO(), []string{sha1}, 0)
-		if err != nil {
-			return "", err
-		}
-	}
-	if len(sha1List) == 1 {
-		return sha1, err
-	}
-	err = s.analyzer.UploadSampleEx(context.TODO(), filePath, filepath.Base(filePath), sha1)
-	if err != nil {
-		return "", err
-	}
-	return sha1, nil
+	return s.Submit(true, filePath)
 }
 
 func CalculateStringHash(input string) string {
@@ -98,7 +69,7 @@ func (s *DDAnSandbox) Submit(file bool, content string) (string, error) {
 		}
 	}
 	if len(sha1List) == 1 {
-		return sha1, err
+		return sha1, nil
 	}
 	if file {
 		err = s.analyzer.UploadSampleEx(context.TODO(), content, filepath.Base(content), sha1)
@@ -142,7 +113,9 @@ func (s *DDAnSandbox) GetResult(id string) (RiskLevel, string, error) {
 	case ddan.RatingNoRiskFound:
 		return RiskLevelNoRisk, "", nil
 	}
-
+	if briefReport.RiskLevel < 0 {
+		return RiskLevelNoRisk, "", fmt.Errorf("%s: %w: %v", id, ErrError, briefReport.RiskLevel)
+	}
 	reports, err := s.analyzer.GetReport(context.TODO(), id)
 	if err != nil {
 		return RiskLevelUnknown, "", fmt.Errorf("GetReport(%s): %w", id, err)

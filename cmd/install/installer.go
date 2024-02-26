@@ -26,6 +26,7 @@ import (
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
 	"sandboxer/pkg/script"
+	"sandboxer/pkg/xplatform"
 )
 
 //go:embed embed/*.gz embed/LICENSE
@@ -39,7 +40,7 @@ type Installer struct {
 }
 
 func NewInstaller(appID string) (*Installer, error) {
-	configFolder, err := globals.UserDataFolder()
+	configFolder, err := xplatform.UserDataFolder(appID)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +79,7 @@ func (i *Installer) SaveConfig() error {
 }
 
 func (i *Installer) ConfigFileFolder() (string, error) {
-	return globals.UserDataFolder()
+	return xplatform.UserDataFolder(globals.AppID)
 }
 
 func (i *Installer) Path(fileName string) string {
@@ -120,7 +121,7 @@ func (i *Installer) Stages() []InstallStage {
 		//{"Uninstall service", i.StageUninstallService},
 		{"Extract executables", i.StageExtractFiles},
 		{"Extend Send To menu", i.StageExtendSendTo},
-		{"Install service", i.StageAutostart},
+		{"Install service", i.StageAutoStart},
 		{"Stop runnin " + globals.AppName, i.StageUninstall},
 	}
 }
@@ -266,25 +267,29 @@ func (i *Installer) StageExtractPericulosum() error {
 func (i *Installer) StageExtendSendTo() error {
 	logging.Debugf("Install: ExtendSendTo")
 	appPath := filepath.Join(i.InstallFolder(), "submit.exe")
-	linkPath, err := globals.ExtendContextMenu(appPath)
+	linkPath, err := xplatform.ExtendContextMenu(globals.AppName, appPath)
 	if err != nil {
 		return err
 	}
 	return i.uninstallScript.AddLine(script.Get().RemoveDir(linkPath))
 }
 
-func (i *Installer) StageAutostart() error {
+func (i *Installer) StageAutoStart() error {
 	logging.Debugf("Install: Autostart")
 	if !i.autostart {
 		logging.Debugf("Install: StageAutostart: Skip")
 		return nil
 	}
-	appPath := filepath.Join(i.InstallFolder(), globals.AppName+".exe")
-	linkPath, err := globals.AutoStart(appPath)
+	var appPath string
+	appPath, err := xplatform.ExecutablePath(i.config.Folder, globals.AppName, globals.Name)
 	if err != nil {
 		return err
 	}
-	return i.uninstallScript.AddLine(script.Get().RemoveDir(linkPath))
+	path, err := xplatform.AutoStart(globals.AppID, appPath)
+	if err != nil {
+		return err
+	}
+	return i.uninstallScript.AddLine(script.Get().RemoveDir(path))
 }
 
 func (i *Installer) StageUninstall() error {

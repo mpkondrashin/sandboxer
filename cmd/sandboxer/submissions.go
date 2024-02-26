@@ -12,9 +12,7 @@ import (
 	"fmt"
 	"image/color"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"runtime"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -30,6 +28,7 @@ import (
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
 	"sandboxer/pkg/task"
+	"sandboxer/pkg/xplatform"
 )
 
 type SubmissionsWindow struct {
@@ -176,21 +175,10 @@ func (s *SubmissionsWindow) DeleteTask(tsk *task.Task) {
 }
 
 func (s *SubmissionsWindow) RunOpen(path string) {
-	err := RunOpen(path)
+	err := xplatform.RunOpen(path)
 	if err != nil {
 		dialog.ShowError(err, s.win)
 	}
-}
-
-func RunOpen(path string) error {
-	name := "open"
-	args := []string{path}
-	if runtime.GOOS == "windows" {
-		name = "cmd"
-		args = []string{"/C", "start", path}
-	}
-	cmd := exec.Command(name, args...)
-	return cmd.Run()
 }
 
 func (s *SubmissionsWindow) OpenInvestigation(investigation string) {

@@ -15,21 +15,17 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 
 	"sandboxer/pkg/extract"
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
+	"sandboxer/pkg/xplatform"
 )
 
 //go:embed embed/*
 var embedFS embed.FS
 
 const wizardLog = globals.Name + "_setup.log"
-
-func IsWindows() bool {
-	return runtime.GOOS == "windows"
-}
 
 func InstallLogFolder() string {
 	path, err := os.Executable()
@@ -60,7 +56,7 @@ func main() {
 		os.Exit(30)
 	}
 	logging.Infof("Temp folder: %s", tempFolder)
-	if IsWindows() {
+	if xplatform.IsWindows() {
 		path, err := extract.FileGZ(embedFS, tempFolder, "embed/opengl32.dll.gz")
 		logging.LogError(err)
 		if err != nil {

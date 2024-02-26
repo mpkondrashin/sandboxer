@@ -16,6 +16,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"sandboxer/pkg/globals"
+	"sandboxer/pkg/xplatform"
 )
 
 type VisionOne struct {
@@ -24,6 +25,7 @@ type VisionOne struct {
 }
 
 type DDAn struct {
+	URL             string `yaml:"url"`
 	ProtocolVersion string `yaml:"protocol_version"`
 	UserAgent       string `yaml:"user_agent"`
 	ProductName     string `yaml:"product_name"`
@@ -33,7 +35,7 @@ type DDAn struct {
 	SourceName      string `yaml:"source_name"`
 	APIKey          string `yaml:"api_key"`
 	IgnoreTLSErrors bool   `yaml:"ignore_tls_errors"`
-	ClientUUID      string `yaml:"client_uuid"`
+	ClientUUID      string `yaml:"client_id"`
 }
 
 func NewDefaultDDAn() DDAn {
@@ -71,7 +73,7 @@ func New(filePath string) *Configuration {
 	return &Configuration{
 		filePath:         filePath,
 		SandboxType:      SandboxVisionOne,
-		Folder:           globals.InstallFolder(),
+		Folder:           xplatform.InstallFolder(),
 		Ignore:           []string{".DS_Store", "Thumbs.db"},
 		Periculosum:      "check",
 		ShowPasswordHint: true,

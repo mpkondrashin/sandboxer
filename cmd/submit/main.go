@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -22,6 +21,7 @@ import (
 	"sandboxer/pkg/fifo"
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
+	"sandboxer/pkg/xplatform"
 )
 
 const submitLog = "submit.log"
@@ -29,22 +29,12 @@ const submitLog = "submit.log"
 var ErrUnsupportedOS = errors.New("unsupported OS")
 
 func SubmissionsExecutablePath(conf *config.Configuration) (string, error) {
-	if runtime.GOOS == "windows" {
-		return filepath.Join(conf.Folder, globals.AppName, globals.AppName+".exe"), nil
-	}
-	if runtime.GOOS == "darwin" {
-		return fmt.Sprintf("%s/%s.app/Contents/MacOS/%s", conf.Folder, globals.AppName, globals.Name), nil
-	}
-	return "", fmt.Errorf("%s: %W", runtime.GOOS, ErrUnsupportedOS)
+	return xplatform.ExecutablePath(conf.Folder, globals.AppName, globals.Name)
 }
 
 func LaunchSandboxer(conf *config.Configuration) {
 	logging.Infof("Launch " + globals.AppName)
-	executableFileName := globals.AppName
-	if runtime.GOOS == "windows" {
-		executableFileName += ".exe"
-	}
-	executablePath, err := SubmissionsExecutablePath(conf) // := filepath.Join(conf.Folder, globals.AppName, executableFileName)
+	executablePath, err := SubmissionsExecutablePath(conf)
 	if err != nil {
 		panic(err)
 	}
@@ -87,7 +77,7 @@ func main() {
 	}
 	conf := config.New(configFilePath)
 	if err := conf.Load(); err != nil {
-		if runtime.GOOS == "windows" {
+		if runtime.GOOS == "windows" { // After creating darwin installer this if should be removed
 			fmt.Fprintf(os.Stderr, "conf.Load: %v", err)
 			os.Exit(20)
 		}
