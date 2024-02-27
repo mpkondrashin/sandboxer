@@ -47,9 +47,12 @@ cmd/setup/setup.syso: cmd/setup/setup.exe.manifest
 	go install github.com/akavel/rsrc
 	rsrc -manifest ./cmd/setup/setup.exe.manifest -o ./cmd/setup/setup.syso
 
-cmd/setup/setup.exe: cmd/setup/embed/sandboxer.tar.gz $(wildcard cmd/setup/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go cmd/setup/setup.syso
+cmd/setup/setup.exe: cmd/setup/embed/install.exe.gz $(wildcard cmd/setup/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go cmd/setup/setup.syso
 	GOOS=windows go build -C ./cmd/setup -ldflags -H=windowsgui 
 #--icon ../../resources/icon.png
+
+cmd/setup/embed/install.exe.gz: cmd/install/install.exe
+	gzip -fc $< > $@
 
 cmd/install/embed/sandboxer.tar.gz: cmd/sandboxer/sandboxer.exe cmd/install/install.exe LICENSE resources/opengl32.dll
 	tar cfvz $@ $^
@@ -60,11 +63,9 @@ cmd/install/install.exe: cmd/install/embed/LICENSE cmd/install/embed/opengl32.dl
 cmd/install/resource.go: resources/icon_transparent.png 
 	fyne bundle --name ApplicationIcon --package main --output cmd/install/resource.go resources/icon_transparent.png 
 
-cmd/install/embed/opengl32.dll.gz: resources/opengl32.dll
-	gzip -fc resources/opengl32.dll  > cmd/install/embed/opengl32.dll.gz
 
-cmd/install/embed/sandboxer.exe.gz: cmd/sandboxer/sandboxer.exe
-	gzip -fc cmd/sandboxer/sandboxer.exe  > cmd/install/embed/sandboxer.exe.gz
+#cmd/install/embed/sandboxer.exe.gz: cmd/sandboxer/sandboxer.exe
+#	gzip -fc cmd/sandboxer/sandboxer.exe  > cmd/install/embed/sandboxer.exe.gz
 
 cmd/submit/submit.exe: $(wildcard cmd/submit/*.go)  $(wildcard pkg/*/*.go) pkg/globals/version.go
 	fyne package --os $(GOOS) --name submit --appID in.kondrash.sandboxer --appVersion $(VERSION) --appBuild $(BUILD) --icon ../../resources/icon.png --release --sourceDir ./cmd/submit
