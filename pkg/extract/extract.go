@@ -140,7 +140,7 @@ func ExtractFileTGZ(targetFolder string, fileSystem fs.FS, filePath string) erro
 		return err
 	}
 	defer f.Close()
-	return Untar(targetFolder, f)
+	return UntarReader(targetFolder, f)
 }
 
 /*
@@ -158,8 +158,22 @@ func ExtractTar(folder string, reader io.Reader) error {
 	return nil
 }
 */
+
+func Untar(fs fs.FS, folder string, filePath string) error {
+	logging.Debugf("Untar %s to %s", folder, filePath)
+	sourceFile, err := fs.Open(filePath)
+	if err != nil {
+		return fmt.Errorf("Open(\"%s\"): %w", filePath, err)
+	}
+	defer func() {
+		//logging.Debugf("Close embed.FS file")
+		sourceFile.Close()
+	}()
+	return UntarReader(folder, sourceFile)
+}
+
 // https://medium.com/@skdomino/taring-untaring-files-in-go-6b07cf56bc07
-func Untar(targetFolder string, r io.Reader) error {
+func UntarReader(targetFolder string, r io.Reader) error {
 	logging.Debugf("Untar(%s)", targetFolder)
 
 	gzr, err := gzip.NewReader(r)

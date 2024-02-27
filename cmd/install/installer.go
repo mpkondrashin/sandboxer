@@ -238,24 +238,16 @@ func (i *Installer) StageWaitServiceToStop() error {
 
 func (i *Installer) StageExtractFiles() error {
 	logging.Debugf("Install: StageExtractExecutable")
-	toExtract := []string{
-		"embed/" + globals.Name + ".exe.gz",
-		"embed/submit.exe.gz",
-		"embed/LICENSE",
+	path := "embed/" + globals.Name + ".tag.gz"
+	err := extract.Untar(embedFS, i.InstallFolder(), path)
+	if err != nil {
+		return err
 	}
-	if IsWindows() {
-		toExtract = append(toExtract, "embed/opengl32.dll.gz")
-	}
-	for _, path := range toExtract {
-		newPath, err := extract.ExtractFile(embedFS, i.InstallFolder(), path)
-		if err != nil {
-			return err
-		}
-		logging.Debugf("Extracted: %s", newPath)
-		if err := i.uninstallScript.AddLine(script.Get().RemoveDir(newPath)); err != nil {
-			return err
-		}
-	}
+	logging.Debugf("Extracted: %s", path)
+	//if err := i.uninstallScript.AddLine(script.Get().RemoveDir(newPath)); err != nil {
+	//	return err
+	//}
+
 	return nil
 }
 

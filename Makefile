@@ -47,18 +47,12 @@ cmd/setup/setup.syso: cmd/setup/setup.exe.manifest
 	go install github.com/akavel/rsrc
 	rsrc -manifest ./cmd/setup/setup.exe.manifest -o ./cmd/setup/setup.syso
 
-cmd/setup/setup.exe: cmd/setup/embed/install.exe.gz cmd/setup/embed/opengl32.dll.gz $(wildcard cmd/setup/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go cmd/setup/setup.syso
+cmd/setup/setup.exe: cmd/setup/embed/sandboxer.tar.gz $(wildcard cmd/setup/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go cmd/setup/setup.syso
 	GOOS=windows go build -C ./cmd/setup -ldflags -H=windowsgui 
 #--icon ../../resources/icon.png
 
-cmd/install/embed/LICENSE: LICENSE
-	cp LICENSE cmd/install/embed/
-
-cmd/setup/embed/install.exe.gz: cmd/install/install.exe
-	gzip -fc cmd/install/install.exe > cmd/setup/embed/install.exe.gz
-
-cmd/setup/embed/opengl32.dll.gz: resources/opengl32.dll
-	gzip -fc resources/opengl32.dll  > cmd/setup/embed/opengl32.dll.gz
+cmd/install/embed/sandboxer.tar.gz: cmd/sandboxer/sandboxer.exe cmd/install/install.exe LICENSE resources/opengl32.dll
+	tar cfvz $@ $^
 
 cmd/install/install.exe: cmd/install/embed/LICENSE cmd/install/embed/opengl32.dll.gz cmd/install/embed/sandboxer.exe.gz cmd/install/embed/submit.exe.gz $(wildcard cmd/install/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go cmd/install/resource.go
 	fyne package --os $(GOOS) --name install --appID in.kondrash.sandboxer --appVersion $(VERSION) --appBuild $(BUILD) --icon ../../resources/icon.png --release --sourceDir ./cmd/install
