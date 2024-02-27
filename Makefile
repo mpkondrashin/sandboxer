@@ -70,9 +70,6 @@ cmd/install/resource.go: resources/icon_transparent.png
 cmd/submit/submit.exe: $(wildcard cmd/submit/*.go)  $(wildcard pkg/*/*.go) pkg/globals/version.go
 	fyne package --os $(GOOS) --name submit --appID in.kondrash.sandboxer --appVersion $(VERSION) --appBuild $(BUILD) --icon ../../resources/icon.png --release --sourceDir ./cmd/submit
 
-cmd/install/embed/submit.exe.gz: cmd/submit/submit.exe
-	gzip -fc cmd/submit/submit.exe  > cmd/install/embed/submit.exe.gz
-
 cmd/sandboxer/sandboxer.exe: $(wildcard cmd/sandboxer/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go cmd/sandboxer/icon.go
 	fyne package --os $(GOOS) --name sandboxer --appID in.kondrash.sandboxer --appVersion $(VERSION) --appBuild $(BUILD) --icon ../../resources/icon.png --release --sourceDir ./cmd/sandboxer
 
