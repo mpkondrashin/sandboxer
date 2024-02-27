@@ -15,6 +15,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 type SandboxType int
@@ -24,7 +26,7 @@ const (
 	SandboxAnalyzer
 )
 
-// String - return string representation for State value
+// String - return string representation for SandboxType value
 func (v SandboxType) String() string {
 	s, ok := map[SandboxType]string{
 		SandboxVisionOne: "VisionOne",
@@ -36,43 +38,25 @@ func (v SandboxType) String() string {
 	return "SandboxType(" + strconv.FormatInt(int64(v), 10) + ")"
 }
 
-// ErrUnknownState - will be returned wrapped when parsing string
+// ErrUnknownSandboxType - will be returned wrapped when parsing string
 // containing unrecognized value.
-var ErrUnknownState = errors.New("unknown State")
+var ErrUnknownSandboxType = errors.New("unknown sandbox type")
 
 var mapSandboxTypeFromString = map[string]SandboxType{
 	"visionone": SandboxVisionOne,
 	"analyzer":  SandboxAnalyzer,
 }
 
-// UnmarshalJSON implements the Unmarshaler interface of the json package for State.
-func (s *SandboxType) UnmarshalJSON(data []byte) error {
-	var v string
-	if err := json.Unmarshal(data, &v); err != nil {
-		return err
-	}
-	result, ok := mapSandboxTypeFromString[strings.ToLower(v)]
-	if !ok {
-		return fmt.Errorf("%w: %s", ErrUnknownState, v)
-	}
-	*s = result
-	return nil
+// MarshalYAML implements the Marshaler interface of the yaml.v3 package for SandboxType.
+func (s SandboxType) MarshalYAML() (interface{}, error) {
+	return fmt.Sprintf("%v", s), nil
 }
 
-// MarshalJSON implements the Marshaler interface of the json package for State.
-func (s SandboxType) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("\"%v\"", s)), nil
-}
-
-// UnmarshalYAML implements the Unmarshaler interface of the yaml.v3 package for State.
-func (s *SandboxType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var v string
-	if err := unmarshal(&v); err != nil {
-		return err
-	}
-	result, ok := mapSandboxTypeFromString[strings.ToLower(v)]
+// UnmarshalYAML implements the Unmarshaler interface of the yaml.v3 package for SandboxType.
+func (s *SandboxType) UnmarshalYAML(value *yaml.Node) error {
+	result, ok := mapSandboxTypeFromString[strings.ToLower(value.Value)]
 	if !ok {
-		return fmt.Errorf("%w: %s", ErrUnknownState, v)
+		return fmt.Errorf("%w: %s", ErrUnknownSandboxType, value.Value)
 	}
 	*s = result
 	return nil
@@ -92,8 +76,27 @@ func (s *SandboxType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error
 	}
 	result, ok := mapSandboxTypeFromString[strings.ToLower(v)]
 	if !ok {
-		return fmt.Errorf("%w: %s", ErrUnknownState, v)
+		return fmt.Errorf("%w: %s", ErrUnknownSandboxType, v)
 	}
 	*s = result
 	return nil
+}
+
+// UnmarshalJSON implements the Unmarshaler interface of the json package for State.
+func (s *SandboxType) UnmarshalJSON(data []byte) error {
+	var v string
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+	result, ok := mapSandboxTypeFromString[strings.ToLower(v)]
+	if !ok {
+		return fmt.Errorf("%w: %s", ErrUnknownSandboxType, v)
+	}
+	*s = result
+	return nil
+}
+
+// MarshalJSON implements the Marshaler interface of the json package for State.
+func (s SandboxType) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf("\"%v\"", s)), nil
 }

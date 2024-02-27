@@ -1,5 +1,16 @@
 package config
 
+import "testing"
+
+func TestSave(t *testing.T) {
+	c := New("testing_config.yaml")
+	//t.Logf("%v", c.SandboxType)
+	err := c.Save()
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 /*
 func TestLoad(t *testing.T) {
 	conf1 := &Configuration{
