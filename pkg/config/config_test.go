@@ -7,7 +7,11 @@ func TestSave(t *testing.T) {
 	//t.Logf("%v", c.SandboxType)
 	err := c.Save()
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
+	}
+	err = c.Load()
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 

@@ -54,9 +54,14 @@ func (s SandboxType) MarshalYAML() (interface{}, error) {
 
 // UnmarshalYAML implements the Unmarshaler interface of the yaml.v3 package for SandboxType.
 func (s *SandboxType) UnmarshalYAML(value *yaml.Node) error {
-	result, ok := mapSandboxTypeFromString[strings.ToLower(value.Value)]
+	var v string
+	err := value.Decode(&v)
+	if err != nil {
+		return err
+	}
+	result, ok := mapSandboxTypeFromString[strings.ToLower(v)]
 	if !ok {
-		return fmt.Errorf("%w: %s", ErrUnknownSandboxType, value.Value)
+		return fmt.Errorf("%w: %s", ErrUnknownSandboxType, v)
 	}
 	*s = result
 	return nil
