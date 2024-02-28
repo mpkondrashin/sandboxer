@@ -65,7 +65,7 @@ cmd/install/resource.go: resources/icon_transparent.png
 	fyne bundle --name ApplicationIcon --package main --output cmd/install/resource.go resources/icon_transparent.png 
 
 cmd/install/embed/sandboxer.tar.gz: cmd/submit/submit.exe cmd/sandboxer/sandboxer.exe LICENSE resources/opengl32.dll
-	tar cfvz $@ $^
+	tar cfvz $@ LICENSE -C resources opengl32.dll -C ../cmd/submit submit.exe -C ../../cmd/sandboxer sandboxer.exe  
 
 cmd/submit/submit.exe: $(wildcard cmd/submit/*.go)  $(wildcard pkg/*/*.go) pkg/globals/version.go resources/icon.png
 	fyne package --os $(GOOS) --name submit --appID in.kondrash.sandboxer --appVersion $(VERSION) --appBuild $(BUILD) --icon ../../resources/icon.png --release --sourceDir ./cmd/submit
