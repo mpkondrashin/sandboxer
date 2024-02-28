@@ -182,16 +182,19 @@ func main() {
 		fmt.Fprintf(os.Stderr, "globals.ConfigurationFilePath: %v", err)
 		os.Exit(globals.ExitGetConfigurationFileathError)
 	}
-	conf := config.New(configFilePath)
-	if err := conf.Load(); err != nil && !errors.Is(err, os.ErrNotExist) {
-		fmt.Fprintf(os.Stderr, "conf.Load: %v", err)
-		os.Exit(globals.ExitLoadConfigError)
-	}
 	close, err := globals.SetupLogging(globals.Name + ".log")
 	if err != nil {
 		fmt.Println(err)
 	} else {
 		defer close()
+	}
+	conf := config.New(configFilePath)
+	if err := conf.Load(); err != nil {
+		logging.LogError(err)
+		fmt.Fprintf(os.Stderr, "conf.Load: %v", err)
+		if !errors.Is(err, os.ErrNotExist) {
+			os.Exit(globals.ExitLoadConfigError)
+		}
 	}
 
 	logging.Infof("%s Version %s Build %s Start", globals.AppName, globals.Version, globals.Build)
