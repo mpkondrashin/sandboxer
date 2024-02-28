@@ -83,4 +83,4 @@ cleansetup:
 	rm -f cmd/setup/setup.exe cmd/setup/setup.exe.manifest cmd/setup/setup.syso cmd/setup/sandboxer_setup_wizard.log cmd/setup/sandboxer_setup.log cmd/setup/install.exe cmd/setup/embed/install.exe.gz cmd/setup/embed/opengl32.dll.gz 
 
 celaninstall:
-	rm -f cmd/install/install.exe cmd/install/embed/opengl32.dll.gz cmd/install/embed/sandboxer.exe.gz cmd/install/embed/submit.exe.gz
+	rm -f cmd/install/install.exe cmd/install/embed/sandboxer.tar.gz
