@@ -238,7 +238,7 @@ func (i *Installer) StageWaitServiceToStop() error {
 
 func (i *Installer) StageExtractFiles() error {
 	logging.Debugf("Install: StageExtractExecutable")
-	path := "embed/" + globals.Name + ".tag.gz"
+	path := "embed/" + globals.Name + ".tar.gz"
 	err := extract.Untar(embedFS, i.InstallFolder(), path)
 	if err != nil {
 		return err
