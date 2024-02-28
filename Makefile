@@ -39,7 +39,7 @@ setup_$(GOOS)_$(GOARCH).zip: cmd/setup/setup.exe
 cmd/setup/setup.exe: cmd/setup/embed/install.exe.gz cmd/setup/embed/opengl32.dll.gz  $(wildcard cmd/setup/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go cmd/setup/setup.syso
 	GOOS=windows go build -C ./cmd/setup -ldflags -H=windowsgui 
 
-cmd/setup/embed/opengl32.dll.gz: resource/opengl32.dll
+cmd/setup/embed/opengl32.dll.gz: resources/opengl32.dll
 	gzip -fc $< > $@
 
 cmd/setup/setup.exe.manifest: preproc.exe cmd/setup/manifest.template
