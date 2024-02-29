@@ -126,6 +126,7 @@ func (i *Installer) Stages() []InstallStage {
 		//{"Uninstall service", i.StageUninstallService},
 		{"Extract executables", i.StageExtractFiles},
 		{"Extend Send To menu", i.StageExtendSendTo},
+		{"Add to Start menu", i.StageAddToStartMenu},
 		{"Install service", i.StageAutoStart},
 		{"Stop runnin " + globals.AppName, i.StageUninstall},
 	}
@@ -296,6 +297,28 @@ func (i *Installer) StageExtendSendTo() error {
 		path = filepath.Join(folder, globals.AppName+".workflow")
 	}
 	return i.uninstallScript.AddLine(script.Get().RemoveDir(path))
+}
+
+func (i *Installer) AddToStartMenu() error {
+	logging.Infof("Install: AddToStartMenu")
+	if !xplatform.IsWindows() {
+		logging.Infof("AddToStartMenu. This is not Windows. Skip")
+		return nil
+	}
+	appPath := filepath.Join(i.InstallFolder(), xplatform.ExecutableName(globals.Name))
+	_, err := xplatform.LinkToStartMenu(globals.AppName, globals.AppName, appPath)
+	if err != nil {
+		return err
+	}
+	scriptPath := i.Path(uninstallScriptName + script.Get().Extension())
+	path, err := xplatform.LinkToStartMenu(globals.AppName, "Uninstall", scriptPath)
+	if err != nil {
+		return err
+	}
+	if err := i.uninstallScript.AddLine(script.Get().RemoveDir(path)); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (i *Installer) StageAutoStart() error {
