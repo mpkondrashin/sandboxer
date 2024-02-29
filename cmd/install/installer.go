@@ -299,7 +299,7 @@ func (i *Installer) StageExtendSendTo() error {
 	return i.uninstallScript.AddLine(script.Get().RemoveDir(path))
 }
 
-func (i *Installer) AddToStartMenu() error {
+func (i *Installer) StageAddToStartMenu() error {
 	logging.Infof("Install: AddToStartMenu")
 	if !xplatform.IsWindows() {
 		logging.Infof("AddToStartMenu. This is not Windows. Skip")
