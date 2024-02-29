@@ -14,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"sandboxer/pkg/globals"
+	"sandboxer/pkg/xplatform"
 )
 
 type PageFinish struct {
@@ -28,7 +29,11 @@ func (p *PageFinish) Name() string {
 
 func (p *PageFinish) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
 	l1 := widget.NewLabel(globals.AppName + " service sucessfully installed.")
-	l2 := widget.NewLabel("Right click on any file and pick Send To -> " + globals.AppName + ".")
+	hint := "Right click on any file and pick Send To -> " + globals.AppName + "."
+	if xplatform.IsWindows() {
+		hint = "Right click on any file and pick Quick Actions -> " + globals.AppName + "."
+	}
+	l2 := widget.NewLabel(hint)
 	//p.runCheck = widget.NewCheck("Run "+globals.AppName+" now", nil)
 	//p.runCheck.SetChecked(true)
 	return container.NewVBox(l1, l2) //, p.runCheck)
