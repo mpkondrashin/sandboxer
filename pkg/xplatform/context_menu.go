@@ -27,13 +27,13 @@ func ExtendContextMenuWindows(appName, appPath string) (string, error) {
 	linkName := appName + ".lnk"
 	linkPath := filepath.Join(userProfile, "Microsoft", "Windows", "SendTo", linkName)
 	_ = os.Remove(linkPath)
-	if err := makeLink(appPath, linkPath); err != nil {
+	if err := makeLink(appPath, linkPath, false); err != nil {
 		return "", err
 	}
 	return linkPath, nil
 }
 
-func makeLink(src, dst string) error {
+func makeLink(src, dst string, asAdministrator bool) error {
 	ole.CoInitializeEx(0, ole.COINIT_APARTMENTTHREADED|ole.COINIT_SPEED_OVER_MEMORY)
 	oleShellObject, err := oleutil.CreateObject("WScript.Shell")
 	if err != nil {
@@ -52,6 +52,11 @@ func makeLink(src, dst string) error {
 	idispatch := cs.ToIDispatch()
 	if _, err := oleutil.PutProperty(idispatch, "TargetPath", src); err != nil {
 		return err
+	}
+	if asAdministrator {
+		if _, err := oleutil.PutProperty(idispatch, "RunAsAdministrator", true); err != nil {
+			return err
+		}
 	}
 	if _, err := oleutil.CallMethod(idispatch, "Save"); err != nil {
 		return err

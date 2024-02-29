@@ -29,7 +29,7 @@ func AutoStartWindows(appPath string) (string, error) {
 	appName := filepath.Base(appPath)
 	fileName := strings.TrimSuffix(appName, filepath.Ext(appName))
 	startupLinkPath := filepath.Join(userProfileFolder, "AppData", "Roaming", "Microsoft", "Windows", "Start Menu", "Programs", "Startup", fileName+".lnk")
-	if err := makeLink(appPath, startupLinkPath); err != nil {
+	if err := makeLink(appPath, startupLinkPath, false); err != nil {
 		return "", err
 	}
 	return startupLinkPath, nil
