@@ -34,5 +34,5 @@ func (Windows) StopService(name string) string {
 }
 
 func (Windows) StopProcess(pidFile string) string {
-	return fmt.Sprintf("SET /P PID= < %s\ntaskkill /pid %%PID%% /f", pidFile)
+	return fmt.Sprintf("SET /P PID= < \"%s\"\ntaskkill /pid %%PID%% /f", pidFile)
 }
