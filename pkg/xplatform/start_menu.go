@@ -10,7 +10,7 @@ func LinkToStartMenu(folder, name, path string) (string, error) {
 	if err := os.Mkdir(folderPath, 0755); err != nil {
 		return "", err
 	}
-	linkPath := filepath.Join(folderPath, name)
+	linkPath := filepath.Join(folderPath, name) + ".lnk"
 	err := makeLink(path, linkPath)
 	if err != nil {
 		_ = os.RemoveAll(folderPath)
