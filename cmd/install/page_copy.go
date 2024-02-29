@@ -9,6 +9,7 @@ Copy files
 package main
 
 import (
+	"fmt"
 	"sandboxer/pkg/logging"
 
 	"fyne.io/fyne/v2"
@@ -51,7 +52,9 @@ func (p *PageInstallation) Content(win fyne.Window, installer *Installer) fyne.C
 func (p *PageInstallation) Run(win fyne.Window, installer *Installer) {
 	total := float64(len(installer.Stages()) - 1)
 	index := 0
+	stageName := ""
 	err := installer.Install(func(name string) error {
+		stageName = name
 		p.progressBar.SetValue(float64(index) / total)
 		p.statusLabel.SetText(name)
 		index++
@@ -59,7 +62,8 @@ func (p *PageInstallation) Run(win fyne.Window, installer *Installer) {
 	})
 	p.statusLabel.SetText("Done")
 	if err != nil {
-		p.statusLabel.SetText("Failed")
+		p.statusLabel.SetText(stageName + " Failed")
+		err = fmt.Errorf("%s: %w", stageName, err)
 		logging.LogError(err)
 		dialog.ShowError(err, win)
 	}

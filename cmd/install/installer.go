@@ -342,6 +342,7 @@ func (i *Installer) StageUninstall() error {
 	if err := os.Rename(i.uninstallScript.FilePath, scriptPath); err != nil {
 		return err
 	}
+	// remove folder
 	return nil
 }
 
