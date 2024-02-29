@@ -54,12 +54,23 @@ func makeLink(src, dst string, asAdministrator bool) error {
 		return err
 	}
 	if asAdministrator {
-		if _, err := oleutil.PutProperty(idispatch, "RunAsAdministrator", true); err != nil {
-			return err
+		if err := runAsAdministrator(dst); err != nil {
+			return nil
 		}
 	}
 	if _, err := oleutil.CallMethod(idispatch, "Save"); err != nil {
 		return err
 	}
 	return nil
+}
+
+// https://stackoverflow.com/questions/28997799/how-to-create-a-run-as-administrator-shortcut-using-powershell#:~:text=In%20short%2C%20you%20need%20to,This%20is%20the%20RunAsAdministrator%20flag.
+func runAsAdministrator(path string) error {
+	//In short, you need to read the .lnk file in as an array of bytes. Locate byte 21 (0x15) and change bit 6 (0x20) to 1. This is the RunAsAdministrator flag.
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	data[0x15] |= 0x20
+	return os.WriteFile(path, data, 0644)
 }
