@@ -8,7 +8,6 @@
 #
 .PHONY: clean
 
-
 GOOS=$(shell go env GOOS)
 GOARCH=$(shell go env GOARCH)
 
@@ -24,39 +23,35 @@ ifeq ($(BUILD),)
 BUILD := b
 endif
 
-setup_$(GOOS)_$(GOARCH).zip: Sandboxer.dmg
-	zip setup_$(GOOS)_$(GOARCH).zip Sandboxer.dmg
+setup_$(GOOS)_$(GOARCH).zip: SandboxerInstall.app/Contents/MacOS/install
+	zip -r setup_$(GOOS)_$(GOARCH).zip SandboxerInstall.app
 
-Sandboxer.dmg: output/SandboxerInstall.app/Contents/MacOS/install
-	hdiutil create -volname "Sandboxer" -srcfolder "output" -ov -format UDZO "Sandboxer.dmg"
+#Sandboxer.dmg: output/SandboxerInstall.app/Contents/MacOS/install
+#	hdiutil create -volname "Sandboxer" -srcfolder "output" -ov -format UDZO "Sandboxer.dmg"
 
-output/SandboxerInstall.app/Contents/MacOS/install: $(wildcard cmd/install/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go cmd/sandboxer/icon.go  resources/icon.png cmd/install/embed/sandboxer.tar.gz cmd/install/embed/sandboxer_submit.tar.gz
-	rm -rf output
-	mkdir -p output
+SandboxerInstall.app/Contents/MacOS/install: $(wildcard cmd/install/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go cmd/sandboxer/icon.go  resources/icon.png cmd/install/embed/sandboxer.tar.gz cmd/install/embed/sandboxer_submit.tar.gz
 	fyne package --os darwin --name SandboxerInstall --appID in.kondrash.sandboxer --appVersion $(VERSION) --appBuild $(BUILD) --icon ../../resources/icon.png --release --sourceDir ./cmd/install
-	mv SandboxerInstall.app output/SandboxerInstall.app
 
 cmd/install/embed/sandboxer_submit.tar.gz: resources/sandboxer_submit.tar.gz
 	cp resources/sandboxer_submit.tar.gz cmd/install/embed/sandboxer_submit.tar.gz
 
-cmd/install/embed/sandboxer.tar.gz: Sandboxer.app
+cmd/install/embed/sandboxer.tar.gz: Sandboxer.app/Contents/MacOS/sandboxer Sandboxer.app/Contents/MacOS/submit Sandboxer.app/Contents/Resources/LICENSE
 	tar cfvz $@ Sandboxer.app
 
-Sandboxer.app: $(wildcard cmd/sandboxer/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go cmd/sandboxer/icon.go
+Sandboxer.app/Contents/Resources/LICENSE: LICENSE Sandboxer.app/Contents/MacOS/sandboxer
+	cp $< $@
+
+Sandboxer.app/Contents/MacOS/submit: $(wildcard cmd/submit/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go Sandboxer.app/Contents/MacOS/sandboxer
+	go build -o ./Sandboxer.app/Contents/MacOS ./cmd/submit
+
+Sandboxer.app/Contents/MacOS/sandboxer: $(wildcard cmd/sandboxer/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go cmd/sandboxer/icon.go
 	fyne package --os darwin --name Sandboxer --appID in.kondrash.sandboxer --appVersion $(VERSION) --appBuild $(BUILD) --icon ../../resources/icon.png --release --sourceDir ./cmd/sandboxer
-#	rm -rf output
-#	mkdir -p output
-#	mv Sandboxer.app output
 
 cmd/sandboxer/icon.go: resources/icon.png 
 	fyne bundle --name ApplicationIcon --package main --output cmd/sandboxer/icon.go resources/icon.png 
 
-output/Sandboxer.app/Contents/MacOS/submit: $(wildcard cmd/submit/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go
-	go build -o ./output/Sandboxer.app/Contents/MacOS ./cmd/submit
-
 pkg/globals/version.go: cmd/genver/main.go
-	echo Version $(VERSION_V) $(BUILD)
 	go run ./cmd/genver/main.go $(VERSION_V) $(BUILD) pkg/globals/version.go
 
 clean:
-	rm -rf output Sandboxer.dmg  
+	rm -rf setup_$(GOOS)_$(GOARCH).zip Sandboxer.app  SandboxerInstall.app cmd/install/embed/sandboxer.tar.gz cmd/install/embed/sandboxer_submit.tar.gz cmd/sandboxer/icon.go pkg/globals/version.go

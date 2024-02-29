@@ -33,6 +33,6 @@ func (Windows) StopService(name string) string {
 	return fmt.Sprintf("sc stop %s", name)
 }
 
-func (Windows) StopProcess(name string) string {
-	return fmt.Sprintf("taskkill /im %s.exe /f", name)
+func (Windows) StopProcess(pidFile string) string {
+	return fmt.Sprintf("SET /P PID= < %s\ntaskkill /pid %%PID%% /f", pidFile)
 }

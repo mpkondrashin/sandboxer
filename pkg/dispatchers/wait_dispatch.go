@@ -58,9 +58,9 @@ func (d *WaitDispatch) ProcessTask(tsk *task.Task) error {
 		tsk.SetChannel(task.ChWait)
 	case vone.StatusFailed:
 		if status.Error.Code == "Unsupported" {
-			tsk.SetChannel(task.ChDone)
 			tsk.SetRiskLevel(task.RiskLevelUnsupported)
 			tsk.SetMessage(status.Error.Message)
+			tsk.SetChannel(task.ChDone)
 			d.list.Updated()
 			return nil
 		}

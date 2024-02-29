@@ -14,20 +14,20 @@ import (
 )
 
 type Script struct {
-	filePath string
+	FilePath string
 	lines    []string
 	header   string
 }
 
 func New(filePath, header string) *Script {
 	return &Script{
-		filePath: filePath,
+		FilePath: filePath,
 		header:   header,
 	}
 }
 
 func (s *Script) Save() error {
-	f, err := os.Create(s.filePath)
+	f, err := os.Create(s.FilePath)
 	if err != nil {
 		return err
 	}

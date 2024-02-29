@@ -160,7 +160,7 @@ func ExtractTar(folder string, reader io.Reader) error {
 */
 
 func Untar(fs fs.FS, folder string, filePath string) error {
-	logging.Debugf("Untar %s to %s", folder, filePath)
+	logging.Debugf("Untar %s to %s", filePath, folder)
 	sourceFile, err := fs.Open(filePath)
 	if err != nil {
 		return fmt.Errorf("Open(\"%s\"): %w", filePath, err)

@@ -88,7 +88,11 @@ func (i *Installer) Path(fileName string) string {
 }
 
 func (i *Installer) InstallFolder() string {
-	return filepath.Join(i.config.Folder, globals.AppFolderName)
+	if xplatform.IsWindows() {
+		return filepath.Join(i.config.Folder, globals.AppFolderName)
+	} else {
+		return i.config.Folder
+	}
 }
 
 func (i *Installer) Run(name string, args ...string) error {
@@ -145,8 +149,14 @@ const uninstallScriptName = "uninstall"
 func (i *Installer) StageCreateUninstallScript() error {
 	logging.Debugf("Install: StageCreateUninstallScript")
 	scriptName := uninstallScriptName + script.Get().Extension()
-	logging.Debugf("Install:  uninstall script name: %s", scriptName)
-	i.uninstallScript = script.New(i.Path(scriptName), script.Get().Comment("Uninstallation script"))
+	logging.Debugf("Install: uninstall script name: %s", scriptName)
+	temp, err := os.MkdirTemp(os.TempDir(), globals.Name+"-uninstall-*")
+	if err != nil {
+		return fmt.Errorf("MkdirTemp: %w", err)
+	}
+	uninstallScriptPath := filepath.Join(temp, scriptName)
+	logging.Debugf("Install: uninstall script path: %s", uninstallScriptPath)
+	i.uninstallScript = script.New(uninstallScriptPath, script.Get().Comment("Uninstallation script"))
 	return nil
 }
 
@@ -156,9 +166,16 @@ func (i *Installer) StageCreateFolders() error {
 	if err != nil {
 		return err
 	}
+	tasksFolder, err := globals.TasksFolder()
+	if err != nil {
+		return err
+	}
 	folders := []string{
-		filepath.Join(i.config.Folder, globals.AppName),
 		logsFolder,
+		tasksFolder,
+	}
+	if xplatform.IsWindows() {
+		folders = append(folders, i.InstallFolder())
 	}
 	for _, f := range folders {
 		logging.Debugf("Install: Create folder \"%s\"", f)
@@ -240,15 +257,17 @@ func (i *Installer) StageWaitServiceToStop() error {
 func (i *Installer) StageExtractFiles() error {
 	logging.Debugf("Install: StageExtractExecutable")
 	path := "embed/" + globals.Name + ".tar.gz"
-	err := extract.Untar(embedFS, i.InstallFolder(), path)
-	if err != nil {
+	if err := extract.Untar(embedFS, i.InstallFolder(), path); err != nil {
 		return err
 	}
-	logging.Debugf("Extracted: %s", path)
-	//if err := i.uninstallScript.AddLine(script.Get().RemoveDir(newPath)); err != nil {
-	//	return err
-	//}
-
+	targetPath := i.InstallFolder()
+	if !xplatform.IsWindows() {
+		targetPath = filepath.Join(i.InstallFolder(), globals.AppName+".app")
+	}
+	if err := i.uninstallScript.AddLine(script.Get().RemoveDir(targetPath)); err != nil {
+		return err
+	}
+	logging.Debugf("Extracted: %s", targetPath)
 	return nil
 }
 
@@ -268,12 +287,13 @@ func (i *Installer) StageExtendSendTo() error {
 			return err
 		}
 	} else {
-		path := "embed/" + globals.Name + "_submit.tar.gz"
+		src := "embed/" + globals.Name + "_submit.tar.gz"
 		folder := filepath.Join(os.Getenv("HOME"), "/Library/Services")
-		err := extract.Untar(embedFS, folder, path)
+		err := extract.Untar(embedFS, folder, src)
 		if err != nil {
 			return err
 		}
+		path = filepath.Join(folder, globals.AppName+".workflow")
 	}
 	return i.uninstallScript.AddLine(script.Get().RemoveDir(path))
 }
@@ -306,7 +326,23 @@ func (i *Installer) StageUninstall() error {
 	if err != nil {
 		return err
 	}
-	return i.uninstallScript.AddLine(script.Get().StopProcess(globals.AppName))
+	if err := i.uninstallScript.AddLine(script.Get().StopProcess(pidPath)); err != nil {
+		return err
+	}
+	scriptName := uninstallScriptName + script.Get().Extension()
+	var scriptPath string
+	if xplatform.IsWindows() {
+		scriptPath = i.Path(scriptName)
+	} else {
+		scriptPath, err = xplatform.ExecutablePath(xplatform.InstallFolder(), globals.AppName, scriptName)
+		if err != nil {
+			return err
+		}
+	}
+	if err := os.Rename(i.uninstallScript.FilePath, scriptPath); err != nil {
+		return err
+	}
+	return nil
 }
 
 /*
