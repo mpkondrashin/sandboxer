@@ -306,12 +306,12 @@ func (i *Installer) StageAddToStartMenu() error {
 		return nil
 	}
 	appPath := filepath.Join(i.InstallFolder(), xplatform.ExecutableName(globals.Name))
-	_, err := xplatform.LinkToStartMenu(globals.AppName, globals.AppName, appPath)
+	_, err := xplatform.LinkToStartMenu(globals.AppName, globals.AppName, appPath, false)
 	if err != nil {
 		return err
 	}
 	scriptPath := i.Path(uninstallScriptName + script.Get().Extension())
-	path, err := xplatform.LinkToStartMenu(globals.AppName, "Uninstall", scriptPath)
+	path, err := xplatform.LinkToStartMenu(globals.AppName, "Uninstall", scriptPath, true)
 	if err != nil {
 		return err
 	}
