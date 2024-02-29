@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"sandboxer/pkg/config"
+	"sandboxer/pkg/fatal"
 	"sandboxer/pkg/fifo"
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
@@ -36,11 +37,13 @@ func LaunchSandboxer(conf *config.Configuration) {
 	logging.Infof("Launch " + globals.AppName)
 	executablePath, err := SubmissionsExecutablePath(conf)
 	if err != nil {
+		fatal.Warning("Config Error", err.Error())
 		panic(err)
 	}
 	logging.Infof("Run " + executablePath)
 	cmd := exec.Command(executablePath, "--submissions")
 	if err := cmd.Start(); err != nil {
+		fatal.Warning("Execute Error", err.Error())
 		panic(err)
 	}
 	//	if err := cmd.Wait(); err != nil {
@@ -55,6 +58,7 @@ func OpenFIFO(conf *config.Configuration) *fifo.Writer {
 		return fifoWriter
 	}
 	if !fifo.IsDown(err) {
+		fatal.Warning("FIFO Error", err.Error())
 		panic(err)
 	}
 	LaunchSandboxer(conf)
@@ -73,12 +77,14 @@ func main() {
 	configFilePath, err := globals.ConfigurationFilePath()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ConfigurationFilePath: %v", err)
+		fatal.Warning("Configuration Error", err.Error())
 		os.Exit(10)
 	}
 	conf := config.New(configFilePath)
 	if err := conf.Load(); err != nil {
 		if runtime.GOOS == "windows" { // After creating darwin installer this if should be removed
 			fmt.Fprintf(os.Stderr, "conf.Load: %v", err)
+			fatal.Warning("Configuration Error", err.Error())
 			os.Exit(20)
 		}
 	}
@@ -86,6 +92,7 @@ func main() {
 	closeLogging, err := globals.SetupLogging(submitLog)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "SetupLogging: %v", err)
+		fatal.Warning("Setup Logging Error", err.Error())
 		os.Exit(30)
 	}
 	defer closeLogging()
@@ -96,21 +103,27 @@ func main() {
 	}()
 	logging.Infof("%s Version %s Build %s Submit Started", globals.AppName, globals.Version, globals.Build)
 	if len(os.Args) != 2 {
-		logging.Errorf("Missing or wrong number of parameters: %s", strings.Join(os.Args[1:], " "))
+		msg := fmt.Sprintf("Missing or wrong number of parameters: %s", strings.Join(os.Args[1:], " "))
+		logging.Errorf(msg)
+		fatal.Warning("Arguments Error", msg)
 		os.Exit(40)
 	}
 	filePath := os.Args[1]
 	logging.Infof("Submit \"%s\"", filePath)
 	fifoWriter := OpenFIFO(conf)
 	if fifoWriter == nil {
-		logging.Errorf(globals.AppName + " is not running and can not be launched")
+		msg := fmt.Sprintf(globals.AppName + " is not running and can not be launched")
+		logging.Errorf(msg)
+		fatal.Warning("Configuration Error", msg)
 		os.Exit(50)
 	}
 	defer func() {
 		logging.LogError(fifoWriter.Close())
 	}()
 	if err = fifoWriter.Write(filePath); err != nil {
-		logging.Errorf("fifoWriter.Write: %v", err)
+		msg := fmt.Sprintf("fifoWriter.Write: %v", err)
+		logging.Errorf(msg)
+		fatal.Warning("Configuration Error", msg)
 		os.Exit(60)
 	}
 	logging.Infof("Submit finished")

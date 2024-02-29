@@ -22,6 +22,7 @@ import (
 
 	"sandboxer/pkg/config"
 	"sandboxer/pkg/dispatchers"
+	"sandboxer/pkg/fatal"
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
 	"sandboxer/pkg/task"
@@ -179,7 +180,9 @@ func HandleSignals() {
 func main() {
 	configFilePath, err := globals.ConfigurationFilePath()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "globals.ConfigurationFilePath: %v", err)
+		msg := fmt.Sprintf("globals.ConfigurationFilePath: %v", err)
+		fmt.Fprintln(os.Stderr, msg)
+		fatal.Warning("Configuration Path Error", msg)
 		os.Exit(globals.ExitGetConfigurationFileathError)
 	}
 	close, err := globals.SetupLogging(globals.Name + ".log")
@@ -193,6 +196,7 @@ func main() {
 		logging.LogError(err)
 		fmt.Fprintf(os.Stderr, "conf.Load: %v", err)
 		if !errors.Is(err, os.ErrNotExist) {
+			fatal.Warning("Config Error", err.Error())
 			os.Exit(globals.ExitLoadConfigError)
 		}
 	}
@@ -201,8 +205,10 @@ func main() {
 	logging.Debugf("Configuration file: %s", configFilePath)
 	removePid, err := SavePid()
 	if err != nil {
-		logging.Errorf("Save pid: %v", err)
-		fmt.Fprintf(os.Stderr, "Save pid: %v", err)
+		msg := fmt.Sprintf("Save pid: %v", err)
+		logging.Errorf(msg)
+		fmt.Fprintln(os.Stderr, msg)
+		fatal.Warning("Save PID Error", msg)
 		os.Exit(globals.ExitSavePidError)
 	}
 	defer removePid()
