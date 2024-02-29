@@ -59,7 +59,7 @@ func AutoStartDarwin(name string, path string) (string, error) {
 		return "", fmt.Errorf("%s: %w", userProfile, ErrNoUserProfile)
 	}
 	folder := "Library/LaunchAgents"
-	fullPath := filepath.Join(userProfile, folder, name+".plist")
+	fullPath := filepath.Join(userProfileFolder, folder, name+".plist")
 	f, err := os.Create(fullPath)
 	if err != nil {
 		return "", err

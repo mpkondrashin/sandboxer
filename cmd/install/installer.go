@@ -16,6 +16,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -29,7 +30,7 @@ import (
 	"sandboxer/pkg/xplatform"
 )
 
-//go:embed embed/sandboxer.tar.gz
+//go:embed embed/*.tar.gz
 var embedFS embed.FS
 
 type Installer struct {
@@ -258,12 +259,23 @@ func (i *Installer) StageExtractPericulosum() error {
 
 func (i *Installer) StageExtendSendTo() error {
 	logging.Debugf("Install: ExtendSendTo")
-	appPath := filepath.Join(i.InstallFolder(), "submit.exe")
-	linkPath, err := xplatform.ExtendContextMenu(globals.AppName, appPath)
-	if err != nil {
-		return err
+	var path string
+	var err error
+	if runtime.GOOS == "windows" {
+		appPath := filepath.Join(i.InstallFolder(), "submit.exe")
+		path, err = xplatform.ExtendContextMenu(globals.AppName, appPath)
+		if err != nil {
+			return err
+		}
+	} else {
+		path := "embed/" + globals.Name + "_submit.tar.gz"
+		folder := filepath.Join(os.Getenv("HOME"), "/Library/Services")
+		err := extract.Untar(embedFS, folder, path)
+		if err != nil {
+			return err
+		}
 	}
-	return i.uninstallScript.AddLine(script.Get().RemoveDir(linkPath))
+	return i.uninstallScript.AddLine(script.Get().RemoveDir(path))
 }
 
 func (i *Installer) StageAutoStart() error {
@@ -275,11 +287,11 @@ func (i *Installer) StageAutoStart() error {
 	var appPath string
 	appPath, err := xplatform.ExecutablePath(i.config.Folder, globals.AppName, globals.Name)
 	if err != nil {
-		return err
+		return fmt.Errorf("ExecutablePath: %w", err)
 	}
 	path, err := xplatform.AutoStart(globals.AppID, appPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("AutoStart: %w", err)
 	}
 	return i.uninstallScript.AddLine(script.Get().RemoveDir(path))
 }
