@@ -53,13 +53,13 @@ func makeLink(src, dst string, asAdministrator bool) error {
 	if _, err := oleutil.PutProperty(idispatch, "TargetPath", src); err != nil {
 		return err
 	}
+	if _, err := oleutil.CallMethod(idispatch, "Save"); err != nil {
+		return err
+	}
 	if asAdministrator {
 		if err := runAsAdministrator(dst); err != nil {
 			return nil
 		}
-	}
-	if _, err := oleutil.CallMethod(idispatch, "Save"); err != nil {
-		return err
 	}
 	return nil
 }
