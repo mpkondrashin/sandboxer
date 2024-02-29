@@ -30,7 +30,7 @@ func (p *PageFinish) Name() string {
 func (p *PageFinish) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
 	l1 := widget.NewLabel(globals.AppName + " service sucessfully installed.")
 	hint := "Right click on any file and pick Send To -> " + globals.AppName + "."
-	if xplatform.IsWindows() {
+	if !xplatform.IsWindows() {
 		hint = "Right click on any file and pick Quick Actions -> " + globals.AppName + "."
 	}
 	l2 := widget.NewLabel(hint)
