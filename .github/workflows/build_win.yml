@@ -8,6 +8,9 @@ permissions:
 jobs:
   Build-Release-Windows:
     runs-on: windows-latest
+    env:
+      GOPRIVATE: github.com/mpkondrashin/ddan
+      DDAN_FOR_SANDBOXER: ${{ secrets.DDAN_FOR_SANDBOXER }}
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -21,6 +24,9 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: 1.21.5
+
+      - name: Config git
+        run: git config --global url.https://$DDAN_FOR_SANDBOXER@github.com/.insteadOf https://github.com/
 
       - name: Install Fyne
         run: go install fyne.io/fyne/v2/cmd/fyne@latest
