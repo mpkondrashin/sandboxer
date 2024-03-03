@@ -202,12 +202,18 @@ func (i *Installer) UninstallStages() (stages []UninstallStage) {
 }
 
 func (i *Installer) Uninstall(callback func(name string) error) error {
+	message := ""
 	for _, stage := range i.UninstallStages() {
-		logging.Debugf("Uninstall Stage %s", stage.Name)
+		logging.Debugf("Uninstall %s. Remove \"%s\"", stage.Name, stage.Path)
 		if err := callback(stage.Name); err != nil {
 			return err
 		}
-		logging.Debugf("Stage %s. Remove \"%s\"", stage.Name, stage.Path)
+		if err := os.RemoveAll(stage.Path); err != nil {
+			message += err.Error() + "\n"
+		}
+	}
+	if message != "" {
+		return fmt.Errorf("%s", message)
 	}
 	return nil
 }
