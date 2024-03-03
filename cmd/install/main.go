@@ -27,6 +27,12 @@ func InstallLogFolder() string {
 	}
 	return filepath.Dir(path)
 }
+
+// TODO:
+// Redirect stderr to log
+// show fatal.Warning in case of error
+// change 10 to globals constant
+
 func main() {
 	close, err := logging.NewFileLog(InstallLogFolder(), installWizardLog)
 	if err != nil {
@@ -37,11 +43,11 @@ func main() {
 		logging.Debugf("Close log file")
 		close()
 	}()
-	defer func() {
+	/*defer func() {
 		if err := recover(); err != nil {
 			logging.Criticalf("panic: %v", err)
 		}
-	}()
+	}()*/
 	logging.Infof("Start. Version %s Build %s", globals.Version, globals.Build)
 	logging.Debugf("OS: %s (%s)", runtime.GOOS, runtime.GOARCH)
 	capturesFolder := ""

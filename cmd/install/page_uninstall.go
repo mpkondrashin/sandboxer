@@ -18,32 +18,26 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-type PageInstallation struct {
+type PageUninstall struct {
 	BasePage
 	progressBar *widget.ProgressBar
 	statusLabel *widget.Label
 }
 
-var _ Page = &PageInstallation{}
+var _ Page = &PageUninstall{}
 
-func (p *PageInstallation) Name() string {
-	return "Copy Files"
+func (p *PageUninstall) Name() string {
+	return "Uninstall"
 }
 
-func (p *PageInstallation) Next(previousPage PageIndex) PageIndex {
-	p.previousPage = previousPage
-	return pgFinish
+func (p *PageUninstall) Next(previousPage PageIndex) PageIndex {
+	p.SavePrevious(previousPage)
+	return pgExit
 }
 
-func (p *PageInstallation) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
+func (p *PageUninstall) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
 	p.progressBar = widget.NewProgressBar()
 	p.statusLabel = widget.NewLabel("")
-	//	var copyButton *widget.Button
-	//copyButton = widget.NewButton("Copy Files",
-	//func() {
-	//	copyButton.Disable()
-
-	//})
 	return container.NewVBox(
 		p.progressBar,
 		p.statusLabel,
@@ -51,11 +45,11 @@ func (p *PageInstallation) Content(win fyne.Window, installer *Installer) fyne.C
 	)
 }
 
-func (p *PageInstallation) Run(win fyne.Window, installer *Installer) {
-	total := float64(len(installer.Stages()) - 1)
+func (p *PageUninstall) Run(win fyne.Window, installer *Installer) {
+	total := float64(len(installer.UninstallStages()) - 1)
 	index := 0
 	stageName := ""
-	err := installer.Install(func(name string) error {
+	err := installer.Uninstall(func(name string) error {
 		stageName = name
 		p.progressBar.SetValue(float64(index) / total)
 		p.statusLabel.SetText(name)
@@ -71,6 +65,6 @@ func (p *PageInstallation) Run(win fyne.Window, installer *Installer) {
 	}
 }
 
-func (p *PageInstallation) AquireData(installer *Installer) error {
+func (p *PageUninstall) AquireData(installer *Installer) error {
 	return nil
 }

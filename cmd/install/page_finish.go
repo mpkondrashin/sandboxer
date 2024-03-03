@@ -18,13 +18,19 @@ import (
 )
 
 type PageFinish struct {
+	BasePage
 	//runCheck *widget.Check
 }
 
-var _ Page = &PageAutostart{}
+var _ Page = &PageFinish{}
 
 func (p *PageFinish) Name() string {
 	return "Finish"
+}
+
+func (p *PageFinish) Next(previousPage PageIndex) PageIndex {
+	p.SavePrevious(previousPage)
+	return pgExit
 }
 
 func (p *PageFinish) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {

@@ -19,15 +19,21 @@ import (
 	"github.com/mpkondrashin/vone"
 )
 
-type PageDomain struct {
+type PageVODomain struct {
+	BasePage
 	chooseLabel      *widget.Label
 	visionOneDomains *widget.Select
 }
 
-var _ Page = &PageDomain{}
+var _ Page = &PageVODomain{}
 
-func (p *PageDomain) Name() string {
+func (p *PageVODomain) Name() string {
 	return "Domain"
+}
+
+func (p *PageVODomain) Next(previousPage PageIndex) PageIndex {
+	p.SavePrevious(previousPage)
+	return pgAutostart
 }
 
 /*
@@ -61,7 +67,7 @@ func (p *PageDomain) Content(win fyne.Window, installer *Installer) fyne.CanvasO
 		return container.NewVBox(p.chooseLabel, domainForm)
 	}
 */
-func (p *PageDomain) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
+func (p *PageVODomain) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
 
 	p.chooseLabel = widget.NewLabel("Choose Vision One Domain:")
 	var domains []string
@@ -79,7 +85,7 @@ func (p *PageDomain) Content(win fyne.Window, installer *Installer) fyne.CanvasO
 	)
 	return container.NewVBox(p.chooseLabel, domainForm)
 }
-func (p *PageDomain) Run(win fyne.Window, installer *Installer) {
+func (p *PageVODomain) Run(win fyne.Window, installer *Installer) {
 	if p.visionOneDomains.Selected != "" {
 		return
 	}
@@ -91,7 +97,7 @@ func (p *PageDomain) Run(win fyne.Window, installer *Installer) {
 	p.chooseLabel.SetText("Detected Vision One Domain:")
 }
 
-func (p *PageDomain) AquireData(installer *Installer) error {
+func (p *PageVODomain) AquireData(installer *Installer) error {
 	if p.visionOneDomains.Selected == "" {
 		return fmt.Errorf("No Domain selected")
 	}

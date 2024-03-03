@@ -6,14 +6,17 @@ import (
 	"path/filepath"
 )
 
-func LinkToStartMenu(folder, name, path string, asAdministrator bool) (string, error) {
+func LinkToStartMenu(dryRun bool, folder, name, path string, asAdministrator bool) (string, error) {
 	folderPath := filepath.Join(os.Getenv("PROGRAMDATA"), `Microsoft\Windows\Start Menu\Programs`, folder)
+	linkPath := filepath.Join(folderPath, name) + ".lnk"
+	if dryRun {
+		return linkPath, nil
+	}
 	if err := os.Mkdir(folderPath, 0755); err != nil {
 		if !errors.Is(err, os.ErrExist) {
 			return "", err
 		}
 	}
-	linkPath := filepath.Join(folderPath, name) + ".lnk"
 	err := makeLink(path, linkPath, asAdministrator)
 	if err != nil {
 		_ = os.RemoveAll(folderPath)

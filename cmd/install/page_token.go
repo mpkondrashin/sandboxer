@@ -14,23 +14,26 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
-
-	"sandboxer/pkg/logging"
 )
 
-type PageOptions struct {
+type PageVOToken struct {
+	BasePage
 	tokenEntry *widget.Entry
 }
 
-var _ Page = &PageOptions{}
+var _ Page = &PageVOToken{}
 
-func (p *PageOptions) Name() string {
+func (p *PageVOToken) Name() string {
 	return "Token"
 }
 
-func (p *PageOptions) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
+func (p *PageVOToken) Next(previousPage PageIndex) PageIndex {
+	p.SavePrevious(previousPage)
+	return pgVODomain
+}
+
+func (p *PageVOToken) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
 	labelTop := widget.NewLabel("Please open Vision One console to get all nessesary parameters")
 	p.tokenEntry = widget.NewMultiLineEntry()
 	p.tokenEntry.Wrapping = fyne.TextWrapBreak
@@ -44,17 +47,17 @@ func (p *PageOptions) Content(win fyne.Window, installer *Installer) fyne.Canvas
 	return container.NewVBox(labelTop, optionsForm)
 }
 
-func (p *PageOptions) Run(win fyne.Window, installer *Installer) {
-	err := installer.LoadConfig()
-	if err != nil {
-		logging.Errorf("LoadConfig: %v", err)
-		dialog.ShowError(err, win)
-	}
+func (p *PageVOToken) Run(win fyne.Window, installer *Installer) {
+	// No need to load, config is loaded when application started
+	//	err := installer.LoadConfig()
+	//	if err != nil {
+	//		logging.Errorf("LoadConfig: %v", err)
+	//		dialog.ShowError(err, win)
+	//	}
 	p.tokenEntry.SetText(installer.config.VisionOne.Token)
-
 }
 
-func (p *PageOptions) AquireData(installer *Installer) error {
+func (p *PageVOToken) AquireData(installer *Installer) error {
 	if p.tokenEntry.Text == "" {
 		return fmt.Errorf("token field is empty")
 	}

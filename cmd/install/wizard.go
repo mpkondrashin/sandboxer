@@ -9,12 +9,12 @@ Installation wizard
 package main
 
 import (
+	"errors"
 	"fmt"
 	"image/png"
 	"log"
 	"os"
 	"path/filepath"
-	"runtime"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -26,61 +26,143 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
+	"golang.org/x/mod/semver"
+
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
 )
 
 //go:generate fyne bundle --name IconSVGResource --output resource.go ../../resources/icon.png
 
-type Wizard struct {
-	pages          []Page
-	current        int
-	app            fyne.App
-	win            fyne.Window
-	installer      *Installer
-	capturesFolder string
-}
+var ErrAbort = errors.New("abort")
 
 type Page interface {
 	Name() string
 	Content(win fyne.Window, installer *Installer) fyne.CanvasObject
 	Run(win fyne.Window, installer *Installer)
 	AquireData(installer *Installer) error
+	Next(previousPage PageIndex) PageIndex
+	Prev() PageIndex
+}
+
+type BasePage struct {
+	wiz          *Wizard
+	previousPage PageIndex
+}
+
+func NewBasePage(wiz *Wizard) BasePage {
+	return BasePage{
+		wiz: wiz,
+	}
+}
+func (p *BasePage) SavePrevious(previousPage PageIndex) {
+	if previousPage == pgExit {
+		return
+	}
+	p.previousPage = previousPage
+}
+
+func (p *BasePage) Prev() PageIndex {
+	return p.previousPage
+}
+
+type PageIndex int
+
+const (
+	pgIntro PageIndex = iota
+	pgDelete
+	pgDowngrade
+	pgReinstall
+	pgUpgrade
+	pgVOToken
+	pgVODomain
+	pgAutostart
+	pgFolder
+	pgInstallation
+	pgUninstall
+	pgFinish
+	pgExit
+)
+
+type Wizard struct {
+	pages          []Page
+	firstPage      PageIndex
+	currentPage    PageIndex
+	app            fyne.App
+	win            fyne.Window
+	pagesList      *fyne.Container
+	buttonsLine    *fyne.Container
+	installer      *Installer
+	capturesFolder string
 }
 
 func NewWizard(capturesFolder string) *Wizard {
 	installer, err := NewInstaller(globals.AppID)
 	if err != nil {
+		logging.LogError(err)
 		return nil // let it crash
 	}
-	c := &Wizard{
+	w := &Wizard{
 		app:            app.NewWithID(globals.AppID),
+		pagesList:      container.NewVBox(),
+		buttonsLine:    container.NewHBox(),
 		capturesFolder: capturesFolder,
 		installer:      installer,
 	}
-	c.app.Lifecycle()
-	_ = c.installer.LoadConfig()
-	c.win = c.app.NewWindow(globals.AppName + " Install Program")
-	c.win.Resize(fyne.NewSize(600, 400))
+	w.app.Lifecycle()
+	w.win = w.app.NewWindow(globals.AppName + " Install Program")
+	w.win.Resize(fyne.NewSize(600, 400))
 	//c.win.SetFixedSize(true)
-	c.win.SetMaster()
-	c.pages = []Page{
-		&PageIntro{},
-		&PageOptions{},
-		&PageDomain{},
-	}
-	if IsWindows() {
-		c.pages = append(c.pages, &PageFolder{})
-	}
-	c.pages = append(c.pages,
-		&PageAutostart{},
-		&PageInstallation{},
-		&PageFinish{},
-	)
+	w.win.SetMaster()
+	w.firstPage = w.Pages()
+	w.currentPage = w.firstPage
 	prtScr := &desktop.CustomShortcut{KeyName: fyne.KeyI, Modifier: fyne.KeyModifierControl}
-	c.win.Canvas().AddShortcut(prtScr, c.captureWindowContents)
-	c.win.SetContent(c.Window(c.pages[0]))
-	return c
+	w.win.Canvas().AddShortcut(prtScr, w.captureWindowContents)
+	w.win.SetContent(w.Window())
+	logging.Debugf("NewWizard: %v", w)
+	return w
+}
+
+func (w *Wizard) Pages() PageIndex {
+	logging.Debugf("Pages")
+	w.pages = make([]Page, pgExit)
+	w.pages[pgIntro] = &PageIntro{BasePage: NewBasePage(w)}
+	//w.pages[pgDelete] = &PageDelete{BasePage: NewBasePage(w)}
+	w.pages[pgDowngrade] = &PageDowngrade{BasePage: NewBasePage(w)}
+	w.pages[pgReinstall] = &PageReinstall{BasePage: NewBasePage(w)}
+	w.pages[pgUpgrade] = &PageUpgrade{BasePage: NewBasePage(w)}
+	w.pages[pgVOToken] = &PageVOToken{BasePage: NewBasePage(w)}
+	w.pages[pgVODomain] = &PageVODomain{BasePage: NewBasePage(w)}
+	w.pages[pgAutostart] = &PageAutostart{BasePage: NewBasePage(w)}
+	w.pages[pgFolder] = &PageFolder{BasePage: NewBasePage(w)}
+	w.pages[pgInstallation] = &PageInstallation{BasePage: NewBasePage(w)}
+	w.pages[pgUninstall] = &PageUninstall{BasePage: NewBasePage(w)}
+	w.pages[pgFinish] = &PageFinish{BasePage: NewBasePage(w)}
+
+	err := w.installer.config.Load()
+	logging.LogError(err)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return pgIntro
+		}
+		//if errors.Is(err, &yaml.TypeError{}) {	}
+		w.pages[pgDelete] = &PageDelete{
+			BasePage:     NewBasePage(w),
+			ErrorMessage: err.Error(),
+		}
+		return pgDelete
+	}
+	cmp := semver.Compare(globals.Version, w.installer.config.Version)
+	logging.Infof("Installer version: %s. Config version %s. Compare %d", globals.Version, w.installer.config.Version, cmp)
+	switch cmp {
+	case -1:
+		return pgDowngrade
+	case 0:
+		return pgReinstall
+	case 1:
+		return pgUpgrade
+	}
+	return pgIntro
 }
 
 func (c *Wizard) captureWindowContents(shortcut fyne.Shortcut) {
@@ -88,7 +170,7 @@ func (c *Wizard) captureWindowContents(shortcut fyne.Shortcut) {
 		log.Println("--capture is not set")
 		return
 	}
-	fileName := fmt.Sprintf("page_%d.png", c.current)
+	fileName := fmt.Sprintf("page_%d.png", c.currentPage)
 	filePath := filepath.Join(c.capturesFolder, fileName)
 	f, err := os.Create(filePath)
 	if err != nil {
@@ -117,55 +199,61 @@ func (c *Wizard) captureWindowContents(shortcut fyne.Shortcut) {
 		}
 	}
 */
-func (c *Wizard) Window(p Page) fyne.CanvasObject {
-	left := container.NewVBox()
-	image := canvas.NewImageFromResource(ApplicationIcon)
-	image.SetMinSize(fyne.NewSize(52, 52))
-	image.FillMode = canvas.ImageFillContain
-	left.Add(image)
-	for _, page := range c.pages {
-		if page == p {
-			left.Add(widget.NewLabelWithStyle("▶ "+page.Name(), fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
-		} else {
-			left.Add(widget.NewLabel("    " + page.Name()))
-		}
-	}
-
+func (c *Wizard) Window() fyne.CanvasObject {
+	logging.Debugf("Window")
+	p := c.pages[c.currentPage]
+	c.UpdatePagesList()
 	middle := container.NewPadded(container.NewVBox(layout.NewSpacer(), p.Content(c.win, c.installer), layout.NewSpacer()))
-	upper := container.NewBorder(nil, nil, container.NewHBox(left, widget.NewSeparator()), nil, middle)
-	prevButton, nextButton := c.Buttons()
-	buttons := container.NewBorder(nil, nil, nil,
-		container.NewHBox(prevButton, nextButton))
+	upper := container.NewBorder(nil, nil, container.NewHBox(c.pagesList, widget.NewSeparator()), nil, middle)
+	buttons := container.NewBorder(nil, nil, nil, c.buttonsLine)
 	bottom := container.NewVBox(widget.NewSeparator(), buttons)
-	_ = bottom
-
 	return container.NewBorder(nil, container.NewPadded(bottom), nil, nil, upper)
 }
 
-func (c *Wizard) Buttons() (*widget.Button, *widget.Button) {
-	//quitButton := widget.NewButtonWithIcon("Quit", theme.CancelIcon(), c.Quit)
+func (c *Wizard) UpdatePagesList() {
+	logging.Debugf("UpdatePagesList")
+	c.pagesList.RemoveAll()
+	image := canvas.NewImageFromResource(ApplicationIcon)
+	image.SetMinSize(fyne.NewSize(52, 52))
+	image.FillMode = canvas.ImageFillContain
+	c.pagesList.Add(image)
 
+	for i := c.firstPage; i != pgExit; i = c.pages[i].Next(i) {
+		pg := c.pages[i]
+		logging.Debugf("Left Menu item %d", i)
+		if i == c.currentPage {
+			c.pagesList.Add(widget.NewLabelWithStyle("▶ "+pg.Name(), fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
+			prev, next := c.Buttons(i == c.firstPage, pg.Next(pgExit) == pgExit)
+			c.buttonsLine.RemoveAll()
+			c.buttonsLine.Add(prev)
+			c.buttonsLine.Add(next)
+		} else {
+			c.pagesList.Add(widget.NewLabel("    " + pg.Name()))
+		}
+	}
+}
+
+func (c *Wizard) Buttons(first, last bool) (*widget.Button, *widget.Button) {
 	prevButton := widget.NewButtonWithIcon("Back", theme.NavigateBackIcon(), c.Prev)
-	if c.current == 0 {
+	if first {
 		prevButton.Disable()
 	}
 
 	nextButton := widget.NewButtonWithIcon("Next", theme.NavigateNextIcon(), c.Next)
 	nextButton.IconPlacement = widget.ButtonIconTrailingText
 
-	if c.current == len(c.pages)-1 {
+	if last {
 		//Button.Disable()
 		//nextButton.IconPlacement = widget.ButtonIconTrailingText
 		//quitButton.Disable()
 		nextButton = widget.NewButtonWithIcon("Quit", theme.CancelIcon(), c.Quit)
-
 	}
 	return prevButton, nextButton
 }
 
 func (c *Wizard) Quit() {
 	logging.Debugf("Quit")
-	err := c.pages[c.current].AquireData(c.installer)
+	err := c.pages[c.currentPage].AquireData(c.installer)
 	if err != nil {
 		logging.Errorf("AquireData: %v", err)
 		dialog.ShowError(err, c.win)
@@ -175,29 +263,28 @@ func (c *Wizard) Quit() {
 }
 
 func (c *Wizard) Next() {
-	logging.Debugf("Next from page %d", c.current)
-	err := c.pages[c.current].AquireData(c.installer)
+	logging.Debugf("Next from page %d", c.currentPage)
+	err := c.pages[c.currentPage].AquireData(c.installer)
 	if err != nil {
+		if errors.Is(err, ErrAbort) {
+			c.app.Quit()
+		}
 		logging.Errorf("AquireData: %v", err)
 		dialog.ShowError(err, c.win)
 		return
 	}
-	c.current++
-	c.win.SetContent(c.Window(c.pages[c.current]))
-	c.pages[c.current].Run(c.win, c.installer)
+	c.currentPage = c.pages[c.currentPage].Next(c.currentPage)
+	c.win.SetContent(c.Window())
+	c.pages[c.currentPage].Run(c.win, c.installer)
 }
 
 func (c *Wizard) Prev() {
-	logging.Debugf("Prev from page %d", c.current)
-	c.current--
-	c.win.SetContent(c.Window(c.pages[c.current]))
-	c.pages[c.current].Run(c.win, c.installer)
+	logging.Debugf("Prev from page %d", c.currentPage)
+	c.currentPage = c.pages[c.currentPage].Prev()
+	c.win.SetContent(c.Window())
+	c.pages[c.currentPage].Run(c.win, c.installer)
 }
 
 func (c *Wizard) Run() {
 	c.win.ShowAndRun()
-}
-
-func IsWindows() bool {
-	return runtime.GOOS == "windows"
 }

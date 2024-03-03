@@ -16,6 +16,7 @@ import (
 )
 
 type PageFolder struct {
+	BasePage
 	folderEntry *widget.Entry
 }
 
@@ -23,6 +24,11 @@ var _ Page = &PageFolder{}
 
 func (p *PageFolder) Name() string {
 	return "Destination"
+}
+
+func (p *PageFolder) Next(previousPage PageIndex) PageIndex {
+	p.SavePrevious(previousPage)
+	return pgInstallation
 }
 
 func (p *PageFolder) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {

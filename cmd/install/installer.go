@@ -16,7 +16,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -28,6 +27,8 @@ import (
 	"sandboxer/pkg/logging"
 	"sandboxer/pkg/script"
 	"sandboxer/pkg/xplatform"
+
+	"golang.org/x/mod/semver"
 )
 
 //go:embed embed/*.tar.gz
@@ -55,12 +56,35 @@ func NewInstaller(appID string) (*Installer, error) {
 	}, nil
 }
 
-func (i *Installer) LoadConfig() error {
+type ModusOperandi int
+
+const (
+	//ModusOperandi
+	moError ModusOperandi = iota
+	moInstall
+	moDowngrade
+	moReinstall
+	moUpgrade
+)
+
+func (i *Installer) __LoadConfig() (ModusOperandi, error) {
 	err := i.config.Load()
-	if err != nil && !os.IsNotExist(err) {
-		return err
+	if err != nil {
+		if os.IsNotExist(err) {
+			return moInstall, nil
+		}
+		//if errors.Is(err, &yaml.TypeError{}) {	}
+		return moError, err
 	}
-	return nil
+	switch semver.Compare(globals.Version, i.config.Version) {
+	case -1:
+		return moDowngrade, nil
+	case 0:
+		return moReinstall, nil
+	case 1:
+		return moUpgrade, nil
+	}
+	return moError, errors.New("version error")
 }
 
 func (i *Installer) SaveConfig() error {
@@ -90,8 +114,8 @@ func (i *Installer) Path(fileName string) string {
 func (i *Installer) InstallFolder() string {
 	if xplatform.IsWindows() {
 		return filepath.Join(i.config.Folder, globals.AppFolderName)
-	} else {
-		return i.config.Folder
+	} else { // It is macOS
+		return filepath.Join(i.config.Folder, globals.AppName+".app")
 	}
 }
 
@@ -141,6 +165,49 @@ func (i *Installer) Install(callback func(name string) error) error {
 		if err := stage.Run(); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+type UninstallStage struct {
+	Name string
+	Path string
+}
+
+func (i *Installer) UninstallStages() (stages []UninstallStage) {
+	stages = []UninstallStage{
+		{"Program", i.InstallFolder()},
+	}
+	configFolder, err := i.ConfigFileFolder()
+	if err == nil {
+		stages = append(stages, UninstallStage{"User Data", configFolder})
+	}
+	autoStartPath, err := i.AutoStart(false)
+	if err == nil {
+		stages = append(stages, UninstallStage{"Autostart", autoStartPath})
+	}
+	sendTo, err := i.ExtendSendTo(true)
+	if err == nil {
+		stages = append(stages, UninstallStage{"RightClick", sendTo})
+	}
+	if xplatform.IsWindows() {
+		path, err := i.AddToStartMenu(true)
+		if err == nil {
+			stages = append(stages, UninstallStage{
+				"Start Menu", path,
+			})
+		}
+	}
+	return
+}
+
+func (i *Installer) Uninstall(callback func(name string) error) error {
+	for _, stage := range i.UninstallStages() {
+		logging.Debugf("Uninstall Stage %s", stage.Name)
+		if err := callback(stage.Name); err != nil {
+			return err
+		}
+		logging.Debugf("Stage %s. Remove \"%s\"", stage.Name, stage.Path)
 	}
 	return nil
 }
@@ -279,24 +346,30 @@ func (i *Installer) StageExtractPericulosum() error {
 
 func (i *Installer) StageExtendSendTo() error {
 	logging.Debugf("Install: ExtendSendTo")
-	var path string
-	var err error
-	if runtime.GOOS == "windows" {
-		appPath := filepath.Join(i.InstallFolder(), "submit.exe")
-		path, err = xplatform.ExtendContextMenu(globals.AppName, appPath)
-		if err != nil {
-			return err
-		}
-	} else {
-		src := "embed/" + globals.Name + "_submit.tar.gz"
-		folder := filepath.Join(os.Getenv("HOME"), "/Library/Services")
-		err := extract.Untar(embedFS, folder, src)
-		if err != nil {
-			return err
-		}
-		path = filepath.Join(folder, globals.AppName+".workflow")
+	path, err := i.ExtendSendTo(false)
+	if err != nil {
+		return err
 	}
 	return i.uninstallScript.AddLine(script.Get().RemoveDir(path))
+}
+
+func (i *Installer) ExtendSendTo(dryRun bool) (string, error) {
+	if xplatform.IsWindows() {
+		appPath := filepath.Join(i.InstallFolder(), "submit.exe")
+		return xplatform.ExtendContextMenu(dryRun, globals.AppName, appPath)
+	} else { // macOS
+		src := "embed/" + globals.Name + "_submit.tar.gz"
+		folder := filepath.Join(os.Getenv("HOME"), "/Library/Services")
+		workflowPath := filepath.Join(folder, globals.AppName+".workflow")
+		if dryRun {
+			return workflowPath, nil
+		}
+		err := extract.Untar(embedFS, folder, src)
+		if err != nil {
+			return "", err
+		}
+		return workflowPath, nil
+	}
 }
 
 func (i *Installer) StageAddToStartMenu() error {
@@ -305,20 +378,41 @@ func (i *Installer) StageAddToStartMenu() error {
 		logging.Infof("AddToStartMenu. This is not Windows. Skip")
 		return nil
 	}
-	appPath := filepath.Join(i.InstallFolder(), xplatform.ExecutableName(globals.Name))
-	_, err := xplatform.LinkToStartMenu(globals.AppName, globals.AppName, appPath, false)
+	path, err := i.AddToStartMenu(false)
 	if err != nil {
 		return err
 	}
-	scriptPath := i.Path(uninstallScriptName + script.Get().Extension())
-	path, err := xplatform.LinkToStartMenu(globals.AppName, "Uninstall", scriptPath, true)
-	if err != nil {
-		return err
-	}
+	/*
+		appPath := filepath.Join(i.InstallFolder(), xplatform.ExecutableName(globals.Name))
+		_, err := xplatform.LinkToStartMenu(false, globals.AppName, globals.AppName, appPath, false)
+		if err != nil {
+			return err
+		}
+		scriptPath := i.Path(uninstallScriptName + script.Get().Extension())
+		path, err := xplatform.LinkToStartMenu(false, globals.AppName, "Uninstall", scriptPath, true)
+		if err != nil {
+			return err
+		}*/
 	if err := i.uninstallScript.AddLine(script.Get().RemoveDir(path)); err != nil {
 		return err
 	}
 	return nil
+}
+func (i *Installer) AddToStartMenu(dryRun bool) (string, error) {
+	appPath := filepath.Join(i.InstallFolder(), xplatform.ExecutableName(globals.Name))
+	path, err := xplatform.LinkToStartMenu(dryRun, globals.AppName, globals.AppName, appPath, false)
+	if err != nil {
+		return "", err
+	}
+	if dryRun {
+		return path, nil
+	}
+	scriptPath := i.Path(uninstallScriptName + script.Get().Extension())
+	path, err = xplatform.LinkToStartMenu(false, globals.AppName, "Uninstall", scriptPath, true)
+	if err != nil {
+		return "", err
+	}
+	return path, nil
 }
 
 func (i *Installer) StageAutoStart() error {
@@ -327,16 +421,23 @@ func (i *Installer) StageAutoStart() error {
 		logging.Debugf("Install: StageAutostart: Skip")
 		return nil
 	}
-	var appPath string
-	appPath, err := xplatform.ExecutablePath(i.config.Folder, globals.AppName, globals.Name)
-	if err != nil {
-		return fmt.Errorf("ExecutablePath: %w", err)
-	}
-	path, err := xplatform.AutoStart(globals.AppID, appPath)
+	path, err := i.AutoStart(false)
 	if err != nil {
 		return fmt.Errorf("AutoStart: %w", err)
 	}
 	return i.uninstallScript.AddLine(script.Get().RemoveDir(path))
+}
+
+func (i *Installer) AutoStart(dryRun bool) (string, error) {
+	appPath, err := xplatform.ExecutablePath(i.config.Folder, globals.AppName, globals.Name)
+	if err != nil {
+		return "", fmt.Errorf("ExecutablePath: %w", err)
+	}
+	path, err := xplatform.AutoStart(false, globals.AppID, appPath)
+	if err != nil {
+		return "", fmt.Errorf("AutoStart: %w", err)
+	}
+	return path, err
 }
 
 func (i *Installer) StageUninstall() error {

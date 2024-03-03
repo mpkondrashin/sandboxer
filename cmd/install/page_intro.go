@@ -51,12 +51,18 @@ SOFTWARE.`
 )
 
 type PageIntro struct {
+	BasePage
 }
 
 var _ Page = &PageIntro{}
 
 func (p *PageIntro) Name() string {
 	return "Intro"
+}
+
+func (p *PageIntro) Next(previousPage PageIndex) PageIndex {
+	p.SavePrevious(previousPage)
+	return pgVOToken
 }
 
 func (p *PageIntro) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {

@@ -10,15 +10,15 @@ import (
 	"github.com/go-ole/go-ole/oleutil"
 )
 
-func ExtendContextMenu(appName, appPath string) (string, error) {
+func ExtendContextMenu(dryRun bool, appName, appPath string) (string, error) {
 	if runtime.GOOS == "windows" {
-		return ExtendContextMenuWindows(appName, appPath)
+		return ExtendContextMenuWindows(dryRun, appName, appPath)
 	}
 	//Darwin ?
 	return "", nil
 }
 
-func ExtendContextMenuWindows(appName, appPath string) (string, error) {
+func ExtendContextMenuWindows(dryRun bool, appName, appPath string) (string, error) {
 	appData := "APPDATA"
 	userProfile := os.Getenv(appData)
 	if userProfile == "" {
@@ -26,6 +26,9 @@ func ExtendContextMenuWindows(appName, appPath string) (string, error) {
 	}
 	linkName := appName + ".lnk"
 	linkPath := filepath.Join(userProfile, "Microsoft", "Windows", "SendTo", linkName)
+	if dryRun {
+		return linkPath, nil
+	}
 	_ = os.Remove(linkPath)
 	if err := makeLink(appPath, linkPath, false); err != nil {
 		return "", err

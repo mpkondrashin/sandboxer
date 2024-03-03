@@ -59,6 +59,7 @@ func NewDefaultDDAn() DDAn {
 
 type Configuration struct {
 	filePath         string
+	Version          string
 	SandboxType      SandboxType   `yaml:"sandbox_type"`
 	VisionOne        VisionOne     `yaml:"vision_one"`
 	DDAn             DDAn          `yaml:"analyzer"`
@@ -72,6 +73,7 @@ type Configuration struct {
 func New(filePath string) *Configuration {
 	return &Configuration{
 		filePath:         filePath,
+		Version:          "",
 		SandboxType:      SandboxVisionOne,
 		Folder:           xplatform.InstallFolder(),
 		Ignore:           []string{".DS_Store", "Thumbs.db"},
@@ -112,6 +114,7 @@ func (c *Configuration) PericulosumPath() (string, error) {
 
 // Save - writes Configuration struct to file as YAML
 func (c *Configuration) Save() (err error) {
+	c.Version = globals.Version
 	data, err := yaml.Marshal(c)
 	if err != nil {
 		return err

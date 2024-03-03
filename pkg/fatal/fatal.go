@@ -12,7 +12,7 @@ func Warning(title, text string) {
 	//dialog.ShowInformation("Information", "This is a sample message", s.window)
 	a := app.New()
 	w := a.NewWindow(globals.AppName + " " + title)
-
+	//w.SetMaster() // will it exit the application?
 	w.SetContent(container.NewVBox(
 		widget.NewLabel(text),
 		widget.NewButton("Ok", func() { a.Quit() }),

@@ -13,9 +13,11 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"sandboxer/pkg/globals"
+	"sandboxer/pkg/xplatform"
 )
 
 type PageAutostart struct {
+	BasePage
 	autostartCheck *widget.Check
 }
 
@@ -23,6 +25,14 @@ var _ Page = &PageAutostart{}
 
 func (p *PageAutostart) Name() string {
 	return "Autostart"
+}
+
+func (p *PageAutostart) Next(previousPage PageIndex) PageIndex {
+	p.SavePrevious(previousPage)
+	if xplatform.IsWindows() {
+		return pgFolder
+	}
+	return pgInstallation
 }
 
 func (p *PageAutostart) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {

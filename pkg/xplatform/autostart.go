@@ -9,18 +9,18 @@ import (
 	"strings"
 )
 
-func AutoStart(name string, appPath string) (string, error) {
+func AutoStart(dryRun bool, name string, appPath string) (string, error) {
 	if runtime.GOOS == "windows" {
-		return AutoStartWindows(appPath)
+		return AutoStartWindows(dryRun, appPath)
 	}
 	if runtime.GOOS == "darwin" {
-		return AutoStartDarwin(name, appPath)
+		return AutoStartDarwin(dryRun, name, appPath)
 	}
 	//Darwin ?
 	return "", nil
 }
 
-func AutoStartWindows(appPath string) (string, error) {
+func AutoStartWindows(dryRun bool, appPath string) (string, error) {
 	userProfile := "USERPROFILE"
 	userProfileFolder := os.Getenv(userProfile)
 	if userProfile == "" {
@@ -29,6 +29,9 @@ func AutoStartWindows(appPath string) (string, error) {
 	appName := filepath.Base(appPath)
 	fileName := strings.TrimSuffix(appName, filepath.Ext(appName))
 	startupLinkPath := filepath.Join(userProfileFolder, "AppData", "Roaming", "Microsoft", "Windows", "Start Menu", "Programs", "Startup", fileName+".lnk")
+	if dryRun {
+		return startupLinkPath, nil
+	}
 	if err := makeLink(appPath, startupLinkPath, false); err != nil {
 		return "", err
 	}
@@ -52,7 +55,7 @@ var plistTemplate = `
 </plist>
 `
 
-func AutoStartDarwin(name string, path string) (string, error) {
+func AutoStartDarwin(dryRun bool, name string, path string) (string, error) {
 	userProfile := "HOME"
 	userProfileFolder := os.Getenv(userProfile)
 	if userProfileFolder == "" {
@@ -60,6 +63,9 @@ func AutoStartDarwin(name string, path string) (string, error) {
 	}
 	folder := "Library/LaunchAgents"
 	fullPath := filepath.Join(userProfileFolder, folder, name+".plist")
+	if dryRun {
+		return fullPath, nil
+	}
 	f, err := os.Create(fullPath)
 	if err != nil {
 		return "", err
