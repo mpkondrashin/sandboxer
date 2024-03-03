@@ -45,6 +45,9 @@ jobs:
             setup_windows_amd64.zip
   Build-Release-Darwin-amd64:
     runs-on: macos-13
+    env:
+      GOPRIVATE: github.com/mpkondrashin/ddan
+      DDAN_FOR_SANDBOXER: ${{ secrets.DDAN_FOR_SANDBOXER }}
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -59,6 +62,9 @@ jobs:
         with:
           go-version: 1.21.5
 
+      - name: Config git
+        run: git config --global url.https://$DDAN_FOR_SANDBOXER@github.com/.insteadOf https://github.com/
+  
       - name: Install Fyne
         run: go install fyne.io/fyne/v2/cmd/fyne@latest
 
@@ -76,7 +82,7 @@ jobs:
             setup_darwin_amd64.zip
   
   Build-Release-Darwin-arm64:
-    runs-on: flyci-macos-large-latest-m2 #macos-13-xlarge
+    runs-on: macos-13-xlarge #flyci-macos-large-latest-m2 #macos-13-xlarge
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
