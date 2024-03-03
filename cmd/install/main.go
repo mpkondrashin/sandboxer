@@ -14,29 +14,45 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"sandboxer/pkg/fatal"
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
+
+	"github.com/virtuald/go-paniclog"
 )
 
 const installWizardLog = globals.Name + "_setup_wizard.log"
 
-func InstallLogFolder() string {
-	path, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-	return filepath.Dir(path)
-}
-
 // TODO:
-// Redirect stderr to log
 // show fatal.Warning in case of error
 // change 10 to globals constant
 
-func main() {
-	close, err := logging.NewFileLog(InstallLogFolder(), installWizardLog)
+func SetupLogging(logFileName string) (func(), error) {
+	logging.SetLevel(logging.DEBUG)
+	path, err := os.Executable()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "NewFileLog: %v", err)
+		return nil, err
+	}
+	logFolder := filepath.Dir(path)
+	logging.SetLevel(logging.DEBUG)
+	file, err := logging.OpenRotated(logFolder, logFileName, 0644, globals.MaxLogFileSize, globals.LogsKeep)
+	if err != nil {
+		return nil, err
+	}
+	paniclog.RedirectStderr(file.File)
+	logging.SetLogger(logging.NewFileLogger(file))
+	return func() {
+		logging.Infof("Close Logging")
+		file.Close()
+	}, nil
+}
+
+func main() {
+	close, err := SetupLogging(installWizardLog)
+	if err != nil {
+		msg := fmt.Sprintf("NewFileLog: %v", err)
+		fmt.Fprintln(os.Stderr, msg)
+		fatal.Warning("SetupLogging Error", msg)
 		os.Exit(10)
 	}
 	defer func() {

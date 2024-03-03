@@ -9,6 +9,8 @@ Pick destination folder
 package main
 
 import (
+	"sandboxer/pkg/globals"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
@@ -32,7 +34,7 @@ func (p *PageFolder) Next(previousPage PageIndex) PageIndex {
 }
 
 func (p *PageFolder) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
-	labelFolder := widget.NewLabel("Installation folder:")
+	labelFolder := widget.NewLabel("Base folder to install " + globals.AppName + ":")
 	p.folderEntry = widget.NewEntry()
 	p.folderEntry.SetText(installer.config.Folder)
 	folderButton := widget.NewButton("Change...", func() {

@@ -152,7 +152,7 @@ func (i *Installer) Stages() []InstallStage {
 		{"Extend Send To menu", i.StageExtendSendTo},
 		{"Add to Start menu", i.StageAddToStartMenu},
 		{"Install service", i.StageAutoStart},
-		{"Stop runnin " + globals.AppName, i.StageUninstall},
+		{"Stop Running " + globals.AppName, i.StageUninstall},
 	}
 }
 
@@ -202,6 +202,7 @@ func (i *Installer) UninstallStages() (stages []UninstallStage) {
 }
 
 func (i *Installer) Uninstall(callback func(name string) error) error {
+	logging.LogError(i.StopProgram())
 	message := ""
 	for _, stage := range i.UninstallStages() {
 		logging.Debugf("Uninstall %s. Remove \"%s\"", stage.Name, stage.Path)
@@ -285,6 +286,10 @@ func (i *Installer) StageCreateConfig() error {
 
 func (i *Installer) StageStopProgram() error {
 	logging.Debugf("Install: Stop " + globals.AppName)
+	return i.StopProgram()
+}
+
+func (i *Installer) StopProgram() error {
 	pidFilePath, err := globals.PidFilePath()
 	if err != nil {
 		return err
@@ -292,23 +297,23 @@ func (i *Installer) StageStopProgram() error {
 	data, err := os.ReadFile(pidFilePath)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			logging.Debugf("Install: Stop "+globals.AppName+": %s: %v", pidFilePath, err)
+			logging.Errorf("Stop "+globals.AppName+": %s: %v", pidFilePath, err)
 			return nil
 		}
 		return err
 	}
 	pid, err := strconv.Atoi(string(data))
 	if err != nil {
-		logging.Debugf("Install: Stop"+globals.AppName+": %s: %v", string(data), err)
+		logging.Errorf("Stop"+globals.AppName+": %s: %v", string(data), err)
 		return nil
 	}
 	proc, err := os.FindProcess(pid)
 	if err != nil {
-		logging.Debugf("Install: Stop"+globals.AppName+": FindProcess(%d): %v", pid, err)
+		logging.Errorf("Stop"+globals.AppName+": FindProcess(%d): %v", pid, err)
 		return nil
 	}
 	if err := proc.Kill(); err != nil {
-		logging.Debugf("Install: Stop"+globals.AppName+": Kill %d: %v", pid, err)
+		logging.Errorf("Stop"+globals.AppName+": Kill %d: %v", pid, err)
 		return nil
 	}
 	return nil
@@ -331,13 +336,16 @@ func (i *Installer) StageWaitServiceToStop() error {
 func (i *Installer) StageExtractFiles() error {
 	logging.Debugf("Install: StageExtractExecutable")
 	path := "embed/" + globals.Name + ".tar.gz"
-	if err := extract.Untar(embedFS, i.InstallFolder(), path); err != nil {
-		return err
-	}
 	targetPath := i.InstallFolder()
 	if !xplatform.IsWindows() {
-		targetPath = filepath.Join(i.InstallFolder(), globals.AppName+".app")
+		targetPath = filepath.Dir(targetPath)
 	}
+	if err := extract.Untar(embedFS, targetPath, path); err != nil {
+		return err
+	}
+	//	if !xplatform.IsWindows() {
+	//		targetPath = filepath.Join(i.InstallFolder(), globals.AppName+".app")
+	//	}
 	if err := i.uninstallScript.AddLine(script.Get().RemoveDir(targetPath)); err != nil {
 		return err
 	}
@@ -459,7 +467,7 @@ func (i *Installer) StageUninstall() error {
 	if err := i.uninstallScript.AddLine(script.Get().StopProcess(pidPath)); err != nil {
 		return err
 	}
-	scriptName := uninstallScriptName + script.Get().Extension()
+	/*scriptName := uninstallScriptName + script.Get().Extension()
 	var scriptPath string
 	if xplatform.IsWindows() {
 		scriptPath = i.Path(scriptName)
@@ -469,9 +477,9 @@ func (i *Installer) StageUninstall() error {
 			return err
 		}
 	}
-	if err := os.Rename(i.uninstallScript.FilePath, scriptPath); err != nil {
+	/*if err := os.Rename(i.uninstallScript.FilePath, scriptPath); err != nil {
 		return err
-	}
+	}*/
 	// remove folder
 	return nil
 }
