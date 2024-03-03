@@ -26,7 +26,7 @@ jobs:
           go-version: 1.21.5
 
       - name: Config git
-        run: git config --global url.https://$DDAN_FOR_SANDBOXER@github.com/.insteadOf https://github.com/
+        run: git config --global url.https://${ENV:DDAN_FOR_SANDBOXER}@github.com/.insteadOf https://github.com/
 
       - name: Install Fyne
         run: go install fyne.io/fyne/v2/cmd/fyne@latest
