@@ -405,14 +405,14 @@ func (i *Installer) AddToStartMenu(dryRun bool) (string, error) {
 		return "", err
 	}
 	if dryRun {
-		return path, nil
+		return filepath.Dir(path), nil
 	}
 	scriptPath := i.Path(uninstallScriptName + script.Get().Extension())
-	path, err = xplatform.LinkToStartMenu(false, globals.AppName, "Uninstall", scriptPath, true)
+	_, err = xplatform.LinkToStartMenu(false, globals.AppName, "Uninstall", scriptPath, true)
 	if err != nil {
 		return "", err
 	}
-	return path, nil
+	return filepath.Dir(path), nil
 }
 
 func (i *Installer) StageAutoStart() error {
