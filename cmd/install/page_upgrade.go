@@ -70,7 +70,7 @@ func (p *PageUpgrade) Content() fyne.CanvasObject {
 
 }
 
-func (p *PageUpgrade) Run() {}
+//func (p *PageUpgrade) Run() {}
 
 func (p *PageUpgrade) AquireData(installer *Installer) error {
 	switch p.reinstallRadio.Selected {

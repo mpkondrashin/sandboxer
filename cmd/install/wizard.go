@@ -66,6 +66,12 @@ func (p *BasePage) Prev() PageIndex {
 	return p.previousPage
 }
 
+func (p *BasePage) Run() {}
+
+func (p *BasePage) AquireData(installer *Installer) error {
+	return nil
+}
+
 type PageIndex int
 
 const (

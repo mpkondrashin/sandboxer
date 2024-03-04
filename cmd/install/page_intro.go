@@ -102,13 +102,9 @@ func (p *PageIntro) Content() fyne.CanvasObject {
 	)
 }
 
-func (p *PageIntro) Run() {
+//func (p *PageIntro) Run() {}
 
-}
-
-func (p *PageIntro) AquireData(installer *Installer) error {
-	return nil
-}
+//func (p *PageIntro) AquireData(installer *Installer) error {	return nil}
 
 func LicenseText() string {
 	filePath := "embed/LICENSE"

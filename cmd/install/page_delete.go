@@ -62,9 +62,7 @@ func (p *PageDelete) Content() fyne.CanvasObject {
 	)
 }
 
-func (p *PageDelete) Run() {
-
-}
+//func (p *PageDelete) Run() {}
 
 func (p *PageDelete) AquireData(installer *Installer) error {
 	switch p.deleteRadio.Selected {

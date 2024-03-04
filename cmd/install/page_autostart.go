@@ -41,7 +41,7 @@ func (p *PageAutostart) Content() fyne.CanvasObject {
 	return p.autostartCheck
 }
 
-func (p *PageAutostart) Run() {}
+//func (p *PageAutostart) Run() {}
 
 func (p *PageAutostart) AquireData(installer *Installer) error {
 	installer.autostart = p.autostartCheck.Checked

@@ -71,6 +71,6 @@ func (p *PageInstallation) Run() {
 	}
 }
 
-func (p *PageInstallation) AquireData(installer *Installer) error {
-	return nil
-}
+//func (p *PageInstallation) AquireData(installer *Installer) error {
+//	return nil
+//}

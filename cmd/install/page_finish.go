@@ -45,14 +45,14 @@ func (p *PageFinish) Content() fyne.CanvasObject {
 	return container.NewVBox(l1, l2) //, p.runCheck)
 }
 
-func (p *PageFinish) Run() {}
+//func (p *PageFinish) Run() {}
 
-func (p *PageFinish) AquireData(installer *Installer) error {
-	//if !p.runCheck.Checked {
-	//	return nil
-	//}
-	//path := filepath.Join(installer.InstallFolder(), globals.Name+".exe")
-	//cmd := exec.Command(path, "--submissions")
-	//return cmd.Start()
-	return nil
-}
+//func (p *PageFinish) AquireData(installer *Installer) error {
+//if !p.runCheck.Checked {
+//	return nil
+//}
+//path := filepath.Join(installer.InstallFolder(), globals.Name+".exe")
+//cmd := exec.Command(path, "--submissions")
+//return cmd.Start()
+//	return nil
+//}

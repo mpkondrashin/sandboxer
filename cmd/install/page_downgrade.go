@@ -58,9 +58,7 @@ func (p *PageDowngrade) Content() fyne.CanvasObject {
 	)
 }
 
-func (p *PageDowngrade) Run() {
-
-}
+//func (p *PageDowngrade) Run() {}
 
 func (p *PageDowngrade) AquireData(installer *Installer) error {
 	switch p.downgradeRadio.Selected {

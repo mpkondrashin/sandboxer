@@ -65,6 +65,6 @@ func (p *PageUninstall) Run() {
 	}
 }
 
-func (p *PageUninstall) AquireData(installer *Installer) error {
-	return nil
-}
+//func (p *PageUninstall) AquireData(installer *Installer) error {
+//	return nil
+//}
