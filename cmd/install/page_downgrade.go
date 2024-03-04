@@ -34,7 +34,16 @@ func (p *PageDowngrade) Name() string {
 
 func (p *PageDowngrade) Next(previousPage PageIndex) PageIndex {
 	p.SavePrevious(previousPage)
-	return pgInstallation
+	if p.downgradeRadio == nil {
+		return pgExit
+	}
+	switch p.downgradeRadio.Selected {
+	case downgrade:
+		return pgInstallation
+	case abort:
+		return pgExit
+	}
+	return pgExit
 }
 
 func (p *PageDowngrade) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
@@ -64,7 +73,9 @@ func (p *PageDowngrade) AquireData(installer *Installer) error {
 	return nil
 }
 
-// Umbrella - segments print glue
 func (p *PageDowngrade) radioChanged(s string) {
-	//p.wiz.win.SetContent(p.wiz.Window())
+	if p.downgradeRadio == nil {
+		return
+	}
+	p.wiz.UpdatePagesList()
 }

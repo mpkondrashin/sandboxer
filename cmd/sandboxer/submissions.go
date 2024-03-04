@@ -268,7 +268,11 @@ func (s *SubmissionsWindow) Update() {
 	}
 	s.vbox.RemoveAll()
 	s.list.Process(func(ids []task.ID) {
-		activeTasks := fmt.Sprintf("Active tasks: %d", s.list.CountActiveTasks())
+		count := s.list.CountActiveTasks()
+		activeTasks := "No active task"
+		if count > 0 {
+			activeTasks = fmt.Sprintf("Active tasks: %d", s.list.CountActiveTasks())
+		}
 		s.statusLabel.SetText(activeTasks)
 		for i := s.from; i < s.from+s.count && i < len(ids); i++ {
 			idx := ids[i]
@@ -293,7 +297,11 @@ func (s *SubmissionsWindow) Update() {
 			s.buttonNext.Disable()
 		}
 	})
-	s.pageLabel.Text = fmt.Sprintf("Submissions %d - %d out of %d", s.from+1, to, s.list.Length())
+	if s.from > 0 {
+		s.pageLabel.Text = fmt.Sprintf("Submissions %d - %d out of %d", s.from+1, to, s.list.Length())
+	} else {
+		s.pageLabel.Text = ""
+	}
 	if len(s.vbox.Objects) == 0 {
 		s.vbox.Add(container.NewCenter(widget.NewLabel("No submissions")))
 		s.pageLabel.Text = ""
