@@ -46,9 +46,9 @@ func (p *PageDowngrade) Next(previousPage PageIndex) PageIndex {
 	return pgExit
 }
 
-func (p *PageDowngrade) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
+func (p *PageDowngrade) Content() fyne.CanvasObject {
 	titleLabel := widget.NewLabel(fmt.Sprintf(globals.AppName+" %s version is already installed. Downgrade to %s?",
-		installer.config.Version, globals.Version))
+		p.wiz.installer.config.Version, globals.Version))
 
 	p.downgradeRadio = widget.NewRadioGroup([]string{abort, downgrade}, p.radioChanged)
 	p.downgradeRadio.SetSelected(abort)
@@ -58,7 +58,7 @@ func (p *PageDowngrade) Content(win fyne.Window, installer *Installer) fyne.Canv
 	)
 }
 
-func (p *PageDowngrade) Run(win fyne.Window, installer *Installer) {
+func (p *PageDowngrade) Run() {
 
 }
 

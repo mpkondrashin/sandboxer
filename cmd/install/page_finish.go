@@ -33,7 +33,7 @@ func (p *PageFinish) Next(previousPage PageIndex) PageIndex {
 	return pgExit
 }
 
-func (p *PageFinish) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
+func (p *PageFinish) Content() fyne.CanvasObject {
 	l1 := widget.NewLabel(globals.AppName + " service sucessfully installed.")
 	hint := "Right click on any file and pick Send To -> " + globals.AppName + "."
 	if !xplatform.IsWindows() {
@@ -45,7 +45,7 @@ func (p *PageFinish) Content(win fyne.Window, installer *Installer) fyne.CanvasO
 	return container.NewVBox(l1, l2) //, p.runCheck)
 }
 
-func (p *PageFinish) Run(win fyne.Window, installer *Installer) {}
+func (p *PageFinish) Run() {}
 
 func (p *PageFinish) AquireData(installer *Installer) error {
 	//if !p.runCheck.Checked {

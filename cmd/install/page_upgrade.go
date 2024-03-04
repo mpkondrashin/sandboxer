@@ -53,12 +53,12 @@ func (p *PageUpgrade) Next(previousPage PageIndex) PageIndex {
 	//return &PageFinish{BasePage{wiz: p.wiz}}
 }
 
-func (p *PageUpgrade) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
+func (p *PageUpgrade) Content() fyne.CanvasObject {
 	if p.content != nil {
 		return p.content
 	}
 	titleLabel := widget.NewRichTextWithText(fmt.Sprintf(globals.AppName+" %s version is already installed on this system. Upgrade to %s?",
-		installer.config.Version, globals.Version))
+		p.wiz.installer.config.Version, globals.Version))
 	titleLabel.Wrapping = fyne.TextWrapWord
 	p.reinstallRadio = widget.NewRadioGroup([]string{upgrade, abort, uninstall}, p.radioChanged)
 	p.reinstallRadio.SetSelected(upgrade)
@@ -70,9 +70,7 @@ func (p *PageUpgrade) Content(win fyne.Window, installer *Installer) fyne.Canvas
 
 }
 
-func (p *PageUpgrade) Run(win fyne.Window, installer *Installer) {
-
-}
+func (p *PageUpgrade) Run() {}
 
 func (p *PageUpgrade) AquireData(installer *Installer) error {
 	switch p.reinstallRadio.Selected {

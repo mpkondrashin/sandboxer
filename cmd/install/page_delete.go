@@ -47,7 +47,7 @@ func (p *PageDelete) Next(previousPage PageIndex) PageIndex {
 	return pgIntro
 }
 
-func (p *PageDelete) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
+func (p *PageDelete) Content() fyne.CanvasObject {
 	titleLabel := widget.NewLabel("Configuration Error")
 
 	errorText := widget.NewRichTextFromMarkdown("Error Message: " + p.ErrorMessage)
@@ -62,7 +62,7 @@ func (p *PageDelete) Content(win fyne.Window, installer *Installer) fyne.CanvasO
 	)
 }
 
-func (p *PageDelete) Run(win fyne.Window, installer *Installer) {
+func (p *PageDelete) Run() {
 
 }
 

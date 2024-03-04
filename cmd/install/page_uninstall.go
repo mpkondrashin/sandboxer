@@ -35,7 +35,7 @@ func (p *PageUninstall) Next(previousPage PageIndex) PageIndex {
 	return pgExit
 }
 
-func (p *PageUninstall) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
+func (p *PageUninstall) Content() fyne.CanvasObject {
 	p.progressBar = widget.NewProgressBar()
 	p.statusLabel = widget.NewLabel("")
 	return container.NewVBox(
@@ -45,11 +45,11 @@ func (p *PageUninstall) Content(win fyne.Window, installer *Installer) fyne.Canv
 	)
 }
 
-func (p *PageUninstall) Run(win fyne.Window, installer *Installer) {
-	total := float64(len(installer.UninstallStages()) - 1)
+func (p *PageUninstall) Run() {
+	total := float64(len(p.wiz.installer.UninstallStages()) - 1)
 	index := 0
 	stageName := ""
-	err := installer.Uninstall(func(name string) error {
+	err := p.wiz.installer.Uninstall(func(name string) error {
 		stageName = name
 		p.progressBar.SetValue(float64(index) / total)
 		p.statusLabel.SetText(name)
@@ -61,7 +61,7 @@ func (p *PageUninstall) Run(win fyne.Window, installer *Installer) {
 		p.statusLabel.SetText(stageName + " Failed")
 		err = fmt.Errorf("%s: %w", stageName, err)
 		logging.LogError(err)
-		dialog.ShowError(err, win)
+		dialog.ShowError(err, p.wiz.win)
 	}
 }
 

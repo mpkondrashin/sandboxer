@@ -33,26 +33,24 @@ func (p *PageFolder) Next(previousPage PageIndex) PageIndex {
 	return pgInstallation
 }
 
-func (p *PageFolder) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
+func (p *PageFolder) Content() fyne.CanvasObject {
 	labelFolder := widget.NewLabel("Base folder to install " + globals.AppName + ":")
 	p.folderEntry = widget.NewEntry()
-	p.folderEntry.SetText(installer.config.Folder)
+	p.folderEntry.SetText(p.wiz.installer.config.Folder)
 	folderButton := widget.NewButton("Change...", func() {
 		folderDialog := dialog.NewFolderOpen(func(uri fyne.ListableURI, err error) {
 			if uri == nil {
 				return
 			}
 			p.folderEntry.SetText(uri.Path())
-		}, win)
+		}, p.wiz.win)
 		folderDialog.Show()
 	})
 	return container.NewVBox(labelFolder,
 		container.NewBorder(nil, nil, nil, folderButton, p.folderEntry)) // p.folderEntry, folderButton)
 }
 
-func (p *PageFolder) Run(win fyne.Window, installer *Installer) {
-
-}
+func (p *PageFolder) Run() {}
 
 func (p *PageFolder) AquireData(installer *Installer) error {
 	installer.config.Folder = p.folderEntry.Text

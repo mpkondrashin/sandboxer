@@ -48,7 +48,7 @@ func (p *PageReinstall) Next(previousPage PageIndex) PageIndex {
 	return 0 //&PageInstallation{		BasePage: BasePage{wiz: p.wiz},		//reinstallRadio: nil,	}
 }
 
-func (p *PageReinstall) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
+func (p *PageReinstall) Content() fyne.CanvasObject {
 	titleLabel := widget.NewLabel(globals.AppName + " " + globals.Version + " version is already installed.")
 	p.reinstallRadio = widget.NewRadioGroup([]string{abort, reinstall, uninstall}, p.radioChanged)
 	p.reinstallRadio.SetSelected(abort)
@@ -58,9 +58,7 @@ func (p *PageReinstall) Content(win fyne.Window, installer *Installer) fyne.Canv
 	)
 }
 
-func (p *PageReinstall) Run(win fyne.Window, installer *Installer) {
-
-}
+func (p *PageReinstall) Run() {}
 
 func (p *PageReinstall) AquireData(installer *Installer) error {
 	switch p.reinstallRadio.Selected {

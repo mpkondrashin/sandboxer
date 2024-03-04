@@ -38,8 +38,8 @@ var ErrAbort = errors.New("abort")
 
 type Page interface {
 	Name() string
-	Content(win fyne.Window, installer *Installer) fyne.CanvasObject
-	Run(win fyne.Window, installer *Installer)
+	Content() fyne.CanvasObject
+	Run()
 	AquireData(installer *Installer) error
 	Next(previousPage PageIndex) PageIndex
 	Prev() PageIndex
@@ -203,7 +203,7 @@ func (c *Wizard) Window() fyne.CanvasObject {
 	logging.Debugf("Window")
 	p := c.pages[c.currentPage]
 	c.UpdatePagesList()
-	middle := container.NewPadded(container.NewVBox(layout.NewSpacer(), p.Content(c.win, c.installer), layout.NewSpacer()))
+	middle := container.NewPadded(container.NewVBox(layout.NewSpacer(), p.Content(), layout.NewSpacer()))
 	upper := container.NewBorder(nil, nil, container.NewHBox(c.pagesList, widget.NewSeparator()), nil, middle)
 	buttons := container.NewBorder(nil, nil, nil, c.buttonsLine)
 	bottom := container.NewVBox(widget.NewSeparator(), buttons)
@@ -220,7 +220,7 @@ func (c *Wizard) UpdatePagesList() {
 
 	for i := c.firstPage; i != pgExit; i = c.pages[i].Next(i) {
 		pg := c.pages[i]
-		logging.Debugf("Left Menu item %d", i)
+		//logging.Debugf("Left Menu item %d", i)
 		if i == c.currentPage {
 			c.pagesList.Add(widget.NewLabelWithStyle("▶ "+pg.Name(), fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
 			prev, next := c.Buttons(i == c.firstPage, pg.Next(pgExit) == pgExit)
@@ -275,14 +275,14 @@ func (c *Wizard) Next() {
 	}
 	c.currentPage = c.pages[c.currentPage].Next(c.currentPage)
 	c.win.SetContent(c.Window())
-	c.pages[c.currentPage].Run(c.win, c.installer)
+	c.pages[c.currentPage].Run()
 }
 
 func (c *Wizard) Prev() {
 	logging.Debugf("Prev from page %d", c.currentPage)
 	c.currentPage = c.pages[c.currentPage].Prev()
 	c.win.SetContent(c.Window())
-	c.pages[c.currentPage].Run(c.win, c.installer)
+	c.pages[c.currentPage].Run()
 }
 
 func (c *Wizard) Run() {

@@ -33,7 +33,7 @@ func (p *PageVOToken) Next(previousPage PageIndex) PageIndex {
 	return pgVODomain
 }
 
-func (p *PageVOToken) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
+func (p *PageVOToken) Content() fyne.CanvasObject {
 	labelTop := widget.NewLabel("Please open Vision One console to get all nessesary parameters")
 	p.tokenEntry = widget.NewMultiLineEntry()
 	p.tokenEntry.Wrapping = fyne.TextWrapBreak
@@ -47,14 +47,14 @@ func (p *PageVOToken) Content(win fyne.Window, installer *Installer) fyne.Canvas
 	return container.NewVBox(labelTop, optionsForm)
 }
 
-func (p *PageVOToken) Run(win fyne.Window, installer *Installer) {
+func (p *PageVOToken) Run() {
 	// No need to load, config is loaded when application started
 	//	err := installer.LoadConfig()
 	//	if err != nil {
 	//		logging.Errorf("LoadConfig: %v", err)
 	//		dialog.ShowError(err, win)
 	//	}
-	p.tokenEntry.SetText(installer.config.VisionOne.Token)
+	p.tokenEntry.SetText(p.wiz.installer.config.VisionOne.Token)
 }
 
 func (p *PageVOToken) AquireData(installer *Installer) error {

@@ -35,7 +35,7 @@ func (p *PageInstallation) Next(previousPage PageIndex) PageIndex {
 	return pgFinish
 }
 
-func (p *PageInstallation) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
+func (p *PageInstallation) Content() fyne.CanvasObject {
 	p.progressBar = widget.NewProgressBar()
 	p.statusLabel = widget.NewLabel("")
 	//	var copyButton *widget.Button
@@ -51,11 +51,11 @@ func (p *PageInstallation) Content(win fyne.Window, installer *Installer) fyne.C
 	)
 }
 
-func (p *PageInstallation) Run(win fyne.Window, installer *Installer) {
-	total := float64(len(installer.Stages()) - 1)
+func (p *PageInstallation) Run() {
+	total := float64(len(p.wiz.installer.Stages()) - 1)
 	index := 0
 	stageName := ""
-	err := installer.Install(func(name string) error {
+	err := p.wiz.installer.Install(func(name string) error {
 		stageName = name
 		p.progressBar.SetValue(float64(index) / total)
 		p.statusLabel.SetText(name)
@@ -67,7 +67,7 @@ func (p *PageInstallation) Run(win fyne.Window, installer *Installer) {
 		p.statusLabel.SetText(stageName + " Failed")
 		err = fmt.Errorf("%s: %w", stageName, err)
 		logging.LogError(err)
-		dialog.ShowError(err, win)
+		dialog.ShowError(err, p.wiz.win)
 	}
 }
 

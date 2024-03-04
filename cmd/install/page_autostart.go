@@ -35,13 +35,13 @@ func (p *PageAutostart) Next(previousPage PageIndex) PageIndex {
 	return pgInstallation
 }
 
-func (p *PageAutostart) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
+func (p *PageAutostart) Content() fyne.CanvasObject {
 	p.autostartCheck = widget.NewCheck("Add "+globals.AppName+" to autostart", nil)
-	p.autostartCheck.SetChecked(installer.autostart)
+	p.autostartCheck.SetChecked(p.wiz.installer.autostart)
 	return p.autostartCheck
 }
 
-func (p *PageAutostart) Run(win fyne.Window, installer *Installer) {}
+func (p *PageAutostart) Run() {}
 
 func (p *PageAutostart) AquireData(installer *Installer) error {
 	installer.autostart = p.autostartCheck.Checked

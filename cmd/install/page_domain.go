@@ -67,7 +67,7 @@ func (p *PageDomain) Content(win fyne.Window, installer *Installer) fyne.CanvasO
 		return container.NewVBox(p.chooseLabel, domainForm)
 	}
 */
-func (p *PageVODomain) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
+func (p *PageVODomain) Content() fyne.CanvasObject {
 
 	p.chooseLabel = widget.NewLabel("Choose Vision One Domain:")
 	var domains []string
@@ -77,19 +77,19 @@ func (p *PageVODomain) Content(win fyne.Window, installer *Installer) fyne.Canva
 	}
 
 	p.visionOneDomains = widget.NewSelect(domains, nil)
-	if installer.config.VisionOne.Domain != "" {
-		p.visionOneDomains.SetSelected(installer.config.VisionOne.Domain)
+	if p.wiz.installer.config.VisionOne.Domain != "" {
+		p.visionOneDomains.SetSelected(p.wiz.installer.config.VisionOne.Domain)
 	}
 	domainForm := widget.NewForm(
 		widget.NewFormItem("Domain:", p.visionOneDomains),
 	)
 	return container.NewVBox(p.chooseLabel, domainForm)
 }
-func (p *PageVODomain) Run(win fyne.Window, installer *Installer) {
+func (p *PageVODomain) Run() {
 	if p.visionOneDomains.Selected != "" {
 		return
 	}
-	detected := vone.DetectVisionOneDomain(context.TODO(), installer.config.VisionOne.Token)
+	detected := vone.DetectVisionOneDomain(context.TODO(), p.wiz.installer.config.VisionOne.Token)
 	if detected == "" {
 		return
 	}

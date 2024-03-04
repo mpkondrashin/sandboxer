@@ -65,7 +65,7 @@ func (p *PageIntro) Next(previousPage PageIndex) PageIndex {
 	return pgVOToken
 }
 
-func (p *PageIntro) Content(win fyne.Window, installer *Installer) fyne.CanvasObject {
+func (p *PageIntro) Content() fyne.CanvasObject {
 	titleLabel := widget.NewLabelWithStyle(globals.AppName,
 		fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 
@@ -87,7 +87,7 @@ func (p *PageIntro) Content(win fyne.Window, installer *Installer) fyne.CanvasOb
 	licensePopUp := func() {
 		licenseLabel := widget.NewLabel(LicenseText())
 		sc := container.NewScroll(licenseLabel)
-		popup := dialog.NewCustom("Show License Information", "Close", sc, win)
+		popup := dialog.NewCustom("Show License Information", "Close", sc, p.wiz.win)
 		popup.Resize(fyne.NewSize(800, 600))
 		popup.Show()
 	}
@@ -102,7 +102,7 @@ func (p *PageIntro) Content(win fyne.Window, installer *Installer) fyne.CanvasOb
 	)
 }
 
-func (p *PageIntro) Run(win fyne.Window, installer *Installer) {
+func (p *PageIntro) Run() {
 
 }
 
