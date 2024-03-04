@@ -82,7 +82,7 @@ jobs:
             setup_darwin_amd64.zip
   
   Build-Release-Darwin-arm64:
-    runs-on: macos-13-xlarge #flyci-macos-large-latest-m2 #macos-13-xlarge
+    runs-on: flyci-macos-large-latest-m2 #macos-13-xlarge
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
