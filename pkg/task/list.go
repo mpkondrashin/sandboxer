@@ -140,7 +140,7 @@ func (l *TaskList) CountActiveTasks() (count int) {
 	return
 }
 
-func (l *TaskList) LoadTasks() error {
+func (l *TaskList) LoadTasks(keepDays int) error {
 	folder, err := globals.TasksFolder()
 	if err != nil {
 		return err
@@ -149,7 +149,8 @@ func (l *TaskList) LoadTasks() error {
 	if err != nil {
 		return err
 	}
-	oldest := time.Now().Add(-globals.TasksKeep)
+	keepDuration := time.Duration(keepDays) * time.Hour * 60
+	oldest := time.Now().Add(-keepDuration)
 	for _, d := range dir {
 		if !d.IsDir() {
 			continue

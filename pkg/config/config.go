@@ -68,6 +68,7 @@ type Configuration struct {
 	Sleep            time.Duration `yaml:"sleep"`
 	Periculosum      string        `yaml:"periculosum"`
 	ShowPasswordHint bool          `yaml:"show_password_hint"`
+	TasksKeepDays    int           `yaml:"task_keep_days"`
 }
 
 func New(filePath string) *Configuration {
@@ -79,6 +80,7 @@ func New(filePath string) *Configuration {
 		Ignore:           []string{".DS_Store", "Thumbs.db"},
 		Periculosum:      "check",
 		ShowPasswordHint: true,
+		TasksKeepDays:    60,
 		Sleep:            5 * time.Second,
 		VisionOne:        VisionOne{},
 		DDAn:             NewDefaultDDAn(),

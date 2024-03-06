@@ -68,7 +68,7 @@ func (l *Launcher) Run() {
 
 func (l *Launcher) LoadTasks() {
 	logging.Debugf("LoadTasks")
-	err := l.list.LoadTasks()
+	err := l.list.LoadTasks(l.conf.TasksKeepDays)
 	if err != nil {
 		logging.LogError(err)
 		return

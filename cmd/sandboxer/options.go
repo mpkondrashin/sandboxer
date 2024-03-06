@@ -11,7 +11,9 @@ package main
 import (
 	"context"
 	"log"
+	"strconv"
 	"strings"
+	"unicode"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -24,11 +26,12 @@ import (
 )
 
 type OptionsWindow struct {
-	conf         *config.Configuration
-	tokenEntry   *widget.Entry
-	domainLabel  *widget.Label
-	ignoreEntry  *widget.Entry
-	cancelDetect context.CancelFunc
+	conf          *config.Configuration
+	tokenEntry    *widget.Entry
+	domainLabel   *widget.Label
+	ignoreEntry   *widget.Entry
+	tasksKeepDays *widget.Entry
+	cancelDetect  context.CancelFunc
 }
 
 func NewOptionsWindow(conf *config.Configuration) *OptionsWindow {
@@ -69,7 +72,23 @@ func (s *OptionsWindow) Content(w *ModalWindow) fyne.CanvasObject {
 	ignoreFormItem := widget.NewFormItem("Ignore:", s.ignoreEntry)
 	ignoreFormItem.HintText = "Comma-separated list of file masks"
 
-	settingsForm := widget.NewForm(ignoreFormItem)
+	s.tasksKeepDays = widget.NewEntry()
+	s.tasksKeepDays.SetText(strconv.Itoa(s.conf.TasksKeepDays))
+	s.tasksKeepDays.OnChanged = func(str string) {
+		n := ""
+		for _, ch := range str {
+			if unicode.IsDigit(ch) {
+				n += string(ch)
+			}
+		}
+		if n != str {
+			s.tasksKeepDays.SetText(n)
+		}
+	}
+	tasksKeepDaysFormItem := widget.NewFormItem("Delete tasks after: ", s.tasksKeepDays)
+	tasksKeepDaysFormItem.HintText = "Number of days"
+
+	settingsForm := widget.NewForm(ignoreFormItem, tasksKeepDaysFormItem)
 	settingsVBox := container.NewVBox(settingsLabel, settingsForm)
 
 	saveButton := widget.NewButton("Save", func() { s.Save(w) })
@@ -97,6 +116,10 @@ func (s *OptionsWindow) Save(w *ModalWindow) {
 		if len(ign) > 0 {
 			s.conf.Ignore = append(s.conf.Ignore, ign)
 		}
+	}
+	days, err := strconv.Atoi(s.tasksKeepDays.Text)
+	if err == nil {
+		s.conf.TasksKeepDays = days
 	}
 	if err := s.conf.Save(); err != nil {
 		logging.Errorf("Save Config: %v", err)
