@@ -1,7 +1,7 @@
 # Sandboxer
 <img src="resources/icon_transparent.png" width="200"/>
 
-## Inspect files using Trend Micro Vision One sandbox service
+## Inspect files using Trend Micro Vision One or Deep Discovery Analyzer sandbox
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
