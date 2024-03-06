@@ -12,17 +12,17 @@ Installation and usage video:
 [![Installation and usage](https://img.youtube.com/vi/beRX6YXjC4k/0.jpg)](https://www.youtube.com/watch?v=beRX6YXjC4k)
 
 
-<p align="center"><kbd><img src="resources/page_0.png" width="600px"/></kbd></p>
+<p align="center"><kbd><img src="resources/captures/page_0.png" width="600px"/></kbd></p>
 <p align="center">On introduction screen press "Next" button.</p>
-<p align="center"><kbd><img src="resources/page_5.png" width="600px"/></kbd></p>
+<p align="center"><kbd><img src="resources/captures/page_5.png" width="600px"/></kbd></p>
 <p align="center">Provide password that will be used to encrypt/decrypt saved Cloud One API key.</p>
-<p align="center"><kbd><img src="resources/page_6.png" width="600px"/></kbd></p>
+<p align="center"><kbd><img src="resources/captures/page_6.png" width="600px"/></kbd></p>
 <p align="center">Open Cloud One console to get required parameters (see below).</p>
-<p align="center"><kbd><img src="resources/page_7.png" width="600px"/></kbd></p>
+<p align="center"><kbd><img src="resources/captures/page_7.png" width="600px"/></kbd></p>
 <p align="center">Pick the AWS region in which you want to control bypass mode. GInspection is detecting regions with deployed NSHI and picks one of them.</p>
-<p align="center"><kbd><img src="resources/page_9.png" width="600px"/></kbd></p>
+<p align="center"><kbd><img src="resources/captures/page_9.png" width="600px"/></kbd></p>
 <p align="center">Push "bypass" button to cancel all Network Security inspection. Push "Inspect" button to return Network Security to its normal operation.</p>
-<p align="center"><kbd><img src="resources/page_11.png" width="600px"/></kbd></p>
+<p align="center"><kbd><img src="resources/captures/page_11.png" width="600px"/></kbd></p>
 <p align="center">Push "bypass" button to cancel all Network Security inspection. Push "Inspect" button to return Network Security to its normal operation.</p>
 
 
