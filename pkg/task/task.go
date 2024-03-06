@@ -104,7 +104,7 @@ func LoadTask(filePath string) (*Task, error) {
 func (t *Task) SetChannel(newChannel Channel) {
 	logging.Debugf("SetChannel(%v)", newChannel)
 	t.Channel = newChannel
-	t.SaveIfNeeded()
+	logging.LogError(t.SaveIfNeeded())
 }
 
 func (t *Task) GetChannel() string {

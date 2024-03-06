@@ -27,6 +27,7 @@ type OptionsWindow struct {
 	conf         *config.Configuration
 	tokenEntry   *widget.Entry
 	domainLabel  *widget.Label
+	ignoreEntry  *widget.Entry
 	cancelDetect context.CancelFunc
 }
 
@@ -61,17 +62,41 @@ func (s *OptionsWindow) Content(w *ModalWindow) fyne.CanvasObject {
 		tokenFormItem,
 		domainFormItem,
 	)
+
+	settingsLabel := widget.NewLabel("Settings")
+	s.ignoreEntry = widget.NewEntry()
+	s.ignoreEntry.SetText(strings.Join(s.conf.Ignore, ", "))
+	ignoreFormItem := widget.NewFormItem("Ignore:", s.ignoreEntry)
+	ignoreFormItem.HintText = "Comma-separated list of file masks"
+
+	settingsForm := widget.NewForm(ignoreFormItem)
+	settingsVBox := container.NewVBox(settingsLabel, settingsForm)
+
 	saveButton := widget.NewButton("Save", func() { s.Save(w) })
 	cancelButton := widget.NewButton("Cancel", w.Hide)
-	bottons := container.NewHBox(cancelButton, saveButton)
+	buttons := container.NewHBox(cancelButton, saveButton)
 	// add link to open v1 console(?)
-	return container.NewVBox(labelTop, optionsForm, bottons)
+	vOneVBox := container.NewVBox(labelTop, optionsForm)
+
+	tabs := container.NewAppTabs(
+		container.NewTabItem("Vision One", vOneVBox),
+		container.NewTabItem("Setting", settingsVBox),
+	)
+
+	return container.NewVBox(tabs, buttons)
 }
 
 func (s *OptionsWindow) Save(w *ModalWindow) {
 	s.conf.VisionOne.Token = strings.TrimSpace(s.tokenEntry.Text)
 	if s.domainLabel.Text != ErrorDomain {
 		s.conf.VisionOne.Domain = s.domainLabel.Text
+	}
+	s.conf.Ignore = nil
+	for _, ign := range strings.Split(s.ignoreEntry.Text, ",") {
+		ign := strings.TrimSpace(ign)
+		if len(ign) > 0 {
+			s.conf.Ignore = append(s.conf.Ignore, ign)
+		}
 	}
 	if err := s.conf.Save(); err != nil {
 		logging.Errorf("Save Config: %v", err)

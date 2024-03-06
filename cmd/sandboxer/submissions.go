@@ -152,9 +152,7 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 		s.channels.TaskChannel[task.ChPrefilter] <- tsk.Number
 	}
 	recheckItem := fyne.NewMenuItem("Recheck File", recheckAction)
-	if tsk.RiskLevel != sandbox.RiskLevelError {
-		recheckItem.Disabled = true
-	}
+	recheckItem.Disabled = (tsk.RiskLevel != sandbox.RiskLevelError) && (tsk.RiskLevel != sandbox.RiskLevelUnsupported)
 	return fyne.NewMenu(globals.AppName,
 		downloadItem,
 		downloadInvestigation,

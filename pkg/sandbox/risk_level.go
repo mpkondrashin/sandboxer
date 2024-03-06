@@ -32,7 +32,7 @@ const (
 var RiskLevelString = [...]string{
 	"Unknown",
 	"Not Ready",
-	"Unsupported",
+	"Not Analyzed",
 	"No Risk",
 	"Low Risk",
 	"Medium Risk",
