@@ -9,7 +9,6 @@ Download PDF report dispatcher
 package dispatchers
 
 import (
-	"context"
 	"sandboxer/pkg/task"
 )
 
@@ -28,7 +27,7 @@ func (d *ReportDispatch) InboundChannel() task.Channel {
 }
 
 func (d *ReportDispatch) ProcessTask(tsk *task.Task) error {
-	vOne, err := d.vOne()
+	sbox, err := d.Sandbox()
 	if err != nil {
 		return err
 	}
@@ -36,7 +35,7 @@ func (d *ReportDispatch) ProcessTask(tsk *task.Task) error {
 	if err != nil {
 		return err
 	}
-	if err := vOne.SandboxDownloadResults(tsk.SandboxID).Store(context.TODO(), filePath); err != nil {
+	if err := sbox.GetReport(tsk.SandboxID, filePath); err != nil {
 		return err
 	}
 	tsk.SetReport(filePath)

@@ -27,6 +27,7 @@ import (
 	"sandboxer/pkg/config"
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
+	"sandboxer/pkg/sandbox"
 	"sandboxer/pkg/task"
 	"sandboxer/pkg/xplatform"
 )
@@ -141,17 +142,17 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 	}
 
 	deleteFileItem = fyne.NewMenuItem("Delete File", deleteFileAction)
-	deleteFileItem.Disabled = tsk.RiskLevel != task.RiskLevelHigh &&
-		tsk.RiskLevel != task.RiskLevelMedium &&
-		tsk.RiskLevel != task.RiskLevelLow
+	deleteFileItem.Disabled = tsk.RiskLevel != sandbox.RiskLevelHigh &&
+		tsk.RiskLevel != sandbox.RiskLevelMedium &&
+		tsk.RiskLevel != sandbox.RiskLevelLow
 	recheckAction := func() {
 		tsk.SetMessage("")
-		tsk.SetRiskLevel(task.RiskLevelUnknown)
+		tsk.SetRiskLevel(sandbox.RiskLevelUnknown)
 		tsk.SetChannel(task.ChPrefilter)
 		s.channels.TaskChannel[task.ChPrefilter] <- tsk.Number
 	}
 	recheckItem := fyne.NewMenuItem("Recheck File", recheckAction)
-	if tsk.RiskLevel != task.RiskLevelError {
+	if tsk.RiskLevel != sandbox.RiskLevelError {
 		recheckItem.Disabled = true
 	}
 	return fyne.NewMenu(globals.AppName,
@@ -297,7 +298,7 @@ func (s *SubmissionsWindow) Update() {
 			s.buttonNext.Disable()
 		}
 	})
-	if s.from > 0 {
+	if s.from > 0 || s.from+s.count < s.list.Length() {
 		s.pageLabel.Text = fmt.Sprintf("Submissions %d - %d out of %d", s.from+1, to, s.list.Length())
 	} else {
 		s.pageLabel.Text = ""

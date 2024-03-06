@@ -24,10 +24,12 @@ import (
 
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
+	"sandboxer/pkg/sandbox"
 )
 
 type ID int64
 
+/*
 type TaskInter interface {
 	SetChannel(newChannel Channel)
 	GetChannel() string
@@ -47,7 +49,7 @@ type TaskInter interface {
 	InvestigationPath() (string, error)
 	CalculateHash() error
 	Delete() error
-}
+}*/
 
 type Task struct {
 	Number        ID
@@ -55,7 +57,7 @@ type Task struct {
 	SubmitTime    time.Time
 	Path          string
 	Channel       Channel
-	RiskLevel     RiskLevel
+	RiskLevel     sandbox.RiskLevel
 	Active        bool
 	Message       string
 	SandboxID     string
@@ -73,7 +75,7 @@ func NewTask(id ID, taskType TaskType, path string) *Task {
 		SubmitTime: time.Now(),
 		Path:       path,
 		Channel:    ChPrefilter,
-		RiskLevel:  RiskLevelUnknown,
+		RiskLevel:  sandbox.RiskLevelUnknown,
 		Active:     false,
 		Message:    "",
 		SandboxID:  "",
@@ -106,7 +108,7 @@ func (t *Task) SetChannel(newChannel Channel) {
 }
 
 func (t *Task) GetChannel() string {
-	if t.Channel == ChDone && t.RiskLevel != RiskLevelUnknown {
+	if t.Channel == ChDone && t.RiskLevel != sandbox.RiskLevelUnknown {
 		return t.RiskLevel.String()
 	}
 	return t.Channel.String()
@@ -123,7 +125,7 @@ func (t *Task) SetSandboxID(sandboxID string) {
 func (t *Task) String() string {
 	return fmt.Sprintf("Task %d; submitted on: %v; channel: %v; id: %s; message: %s, path: %s", t.Number, t.SubmitTime, t.Channel, t.SandboxID, t.Message, t.Path)
 }
-func (t *Task) SetRiskLevel(riskLevel RiskLevel) {
+func (t *Task) SetRiskLevel(riskLevel sandbox.RiskLevel) {
 	//t.State = StateDone
 	t.RiskLevel = riskLevel
 }
@@ -140,7 +142,7 @@ func (t *Task) Title() string {
 
 func (t *Task) SetError(err error) {
 	t.Channel = ChDone
-	t.RiskLevel = RiskLevelError
+	t.RiskLevel = sandbox.RiskLevelError
 	t.Message = err.Error()
 }
 

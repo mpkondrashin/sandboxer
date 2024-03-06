@@ -9,8 +9,6 @@ Upload file for inspection
 package dispatchers
 
 import (
-	"context"
-	"fmt"
 	"sandboxer/pkg/logging"
 	"sandboxer/pkg/task"
 )
@@ -32,35 +30,23 @@ func NewUploadDispatch(d BaseDispatcher) *UploadDispatch {
 func (d *UploadDispatch) ProcessTask(tsk *task.Task) error {
 	//tsk.SetState(task.StateUpload)
 	//d.list.Updated()
-	vOne, err := d.vOne()
+	sb, err := d.Sandbox()
 	if err != nil {
 		return err
 	}
+	var id string
 	if tsk.Type == task.URLTask {
-		f := vOne.SandboxSubmitURLs().AddURL(tsk.Path)
-		response, _, err := f.Do(context.TODO())
-		if err != nil {
-			return err
-		}
-		if len(response) != 1 {
-			return fmt.Errorf("wrong response length: %v", response)
-		}
-		tsk.SetSandboxID(response[0].Body.ID)
-		logging.Infof("Accepted: %v", response[0].Body.ID)
+		id, err = sb.SubmitURL(tsk.Path)
 	} else {
-		f, err := vOne.SandboxSubmitFile().SetFilePath(tsk.Path)
-		if err != nil {
-			return err
-		}
-		response, _, err := f.Do(context.TODO())
-		if err != nil {
-			return err
-		}
-		tsk.SetSandboxID(response.ID)
-		logging.Infof("Accepted: %v", response.ID)
+		id, err = sb.SubmitFile(tsk.Path)
 	}
+	if err != nil {
+		return err
+	}
+	tsk.SetSandboxID(id)
+	logging.Infof("Accepted: %v", id)
 	//tsk.SetState(task.StateAccepted)
-	tsk.SetChannel(task.ChWait)
+	tsk.SetChannel(task.ChResult)
 	d.list.Updated()
 	//d.Channel(ChWait) <- tsk.Number
 	return nil

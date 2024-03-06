@@ -11,6 +11,7 @@ package dispatchers
 import (
 	"errors"
 	"sandboxer/pkg/config"
+	"sandboxer/pkg/sandbox"
 	"sandboxer/pkg/task"
 
 	"github.com/mpkondrashin/vone"
@@ -35,7 +36,7 @@ func (d *BaseDispatcher) Channel(ch task.Channel) task.IDChannel {
 	return d.channels.TaskChannel[ch]
 }
 
-func (d *BaseDispatcher) vOne() (*vone.VOne, error) {
+func (d *BaseDispatcher) Sandbox() (sandbox.Sandbox, error) {
 	token := d.conf.VisionOne.Token
 	if token == "" {
 		return nil, errors.New("token is not set")
@@ -44,5 +45,5 @@ func (d *BaseDispatcher) vOne() (*vone.VOne, error) {
 	if domain == "" {
 		return nil, errors.New("domain is not set")
 	}
-	return vone.NewVOne(domain, token), nil
+	return sandbox.NewVOneSandbox(vone.NewVOne(domain, token)), nil
 }

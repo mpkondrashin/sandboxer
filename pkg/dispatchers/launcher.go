@@ -17,9 +17,9 @@ import (
 )
 
 const (
-	PrefilterDispatchers    = 5
-	UploadDispatchers       = 5
-	WaitDispatchers         = 5
+	PrefilterDispatchers = 5
+	UploadDispatchers    = 5
+	//	WaitDispatchers         = 5
 	ResultDispatchers       = 5
 	ReportDispatcher        = 5
 	InvestigationDispatcher = 5
@@ -48,7 +48,7 @@ func (l *Launcher) Run() {
 		{InvestigationDispatcher, NewInvestigationDispatch(base)},
 		{ReportDispatcher, NewReportDispatch(base)},
 		{ResultDispatchers, NewResultDispatch(base)},
-		{WaitDispatchers, NewWaitDispatch(base)},
+		//{WaitDispatchers, NewWaitDispatch(base)},
 		{UploadDispatchers, NewUploadDispatch(base)},
 		{PrefilterDispatchers, NewPrefilterDispatch(base)},
 	}

@@ -9,13 +9,10 @@ Get inspection result
 package dispatchers
 
 import (
-	"context"
-	"fmt"
 	"sandboxer/pkg/logging"
+	"sandboxer/pkg/sandbox"
 	"sandboxer/pkg/task"
-	"strings"
-
-	"github.com/mpkondrashin/vone"
+	"time"
 )
 
 type ResultDispatch struct {
@@ -33,41 +30,29 @@ func (d *ResultDispatch) InboundChannel() task.Channel {
 }
 
 func (d *ResultDispatch) ProcessTask(tsk *task.Task) error {
-	vOne, err := d.vOne()
+	sb, err := d.Sandbox()
 	if err != nil {
 		return err
 	}
-	//	time.Sleep(10 * time.Second)
-	//tsk.SetState(task.StateCheck)
-	//d.list.Updated()
-	results, err := vOne.SandboxAnalysisResults(tsk.SandboxID).Do(context.TODO())
-	if err != nil {
-		return err
-	}
-	//tsk.SetDigest(results.Digest.MD5, results.Digest.SHA1, results.Digest.SHA256)
-	// Should WE CHECK whenever hash was changed?
-	//logging.Debugf("XXX MESSAGE SET: %v", tsk)
-	//tsk.SetState(task.StateReport)
-	switch results.RiskLevel {
-	case vone.RiskLevelHigh:
-		tsk.SetRiskLevel(task.RiskLevelHigh)
-	case vone.RiskLevelMedium:
-		tsk.SetRiskLevel(task.RiskLevelMedium)
-	case vone.RiskLevelLow:
-		tsk.SetRiskLevel(task.RiskLevelLow)
-	case vone.RiskLevelNoRisk:
-		tsk.SetRiskLevel(task.RiskLevelNoRisk)
-		tsk.SetMessage(task.RiskLevelNoRisk.String())
+	riskLevel, threatName, err := sb.GetResult(tsk.SandboxID)
+	logging.Debugf("GetResut: %v (%d), %s [%v]", riskLevel, riskLevel, threatName, err)
+	tsk.SetRiskLevel(riskLevel)
+	switch riskLevel {
+	case sandbox.RiskLevelNotReady:
+		tsk.Deactivate()
+		d.list.Updated()
+		logging.Debugf("Seleep %v for %v", d.conf.Sleep, tsk)
+		time.Sleep(d.conf.Sleep)
+		tsk.SetChannel(task.ChResult)
+	case sandbox.RiskLevelUnsupported:
+		tsk.SetMessage(err.Error())
+		tsk.SetChannel(task.ChDone)
+		return nil
+		//	case sandbox.RiskLevelError:
+		//		return err
 	default:
-		return fmt.Errorf("unknown risk level: %d", results.RiskLevel)
+		tsk.SetMessage(threatName)
+		tsk.SetChannel(task.ChReport)
 	}
-	tsk.SetChannel(task.ChReport)
-	//d.Channel(ChReport) <- tsk.Number
-	detectionName := strings.Join(results.DetectionNames, ", ")
-	threatType := strings.Join(results.ThreatTypes, ", ")
-	tsk.SetMessage(detectionName + threatType)
-	logging.Debugf("Type: %s, TrueFileType: %s, RiskLevel: %s, DetectionNames: %s, threatTypes: %s; for task %v",
-		results.Type, results.TrueFileType, results.RiskLevel, detectionName, threatType, tsk.Number)
-	d.list.Updated()
-	return nil
+	return err
 }

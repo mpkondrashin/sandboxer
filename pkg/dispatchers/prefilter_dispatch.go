@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"sandboxer/pkg/logging"
+	"sandboxer/pkg/sandbox"
 	"sandboxer/pkg/task"
 	"strings"
 )
@@ -49,7 +50,7 @@ func (d *PrefilterDispatch) ProcessTask(tsk *task.Task) error {
 		}
 		if d.ShouldIgnore(tsk.Path) {
 			tsk.SetChannel(task.ChDone)
-			tsk.SetRiskLevel(task.RiskLevelUnsupported)
+			tsk.SetRiskLevel(sandbox.RiskLevelUnsupported)
 			d.list.Updated()
 			return nil
 		}

@@ -25,7 +25,7 @@ type Channel int
 const (
 	ChPrefilter Channel = iota
 	ChSubmit
-	ChWait
+	//	ChWait
 	ChResult
 	ChReport
 	ChInvestigation
@@ -35,8 +35,8 @@ const (
 var ChannelString = [...]string{
 	"Prefilter",
 	"Submission",
-	"Wait",
-	"Get Result",
+	//	"Wait",
+	"Wait For Result",
 	"Get Report",
 	"Get Investigation",
 	"Done",
@@ -55,9 +55,9 @@ func (c Channel) String() string {
 var ErrUnknownChannel = errors.New("unknown Channel")
 
 var mapChannelFromString = map[string]Channel{
-	ChannelString[ChPrefilter]:     ChPrefilter,
-	ChannelString[ChSubmit]:        ChSubmit,
-	ChannelString[ChWait]:          ChWait,
+	ChannelString[ChPrefilter]: ChPrefilter,
+	ChannelString[ChSubmit]:    ChSubmit,
+	//	ChannelString[ChWait]:          ChWait,
 	ChannelString[ChResult]:        ChResult,
 	ChannelString[ChReport]:        ChReport,
 	ChannelString[ChInvestigation]: ChInvestigation,

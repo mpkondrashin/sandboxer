@@ -103,9 +103,9 @@ func (s *DDAnSandbox) GetResult(id string) (RiskLevel, string, error) {
 	case ddan.StatusError:
 		return RiskLevelUnknown, "", fmt.Errorf("%s: %w", id, ErrError)
 	case ddan.StatusTimeout:
-		return RiskLevelUnknown, "", fmt.Errorf("%s: %w: timeout", id, ErrError)
+		return RiskLevelError, "", fmt.Errorf("%s: %w: timeout", id, ErrError)
 	default:
-		return RiskLevelUnknown, "", fmt.Errorf("%s: %w: unknown", id, ErrError)
+		return RiskLevelError, "", fmt.Errorf("%s: %w: unknown", id, ErrError)
 	}
 	switch briefReport.RiskLevel {
 	case ddan.RatingUnsupported:
@@ -118,10 +118,10 @@ func (s *DDAnSandbox) GetResult(id string) (RiskLevel, string, error) {
 	}
 	reports, err := s.analyzer.GetReport(context.TODO(), id)
 	if err != nil {
-		return RiskLevelUnknown, "", fmt.Errorf("GetReport(%s): %w", id, err)
+		return RiskLevelError, "", fmt.Errorf("GetReport(%s): %w", id, err)
 	}
 	if len(reports.FILEANALYZEREPORT) != 1 {
-		return RiskLevelUnknown, "", fmt.Errorf("%s: %w: wrong report length: %v", id, ErrError, reports)
+		return RiskLevelError, "", fmt.Errorf("%s: %w: wrong report length: %v", id, ErrError, reports)
 	}
 	VirusName := reports.FILEANALYZEREPORT[0].VirusName.Value
 
@@ -133,7 +133,7 @@ func (s *DDAnSandbox) GetResult(id string) (RiskLevel, string, error) {
 	case ddan.RatingHighRisk:
 		return RiskLevelHigh, VirusName, nil
 	default:
-		return RiskLevelUnknown, "", fmt.Errorf("GetBriefReport(%s): %d: %w", id, briefReport.RiskLevel, ErrUnknownRiskLevel)
+		return RiskLevelError, "", fmt.Errorf("GetBriefReport(%s): %d: %w", id, briefReport.RiskLevel, ErrUnknownRiskLevel)
 	}
 }
 

@@ -55,11 +55,11 @@ func (s *VOneSandbox) GetResult(id string) (RiskLevel, string, error) {
 		return RiskLevelNotReady, "", nil
 	case vone.StatusFailed:
 		if status.Error.Code == "Unsupported" {
-			return RiskLevelUnsupported, "", nil // fmt.Errorf("%w: %s", ErrUnsupported, status.Error.Message)
+			return RiskLevelUnsupported, "", fmt.Errorf("%w: %s", ErrUnsupported, status.Error.Message)
 		}
 		return RiskLevelError, "", fmt.Errorf("%s: %w: %s %s", id, ErrError, status.Error.Code, status.Error.Message)
 	default:
-		return RiskLevelUnknown, "", fmt.Errorf("%v: %w", status, ErrUnknownRiskLevel)
+		return RiskLevelError, "", fmt.Errorf("%v: %w", status, ErrUnknownRiskLevel)
 	}
 	results, err := s.vOne.SandboxAnalysisResults(id).Do(context.TODO())
 	if err != nil {
@@ -79,7 +79,7 @@ func (s *VOneSandbox) GetResult(id string) (RiskLevel, string, error) {
 	case vone.RiskLevelLow:
 		return RiskLevelLow, virusName, nil
 	default:
-		return RiskLevelUnknown, "", fmt.Errorf("%d: %w", results.RiskLevel, ErrUnknownRiskLevel)
+		return RiskLevelError, "", fmt.Errorf("%d: %w", results.RiskLevel, ErrUnknownRiskLevel)
 	}
 }
 

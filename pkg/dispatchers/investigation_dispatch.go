@@ -9,7 +9,6 @@ Download investigation package
 package dispatchers
 
 import (
-	"context"
 	"sandboxer/pkg/task"
 )
 
@@ -28,7 +27,7 @@ func (d *InvestigationDispatch) InboundChannel() task.Channel {
 }
 
 func (d *InvestigationDispatch) ProcessTask(tsk *task.Task) error {
-	vOne, err := d.vOne()
+	sbox, err := d.Sandbox()
 	if err != nil {
 		return err
 	}
@@ -40,7 +39,7 @@ func (d *InvestigationDispatch) ProcessTask(tsk *task.Task) error {
 	}
 	//zipFileName := fmt.Sprintf("%s.zip", tsk.SHA256)
 	//zipFilePath := filepath.Join(tasksFolder, zipFileName)
-	if err := vOne.SandboxInvestigationPackage(tsk.SandboxID).Store(context.TODO(), zipFilePath); err != nil {
+	if err := sbox.GetInvestigation(tsk.SandboxID, zipFilePath); err != nil {
 		return err
 	}
 	tsk.SetInvestigation(zipFilePath)
