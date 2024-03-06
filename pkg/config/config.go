@@ -35,7 +35,7 @@ type DDAn struct {
 	SourceName      string `yaml:"source_name"`
 	APIKey          string `yaml:"api_key"`
 	IgnoreTLSErrors bool   `yaml:"ignore_tls_errors"`
-	ClientUUID      string `yaml:"client_id"`
+	ClientUUID      string `yaml:"-"`
 }
 
 func NewDefaultDDAn() DDAn {

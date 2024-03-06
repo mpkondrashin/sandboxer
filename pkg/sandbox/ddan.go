@@ -105,7 +105,7 @@ func (s *DDAnSandbox) GetResult(id string) (RiskLevel, string, error) {
 	case ddan.StatusTimeout:
 		return RiskLevelError, "", fmt.Errorf("%s: %w: timeout", id, ErrError)
 	default:
-		return RiskLevelError, "", fmt.Errorf("%s: %w: unknown", id, ErrError)
+		return RiskLevelError, "", fmt.Errorf("%s: %w: %d: unknown status", id, ErrError, briefReport.SampleStatus)
 	}
 	switch briefReport.RiskLevel {
 	case ddan.RatingUnsupported:
@@ -114,7 +114,7 @@ func (s *DDAnSandbox) GetResult(id string) (RiskLevel, string, error) {
 		return RiskLevelNoRisk, "", nil
 	}
 	if briefReport.RiskLevel < 0 {
-		return RiskLevelNoRisk, "", fmt.Errorf("%s: %w: %v", id, ErrError, briefReport.RiskLevel)
+		return RiskLevelUnknown, "", fmt.Errorf("%s: %w: %v", id, ErrError, briefReport.RiskLevel)
 	}
 	reports, err := s.analyzer.GetReport(context.TODO(), id)
 	if err != nil {

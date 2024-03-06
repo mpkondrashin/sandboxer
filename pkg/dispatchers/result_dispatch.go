@@ -45,7 +45,11 @@ func (d *ResultDispatch) ProcessTask(tsk *task.Task) error {
 		time.Sleep(d.conf.Sleep)
 		tsk.SetChannel(task.ChResult)
 	case sandbox.RiskLevelUnsupported:
-		tsk.SetMessage(err.Error())
+		if err != nil {
+			tsk.SetMessage(err.Error())
+		} else {
+			tsk.SetMessage("Unsupported file type")
+		}
 		tsk.SetChannel(task.ChDone)
 		return nil
 		//	case sandbox.RiskLevelError:

@@ -47,6 +47,14 @@ func TasksFolder() (string, error) {
 	return filepath.Join(folder, tasksFolder), nil
 }
 
+func AnalyzerClientUUIDFilePath() (string, error) {
+	folder, err := xplatform.UserDataFolder(AppID)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(folder, AnalyzerClientUUID), nil
+}
+
 func PidFilePath() (string, error) {
 	folder, err := xplatform.UserDataFolder(AppID)
 	if err != nil {

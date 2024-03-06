@@ -9,12 +9,13 @@ Global values
 package globals
 
 const (
-	AppName        = "Sandboxer"
-	AppFolderName  = AppName
-	Name           = "sandboxer"
-	AppID          = "com.github.mpkondrashin." + Name
-	ConfigFileName = Name + ".yaml"
-	FIFOName       = Name + "_submit_fifo"
-	MaxLogFileSize = 10_000_000
-	LogsKeep       = 1
+	AppName            = "Sandboxer"
+	AppFolderName      = AppName
+	Name               = "sandboxer"
+	AppID              = "com.github.mpkondrashin." + Name
+	ConfigFileName     = Name + ".yaml"
+	FIFOName           = Name + "_submit_fifo"
+	AnalyzerClientUUID = Name + "_uuid.txt"
+	MaxLogFileSize     = 10_000_000
+	LogsKeep           = 1
 )

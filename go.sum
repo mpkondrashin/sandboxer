@@ -264,6 +264,8 @@ github.com/mpkondrashin/ddan v0.0.79 h1:bYtuzzjcDFOnH5e+R9DK037AlAm61dJNHBHEZCiF
 github.com/mpkondrashin/ddan v0.0.79/go.mod h1:cgzsCG6L+45K74pEJUy8qOMQZY9gw0nMSDozCTqK2qw=
 github.com/mpkondrashin/ddan v0.0.80 h1:bSYlGyGx6leeV+WE+MxCrtiycf8i/UE2UUA7k788VTs=
 github.com/mpkondrashin/ddan v0.0.80/go.mod h1:cgzsCG6L+45K74pEJUy8qOMQZY9gw0nMSDozCTqK2qw=
+github.com/mpkondrashin/ddan v0.0.81 h1:wZN/GpEZZMnp/3YsnD+pcxgISMhrwXXFDRrgOHwWEV8=
+github.com/mpkondrashin/ddan v0.0.81/go.mod h1:cgzsCG6L+45K74pEJUy8qOMQZY9gw0nMSDozCTqK2qw=
 github.com/mpkondrashin/fileicon v0.0.6 h1:XmK6kb5duUORBhNLiP6SEuUBpA3NY/GnouCSvGTRPWI=
 github.com/mpkondrashin/fileicon v0.0.6/go.mod h1:0E0/m5tR/RcAE75Luu/XTeJG4vU8uxMowb0iOfRG92c=
 github.com/mpkondrashin/fileicon v0.0.7 h1:AGpjvj2VHujW2cKXlK/zKCQzjy9gynPeNpKmqgwesgg=
