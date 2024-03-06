@@ -5,6 +5,11 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+Sandboxer submissions window:
+
+<p align="center"><kbd><img src="resources/captures/submissions.png" width="600px"/></kbd></p>
+
+
 ### Installation for Windows
 Download setup_windows_amd64.zip from [latest release](https://github.com/mpkondrashin/sandboxer/releases/latest), unpack zip file and run setup.exe.
 
