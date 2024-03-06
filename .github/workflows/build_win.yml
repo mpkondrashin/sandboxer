@@ -83,6 +83,9 @@ jobs:
   
   Build-Release-Darwin-arm64:
     runs-on: flyci-macos-large-latest-m2 #macos-13-xlarge
+    env:
+      GOPRIVATE: github.com/mpkondrashin/ddan
+      DDAN_FOR_SANDBOXER: ${{ secrets.DDAN_FOR_SANDBOXER }}
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
