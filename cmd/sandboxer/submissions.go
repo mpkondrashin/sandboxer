@@ -238,8 +238,9 @@ func IconForFile(path string) fyne.CanvasObject {
 func (s *SubmissionsWindow) CardWidget(tsk *task.Task) fyne.CanvasObject {
 	path := tsk.Path
 	icon := IconForFile(path)
+
 	fileNameText := canvas.NewText(tsk.Title(), color.Black)
-	fileNameText.TextStyle = fyne.TextStyle{Bold: true}
+	//fileNameText.TextStyle = fyne.TextStyle{Bold: true}
 	stateText := canvas.NewText(tsk.GetChannel(), tsk.RiskLevel.Color())
 	stateText.TextStyle = fyne.TextStyle{Bold: tsk.Active}
 

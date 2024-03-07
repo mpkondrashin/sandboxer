@@ -34,6 +34,7 @@ require (
 	github.com/jsummers/gobmp v0.0.0-20151104160322-e2ba15ffa76e // indirect
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/robertkrimen/otto v0.0.0-20211024170158-b87d35c0b86f // indirect
 	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
@@ -43,5 +44,6 @@ require (
 	golang.org/x/mobile v0.0.0-20230531173138-3c911d8e3eda // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
+	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 	honnef.co/go/js/dom v0.0.0-20210725211120-f030747120f2 // indirect
 )

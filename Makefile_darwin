@@ -38,10 +38,13 @@ cmd/install/resource.go: resources/icon_transparent.png
 cmd/install/embed/sandboxer_submit.tar.gz: resources/sandboxer_submit.tar.gz
 	cp resources/sandboxer_submit.tar.gz cmd/install/embed/sandboxer_submit.tar.gz
 
-cmd/install/embed/sandboxer.tar.gz: Sandboxer.app/Contents/MacOS/sandboxer Sandboxer.app/Contents/MacOS/submit Sandboxer.app/Contents/Resources/LICENSE
+cmd/install/embed/sandboxer.tar.gz: Sandboxer.app/Contents/MacOS/sandboxer Sandboxer.app/Contents/MacOS/submit Sandboxer.app/Contents/Resources/LICENSE Sandboxer.app/Contents/Resources/DroidSansHebrew-Regular.ttf
 	tar cfvz $@ Sandboxer.app
 
 Sandboxer.app/Contents/Resources/LICENSE: LICENSE Sandboxer.app/Contents/MacOS/sandboxer
+	cp $< $@
+
+Sandboxer.app/Contents/Resources/DroidSansHebrew-Regular.ttf: resources/DroidSansHebrew-Regular.ttf Sandboxer.app/Contents/MacOS/sandboxer
 	cp $< $@
 
 Sandboxer.app/Contents/MacOS/submit: $(wildcard cmd/submit/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go Sandboxer.app/Contents/MacOS/sandboxer
