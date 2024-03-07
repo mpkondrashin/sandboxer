@@ -1,13 +1,19 @@
 # Sandboxer
 <img src="resources/icon_transparent.png" width="200"/>
 
-## Inspect files using Trend Micro Vision One or Deep Discovery Analyzer sandbox
+## Inspect objects using Trend Micro Vision One or Deep Discovery Analyzer sandbox
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+## Features
+
+1. Inspected objects: Files and URLs
+2. Supported sandboxes: Vision One and Deep Discovery Analyzer 
+3. Supported platforms: Windows and macOS
+
 Sandboxer submissions window:
 
-<p align="center"><kbd><img src="resources/captures/submissions.png" width="500px"/></kbd></p>
+<p align="center"><kbd><img src="resources/captures/submissions.png" width="300px"/></kbd></p>
 
 
 ### Installation for Windows
