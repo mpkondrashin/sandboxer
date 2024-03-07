@@ -1,5 +1,5 @@
 # Sandboxer
-<p align="center"><kbd><img src="resources/icon_transparent.png" width="200"/></kbd></p>
+<p align="center"><img src="resources/icon_transparent.png" width="200"/></p>
 
 ## Inspect objects using Trend Micro Vision One or Deep Discovery Analyzer sandbox
 
@@ -13,7 +13,7 @@
 
 Sandboxer submissions window:
 
-<p align="center"><kbd><img src="resources/captures/submissions.png" width="300px"/></kbd></p>
+<p align="center"><img src="resources/captures/submissions.png" width="300px"/></p>
 
 
 ### Installation
