@@ -11,7 +11,7 @@
 2. Supported sandboxes: Vision One and Deep Discovery Analyzer. 
 3. Supported platforms: Windows and macOS.
 4. Auto notification and download when new version is released.
-5. Store analysis fesults for two months (this is configurable option).
+5. Store analysis results for two months (this is configurable option).
 
 Sandboxer submissions window:
 
