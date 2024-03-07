@@ -69,7 +69,7 @@ func (s *OptionsWindow) Content(w *ModalWindow) fyne.CanvasObject {
 	tabs.OnSelected = func(tab *container.TabItem) {
 		switch tab {
 		case ddanTab:
-			s.ddanSettings.TestAnalyzer()
+			s.ddanSettings.Update()
 		case voneTab:
 			s.voneSettings.Update()
 		}

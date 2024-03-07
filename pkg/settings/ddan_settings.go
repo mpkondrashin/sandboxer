@@ -62,6 +62,10 @@ func (s *DDAn) Widget() fyne.CanvasObject {
 	return container.NewVBox(ddanForm, s.ddanTest)
 }
 
+func (s *DDAn) Update() {
+	s.TestAnalyzer()
+}
+
 func (s *DDAn) TestAnalyzer() {
 	log.Println("TestAnalyzer")
 	go func() {
