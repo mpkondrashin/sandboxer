@@ -51,7 +51,7 @@ Right click on file and choose Send To -> Sandboxer. Note that for latest Window
 <p align="center"><img src="resources/captures/send_to.png" width="300px"/></p>
 
 ### To Submit URL
-Run Sandboxer if it is not yet running and pick from its system tray icon menu "Submit URL" item.
+Run Sandboxer, if it is not yet running, and pick from its system tray icon menu "Submit URL" item.
 
 ### To Get Results
 Pick from Sandboxer system tray icon menu "Submissions" item. Right click on the menu icon "⋮" and choose "Show Report" or "Investigation Package".
