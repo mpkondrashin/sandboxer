@@ -16,7 +16,7 @@ Sandboxer submissions window:
 <p align="center"><kbd><img src="resources/captures/submissions.png" width="300px"/></kbd></p>
 
 
-### Installation for Windows
+### Installation
 Download distributive file for your platform from [latest release](https://github.com/mpkondrashin/sandboxer/releases/latest), unpack zip file and run setup.exe (for Windows)SandboxerInstaller (for macOS).
 
 Installation and usage video:
