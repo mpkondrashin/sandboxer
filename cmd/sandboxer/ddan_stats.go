@@ -59,12 +59,19 @@ func (s *StatStruct) Reset() {
 	s.Last90Days.Set("?")
 }
 
+func toString(v int) string {
+	if v == -1 {
+		return "no data"
+	}
+	return fmt.Sprintf("%d sec", v)
+}
+
 func (s *StatStruct) Set(t *ddan.AvgTime) {
-	s.Last4Hours.Set(fmt.Sprintf("%d", t.Last4Hours))
-	s.Last24Hours.Set(fmt.Sprintf("%d", t.Last24Hours))
-	s.Last7Days.Set(fmt.Sprintf("%d", t.Last7Days))
-	s.Last30Days.Set(fmt.Sprintf("%d", t.Last30Days))
-	s.Last90Days.Set(fmt.Sprintf("%d", t.Last90Days))
+	s.Last4Hours.Set(toString(t.Last4Hours))
+	s.Last24Hours.Set(toString(t.Last24Hours))
+	s.Last7Days.Set(toString(t.Last7Days))
+	s.Last30Days.Set(toString(t.Last30Days))
+	s.Last90Days.Set(toString(t.Last90Days))
 }
 
 type StatsWindow struct {
@@ -86,17 +93,16 @@ func NewStatsWindow(conf *config.Configuration) *StatsWindow {
 
 func (w *StatsWindow) Content(modal *ModalWindow) fyne.CanvasObject {
 	w.win = modal.win
-	totalLabel := widget.NewLabel("Average Total Processing Time")
+	totalLabel := widget.NewLabel("Average Total Processing Time\n(from the moment of submission,\nincluding queueing)")
 	totalForm := widget.NewForm(w.AvgTotalProcessingTime.FormItems()...)
-	averageLabel := widget.NewLabel("Average Analysis Time")
-	averageForm := widget.NewForm(w.AvgVAAnalysisTime.FormItems()...)
-
+	vaLabel := widget.NewLabel("Average Analysis Time\n(by sandbox)\n")
+	vaForm := widget.NewForm(w.AvgVAAnalysisTime.FormItems()...)
+	totalVBox := container.NewVBox(totalLabel, totalForm)
+	vaVBox := container.NewVBox(vaLabel, vaForm)
+	dataHBox := container.NewHBox(totalVBox, vaVBox)
 	w.Reset()
 	return container.NewVBox(
-		totalLabel,
-		totalForm,
-		averageLabel,
-		averageForm,
+		dataHBox,
 		widget.NewButton("Update", func() {
 			w.Update()
 		}),

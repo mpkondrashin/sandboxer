@@ -29,28 +29,6 @@ import (
 
 type ID int64
 
-/*
-type TaskInter interface {
-	SetChannel(newChannel Channel)
-	GetChannel() string
-	VOneID() string
-	SetSandboxID(sandboxID string)
-	String() string
-	SetRiskLevel(riskLevel RiskLevel)
-	Title() string
-	SetError(err error)
-	SetMessage(message string)
-	SetReport(report string)
-	SetInvestigation(investigation string)
-	Activate()
-	Deactivate()
-	Save()
-	ReportPath() (string, error)
-	InvestigationPath() (string, error)
-	CalculateHash() error
-	Delete() error
-}*/
-
 type Task struct {
 	Number        ID
 	Type          TaskType
@@ -108,7 +86,7 @@ func (t *Task) SetChannel(newChannel Channel) {
 }
 
 func (t *Task) GetChannel() string {
-	if t.Channel == ChDone && t.RiskLevel != sandbox.RiskLevelUnknown {
+	if t.Channel == ChDone { //} && t.RiskLevel  != sandbox.RiskLevelUnknown {
 		return t.RiskLevel.String()
 	}
 	return t.Channel.String()
