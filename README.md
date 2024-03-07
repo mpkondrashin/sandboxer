@@ -45,5 +45,16 @@ If correct Domain value is not detected automatically, choose it from dropdown l
 Right click on file and choose Quick Actions -> Sandboxer
 <p align="center"><img src="resources/captures/quick_actions.png" width="300px"/></p>
 
+### For Windows
+
+Right click on file and choose Send To -> Sandboxer. Note that for latest Windows, you will have to chosse first "Show more options".
+<p align="center"><img src="resources/captures/send_to.png" width="300px"/></p>
+
+### To Submit URL
+Run Sandboxer if it is not yet running and pick from its system tray icon menu "Submit URL" item.
+
+### To Get Results
+Pick from Sandboxer system tray icon menu "Submissions" item. Right click on the menu icon "⋮" and choose "Show Report" or "Investigation Package".
+
 
 Icon is taken from <a href="https://www.flaticon.com/free-icons/dog" title="dog icons">Dog icons created by Freepik - Flaticon</a>
