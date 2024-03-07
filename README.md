@@ -7,9 +7,12 @@
 
 ## Features
 
+### Major Features
 1. Inspected objects: Files and URLs.
 2. Supported sandboxes: Vision One and Deep Discovery Analyzer. 
 3. Supported platforms: Windows and macOS.
+
+###  Minor Features
 4. Auto notification and download when new version is released.
 5. Store analysis results for two months (this is configurable option).
 
