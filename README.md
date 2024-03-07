@@ -30,7 +30,7 @@ Installation and usage video:
 <p align="center">If you selected Vision One on the first step, then enter Token. Learn more about <a href="https://docs.trendmicro.com/en-us/documentation/article/trend-vision-one-api-keys">API Keys</a> and <a href="https://docs.trendmicro.com/en-US/documentation/article/trend-vision-one-configuring-user-rol">Roles</a>. 
 If correct Domain value is not detected automatically, choose it from dropdown list.</p> 
 <p align="center"><kbd><img src="resources/captures/page_6.png" width="500px"/></kbd></p>
-<p align="center">If you selected Deep Discovery Analyzer on the first step, provide its IP/DNS address and API Key.</p>
+<p align="center">If you selected Deep Discovery Analyzer on the first step, provide its IP/DNS address and API Key. If you are using self-signed certificate, check TLS Errors Ignore.</p>
 <p align="center"><kbd><img src="resources/captures/page_7.png" width="500px"/></kbd></p>
 <p align="center">Remove checkbox is there is not need to run Sandboxer automatically. It will be launched automatically upon file submission.</p>
 <p align="center"><kbd><img src="resources/captures/page_9.png" width="500px"/></kbd></p>

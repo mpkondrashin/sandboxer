@@ -50,7 +50,6 @@ func (s *DDAn) Widget() fyne.CanvasObject {
 	apiKeyFormItem.HintText = "Go to Help -> About on Analyzer console"
 
 	s.ddanIgnoreTLSCheck = widget.NewCheck("Ignore", nil)
-	//	s.ddanIgnoreTLSCheck.HintText = "In case you are using self-signed certificate"
 	s.ddanIgnoreTLSCheck.SetChecked(s.conf.IgnoreTLSErrors)
 	s.ddanIgnoreTLSCheck.OnChanged = func(bool) {
 		s.TestAnalyzer()
