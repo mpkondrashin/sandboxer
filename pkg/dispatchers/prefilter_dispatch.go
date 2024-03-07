@@ -35,9 +35,6 @@ func (*PrefilterDispatch) InboundChannel() task.Channel {
 
 func (d *PrefilterDispatch) ProcessTask(tsk *task.Task) error {
 	logging.Debugf("Prefilter %s", tsk.Path)
-	if err := tsk.CalculateHash(); err != nil {
-		return err
-	}
 	if tsk.Type == task.FileTask {
 		info, err := os.Lstat(tsk.Path)
 		if err != nil {
@@ -52,6 +49,9 @@ func (d *PrefilterDispatch) ProcessTask(tsk *task.Task) error {
 		if !info.Mode().IsRegular() {
 			return errors.New("not regular file")
 		}
+		if err := tsk.CalculateHash(); err != nil {
+			return err
+		}
 		mask := d.MatchIgnoreMask(tsk.Path)
 		if mask != "" {
 			tsk.SetChannel(task.ChDone)
@@ -60,6 +60,10 @@ func (d *PrefilterDispatch) ProcessTask(tsk *task.Task) error {
 			tsk.SetChannel(task.ChDone)
 			d.list.Updated()
 			return nil
+		}
+	} else {
+		if err := tsk.CalculateHash(); err != nil {
+			return err
 		}
 	} //	logging.Debugf("Send Task #%d to %d", tsk.Number, ChUpload)
 	tsk.SetChannel(task.ChSubmit)

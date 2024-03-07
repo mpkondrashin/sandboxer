@@ -9,10 +9,15 @@ Configuration
 package config
 
 import (
+	"errors"
+	"net/url"
 	"os"
 	"path/filepath"
 	"time"
 
+	"github.com/google/uuid"
+	"github.com/mpkondrashin/ddan"
+	"github.com/mpkondrashin/vone"
 	"gopkg.in/yaml.v3"
 
 	"sandboxer/pkg/globals"
@@ -22,6 +27,18 @@ import (
 type VisionOne struct {
 	Token  string `yaml:"token"`
 	Domain string `yaml:"domain"`
+}
+
+func (s *VisionOne) VisionOneSandbox() (*vone.VOne, error) {
+	token := s.Token
+	if token == "" {
+		return nil, errors.New("token is not set")
+	}
+	domain := s.Domain
+	if domain == "" {
+		return nil, errors.New("domain is not set")
+	}
+	return vone.NewVOne(domain, token), nil
 }
 
 type DDAn struct {
@@ -44,7 +61,7 @@ func NewDefaultDDAn() DDAn {
 		hostname = err.Error()
 	}
 	return DDAn{
-		ProtocolVersion: "2.0",
+		ProtocolVersion: "1.8",
 		UserAgent:       globals.Name + "/" + globals.Version,
 		ProductName:     globals.AppName,
 		Hostname:        hostname,
@@ -55,6 +72,56 @@ func NewDefaultDDAn() DDAn {
 		IgnoreTLSErrors: false,
 		//ClientUUID      string `yaml:"client_uuid"`
 	}
+}
+
+func (d *DDAn) Analyzer() (*ddan.Client, error) {
+	u, err := url.Parse(d.URL)
+	if err != nil {
+		return nil, err
+	}
+	analyzer := ddan.NewClient(d.ProductName, d.Hostname)
+	analyzer.SetAnalyzer(u, d.APIKey, d.IgnoreTLSErrors)
+	analyzer.SetSource(d.SourceID, d.SourceName)
+	analyzer.SetUUID(d.ClientUUID)
+	analyzer.SetProtocolVersion(d.ProtocolVersion)
+	return analyzer, nil
+}
+
+func (d *DDAn) AnalyzerWithUUID() (*ddan.Client, error) {
+	var err error
+	if d.ClientUUID == "" {
+		if d.ClientUUID == "" {
+			d.ClientUUID, err = GenerateUUID()
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	return d.Analyzer()
+}
+
+func GenerateUUID() (string, error) {
+	path, err := globals.AnalyzerClientUUIDFilePath()
+	if err != nil {
+		return "", err
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		//logging.Errorf("Client UUID file read error: %v", err)
+		if !errors.Is(err, os.ErrNotExist) {
+			return "", err
+		}
+		uuidData, err := uuid.NewRandom()
+		if err != nil {
+			return "", err
+		}
+		err = os.WriteFile(path, []byte(uuidData.String()), 0600)
+		if err != nil {
+			return "", err
+		}
+		return uuidData.String(), nil
+	}
+	return string(data), nil
 }
 
 type Configuration struct {

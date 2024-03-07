@@ -3,7 +3,6 @@ package settings
 import (
 	"context"
 	"errors"
-	"log"
 	"net/url"
 	"sandboxer/pkg/config"
 	"strings"
@@ -67,11 +66,8 @@ func (s *DDAn) Update() {
 }
 
 func (s *DDAn) TestAnalyzer() {
-	log.Println("TestAnalyzer")
 	go func() {
-		log.Println("TestAnalyzer go")
 		if s.cancelTestDDAn != nil {
-			log.Println("s.cancelTestDDAn != nil ")
 			s.cancelTestDDAn()
 		}
 		var ctx context.Context
@@ -88,21 +84,16 @@ func (s *DDAn) TestAnalyzer() {
 			s.ddanTest.SetText(err.Error())
 			return
 		}
-		log.Println("TestAnalyzer u = ", u)
 		apiKey := strings.TrimSpace(s.ddanAPIKeyEntry.Text)
-		log.Println("apiKey = ", apiKey)
 		analyzer := ddan.NewClient(s.conf.ProductName, s.conf.Hostname).
 			SetAnalyzer(u, apiKey, s.ddanIgnoreTLSCheck.Checked)
-		log.Println("analyzer ", analyzer)
 		//if s.conf.ProtocolVersion != "" {
 		//	log.Println("analyzer set version ", s.conf.ProtocolVersion)
 		analyzer.SetProtocolVersion(s.conf.ProtocolVersion)
 		//}
-		log.Println("To test connection")
 		ctxTimeout, cancelTimeout := context.WithTimeout(ctx, 5*time.Second)
 		defer cancelTimeout()
 		err = analyzer.TestConnection(ctxTimeout)
-		log.Println("TestConnection err ", err)
 		if err != nil {
 			if !errors.Is(err, context.Canceled) {
 				if errors.Is(err, context.DeadlineExceeded) {

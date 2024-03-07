@@ -132,10 +132,8 @@ func (t *Task) SetRiskLevel(riskLevel sandbox.RiskLevel) {
 
 func (t *Task) Title() string {
 	if t.Type == URLTask {
-		logging.Debugf("Title url: %s", t.Path)
 		return t.Path
 	} else {
-		logging.Debugf("Title file: %s", t.Path)
 		return filepath.Base(t.Path)
 	}
 }

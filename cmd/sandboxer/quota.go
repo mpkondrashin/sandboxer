@@ -17,8 +17,6 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 
-	"github.com/mpkondrashin/vone"
-
 	"sandboxer/pkg/config"
 	"sandboxer/pkg/logging"
 )
@@ -65,7 +63,7 @@ func (w *QuotaWindow) Content(modal *ModalWindow) fyne.CanvasObject {
 }
 
 func (w *QuotaWindow) Name() string {
-	return "Quota"
+	return "Vision One Quota"
 }
 
 func (s *QuotaWindow) Reset() {
@@ -77,7 +75,12 @@ func (s *QuotaWindow) Reset() {
 
 func (s *QuotaWindow) Update() {
 	s.Reset()
-	vOne := vone.NewVOne(s.conf.VisionOne.Domain, s.conf.VisionOne.Token)
+	vOne, err := s.conf.VisionOne.VisionOneSandbox()
+	if err != nil {
+		logging.LogError(err)
+		dialog.ShowError(err, s.win)
+		return
+	}
 	result, err := vOne.SandboxDailyReserve().Do(context.TODO())
 	if err != nil {
 		logging.LogError(err)
