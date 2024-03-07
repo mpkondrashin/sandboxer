@@ -43,7 +43,7 @@ If correct Domain value is not detected automatically, choose it from dropdown l
 ### For macOS
 
 Right click on file and choose Quick Actions -> Sandboxer
-
+<p align="center"><img src="resources/captures/quick_actions.png" width="300px"/></p>
 
 
 Icon is taken from <a href="https://www.flaticon.com/free-icons/dog" title="dog icons">Dog icons created by Freepik - Flaticon</a>
