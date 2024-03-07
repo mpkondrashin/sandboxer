@@ -40,12 +40,12 @@ If correct Domain value is not detected automatically, choose it from dropdown l
 
 ## Usage
 
-### For macOS
+### To Submit File (on macOS)
 
 Right click on file and choose Quick Actions -> Sandboxer
 <p align="center"><img src="resources/captures/quick_actions.png" width="300px"/></p>
 
-### For Windows
+### To Submit Files (On Windows)
 
 Right click on file and choose Send To -> Sandboxer. Note that for latest Windows, you will have to chosse first "Show more options".
 <p align="center"><img src="resources/captures/send_to.png" width="300px"/></p>
