@@ -2,6 +2,7 @@ package settings
 
 import (
 	"context"
+	"errors"
 	"sandboxer/pkg/config"
 	"strings"
 
@@ -84,9 +85,14 @@ func (s *VisionOne) DetectDomain(token string) {
 	}()
 }
 
-func (s *VisionOne) Aquire() {
+func (s *VisionOne) Aquire() error {
 	s.conf.Token = strings.TrimSpace(s.tokenEntry.Text)
-	if s.visionOneDomains.Selected != "" {
-		s.conf.Domain = s.visionOneDomains.Selected
+	if s.conf.Token == "" {
+		return errors.New("Vision One Token is empty")
 	}
+	if s.visionOneDomains.Selected == "" {
+		return errors.New("Vision One Domain is not selected")
+	}
+	s.conf.Domain = s.visionOneDomains.Selected
+	return nil
 }

@@ -9,42 +9,39 @@ Provide Vision One token
 package main
 
 import (
-	"fmt"
-	"strings"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+
+	"sandboxer/pkg/logging"
+	"sandboxer/pkg/settings"
 )
 
 type PageVOToken struct {
 	BasePage
-	tokenEntry *widget.Entry
+	voneSettings *settings.VisionOne
 }
 
 var _ Page = &PageVOToken{}
 
 func (p *PageVOToken) Name() string {
-	return "Token"
+	return "Settings"
 }
 
 func (p *PageVOToken) Next(previousPage PageIndex) PageIndex {
+	logging.Debugf("Next(%d) = %d", previousPage, pgAutostart)
 	p.SavePrevious(previousPage)
-	return pgVODomain
+	return pgAutostart
 }
 
 func (p *PageVOToken) Content() fyne.CanvasObject {
+	p.voneSettings = settings.NewVisionOne(&p.wiz.installer.config.VisionOne)
+
 	labelTop := widget.NewLabel("Please open Vision One console to get all nessesary parameters")
-	p.tokenEntry = widget.NewMultiLineEntry()
-	p.tokenEntry.Wrapping = fyne.TextWrapBreak
-	tokenFormItem := widget.NewFormItem("Token:", p.tokenEntry)
-	tokenFormItem.HintText = "Go to Administrator -> API Keys"
+
 	// https://docs.trendmicro.com/en-US/documentation/article/trend-vision-one-configuring-user-rol
 	// https://docs.trendmicro.com/en-us/documentation/article/trend-vision-one-api-keys
-	optionsForm := widget.NewForm(
-		tokenFormItem,
-	)
-	return container.NewVBox(labelTop, optionsForm)
+	return container.NewVBox(labelTop, p.voneSettings.Widget())
 }
 
 func (p *PageVOToken) Run() {
@@ -54,13 +51,8 @@ func (p *PageVOToken) Run() {
 	//		logging.Errorf("LoadConfig: %v", err)
 	//		dialog.ShowError(err, win)
 	//	}
-	p.tokenEntry.SetText(p.wiz.installer.config.VisionOne.Token)
 }
 
 func (p *PageVOToken) AquireData(installer *Installer) error {
-	if p.tokenEntry.Text == "" {
-		return fmt.Errorf("token field is empty")
-	}
-	installer.config.VisionOne.Token = strings.TrimSpace(p.tokenEntry.Text)
-	return nil
+	return p.voneSettings.Aquire()
 }

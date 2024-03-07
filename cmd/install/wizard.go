@@ -130,7 +130,7 @@ func NewWizard(capturesFolder string) *Wizard {
 }
 
 func (w *Wizard) Pages() PageIndex {
-	logging.Debugf("Pages")
+	//logging.Debugf("Pages")
 	w.pages = make([]Page, pgExit)
 	w.pages[pgIntro] = &PageIntro{BasePage: NewBasePage(w)}
 	//w.pages[pgDelete] = &PageDelete{BasePage: NewBasePage(w)}
@@ -217,25 +217,31 @@ func (c *Wizard) Window() fyne.CanvasObject {
 }
 
 func (c *Wizard) UpdatePagesList() {
-	logging.Debugf("UpdatePagesList")
 	c.pagesList.RemoveAll()
 	image := canvas.NewImageFromResource(ApplicationIcon)
 	image.SetMinSize(fyne.NewSize(52, 52))
 	image.FillMode = canvas.ImageFillContain
 	c.pagesList.Add(image)
 
-	for i := c.firstPage; i != pgExit; i = c.pages[i].Next(i) {
+	previous := pgExit
+	i := c.firstPage
+	for {
+		if i == pgExit {
+			break
+		}
 		pg := c.pages[i]
-		//logging.Debugf("Left Menu item %d", i)
+		next := pg.Next(previous)
 		if i == c.currentPage {
 			c.pagesList.Add(widget.NewLabelWithStyle("▶ "+pg.Name(), fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
-			prev, next := c.Buttons(i == c.firstPage, pg.Next(pgExit) == pgExit)
+			prev, next := c.Buttons(i == c.firstPage, next == pgExit)
 			c.buttonsLine.RemoveAll()
 			c.buttonsLine.Add(prev)
 			c.buttonsLine.Add(next)
 		} else {
 			c.pagesList.Add(widget.NewLabel("    " + pg.Name()))
 		}
+		previous = i
+		i = next
 	}
 }
 
@@ -285,7 +291,7 @@ func (c *Wizard) Next() {
 }
 
 func (c *Wizard) Prev() {
-	logging.Debugf("Prev from page %d", c.currentPage)
+	logging.Debugf("Prev from page %d to %d", c.currentPage, c.pages[c.currentPage].Prev())
 	c.currentPage = c.pages[c.currentPage].Prev()
 	c.win.SetContent(c.Window())
 	c.pages[c.currentPage].Run()
