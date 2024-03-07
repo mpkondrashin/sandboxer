@@ -38,4 +38,12 @@ If correct Domain value is not detected automatically, choose it from dropdown l
 <p align="center">Press "Quit" button.</p>
 
 
+## Usage
+
+### For macOS
+
+Right click on file and choose Quick Actions -> Sandboxer
+
+
+
 Icon is taken from <a href="https://www.flaticon.com/free-icons/dog" title="dog icons">Dog icons created by Freepik - Flaticon</a>
