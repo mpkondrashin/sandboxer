@@ -25,7 +25,7 @@ Installation and usage video:
 ## Installation process
 
 <p align="center"><kbd><img src="resources/captures/page_0.png" width="500px"/></kbd></p>
-<p align="center">Choose your type of sandbox. Then press "Next" button.</p>
+<p align="center">Choose your sanbox type: <a href="https://docs.trendmicro.com/en-us/documentation/article/trend-vision-one-sandbox-analysis">Vision One</a> or <a href="https://www.trendmicro.com/en_ca/business/products/network/advanced-threat-protection/analyzer.html">Deep Discovery Analyzer</a>. Then press "Next" button.</p>
 <p align="center"><kbd><img src="resources/captures/page_5.png" width="500px"/></kbd></p>
 <p align="center">If you selected Vision One on the previous step, then enter Token. Learn more about <a href="https://docs.trendmicro.com/en-us/documentation/article/trend-vision-one-api-keys">API Keys</a> and <a href="https://docs.trendmicro.com/en-US/documentation/article/trend-vision-one-configuring-user-rol">Roles</a>. 
 
