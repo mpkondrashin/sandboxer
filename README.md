@@ -1,5 +1,5 @@
 # Sandboxer
-<img src="resources/icon_transparent.png" width="200"/>
+<p align="center"><kbd><img src="resources/icon_transparent.png" width="200"/></kbd></p>
 
 ## Inspect objects using Trend Micro Vision One or Deep Discovery Analyzer sandbox
 
