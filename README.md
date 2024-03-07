@@ -16,14 +16,12 @@ Sandboxer submissions window:
 <p align="center"><img src="resources/captures/submissions.png" width="300px"/></p>
 
 
-### Installation
-Download [latest release](https://github.com/mpkondrashin/sandboxer/releases/latest) for your platform, unpack zip file, and run setup.exe (for Windows) or SandboxerInstaller (for macOS).
-
+## Installation
 Installation and usage video:
 
 [![Installation and usage](https://img.youtube.com/vi/beRX6YXjC4k/0.jpg)](https://www.youtube.com/watch?v=beRX6YXjC4k)
 
-## Installation process
+Download [latest release](https://github.com/mpkondrashin/sandboxer/releases/latest) for your platform, unpack zip file, and run setup.exe (for Windows) or SandboxerInstaller (for macOS).
 
 <p align="center"><kbd><img src="resources/captures/page_0.png" width="500px"/></kbd></p>
 <p align="center">Choose your sanbox type: <a href="https://docs.trendmicro.com/en-us/documentation/article/trend-vision-one-sandbox-analysis">Vision One</a> or <a href="https://www.trendmicro.com/en_ca/business/products/network/advanced-threat-protection/analyzer.html">Deep Discovery Analyzer</a>. Then press "Next" button.</p>
