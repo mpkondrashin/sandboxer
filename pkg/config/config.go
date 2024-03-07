@@ -21,7 +21,7 @@ import (
 
 type VisionOne struct {
 	Token  string `yaml:"token"`
-	Domain string `yaml:"aws_region"`
+	Domain string `yaml:"domain"`
 }
 
 type DDAn struct {
