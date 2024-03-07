@@ -25,17 +25,17 @@ Installation and usage video:
 ## Installation process
 
 <p align="center"><kbd><img src="resources/captures/page_0.png" width="500px"/></kbd></p>
-<p align="center">On introduction screen use link to open Vision One console and generate Token. Then press "Next" button.</p>
+<p align="center">Choose your type of sandbox. Then press "Next" button.</p>
 <p align="center"><kbd><img src="resources/captures/page_5.png" width="500px"/></kbd></p>
-<p align="center">Enter Token and press "Next" button.</p>
+<p align="center">If you selected Vision One on the previous step, Enter Token. If correct Domain value is not detected automatically, choose it from dropdown list.</p>
 <p align="center"><kbd><img src="resources/captures/page_6.png" width="500px"/></kbd></p>
-<p align="center">If correct Domain value is not detected automatically, chosse it from dropdown list.</p>
+<p align="center">If you selected Deep Discovery Analyzer on the previous step, provide its IP/DNS address and API Key.</p>
 <p align="center"><kbd><img src="resources/captures/page_7.png" width="500px"/></kbd></p>
 <p align="center">Remove checkbox is there is not need to run Sandboxer automatically. It will be launched automatically upon file submission.</p>
 <p align="center"><kbd><img src="resources/captures/page_9.png" width="500px"/></kbd></p>
 <p align="center">Wait for file copy process to finish.</p>
 <p align="center"><kbd><img src="resources/captures/page_11.png" width="500px"/></kbd></p>
-<p align="center">Push "Quit" button.</p>
+<p align="center">Press "Quit" button.</p>
 
 
 Icon is taken from <a href="https://www.flaticon.com/free-icons/dog" title="dog icons">Dog icons created by Freepik - Flaticon</a>
