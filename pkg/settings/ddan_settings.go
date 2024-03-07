@@ -50,6 +50,7 @@ func (s *DDAn) Widget() fyne.CanvasObject {
 	apiKeyFormItem.HintText = "Go to Help -> About on Analyzer console"
 
 	s.ddanIgnoreTLSCheck = widget.NewCheck("Ignore", nil)
+	//	s.ddanIgnoreTLSCheck.HintText = "In case you are using self-signed certificate"
 	s.ddanIgnoreTLSCheck.SetChecked(s.conf.IgnoreTLSErrors)
 	s.ddanIgnoreTLSCheck.OnChanged = func(bool) {
 		s.TestAnalyzer()
@@ -128,9 +129,16 @@ func (s *DDAn) GetDDAnURL() (result string) {
 	return "https://" + result
 }
 
-func (s *DDAn) Aquire() {
+func (s *DDAn) Aquire() error {
+	if strings.TrimSpace(s.ddanURLEntry.Text) == "" {
+		return errors.New("Analyzer URL is empty")
+	}
 	s.conf.URL = s.GetDDAnURL()
-	s.conf.APIKey = s.ddanAPIKeyEntry.Text
+	apiKey := strings.TrimSpace(s.ddanAPIKeyEntry.Text)
+	if apiKey == "" {
+		return errors.New("Analyzer API Key is empty")
+	}
+	s.conf.APIKey = apiKey
 	s.conf.IgnoreTLSErrors = s.ddanIgnoreTLSCheck.Checked
-
+	return nil
 }

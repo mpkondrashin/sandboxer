@@ -9,11 +9,12 @@ Provide Vision One token
 package main
 
 import (
+	"net/url"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 
-	"sandboxer/pkg/logging"
 	"sandboxer/pkg/settings"
 )
 
@@ -29,7 +30,6 @@ func (p *PageVOToken) Name() string {
 }
 
 func (p *PageVOToken) Next(previousPage PageIndex) PageIndex {
-	logging.Debugf("Next(%d) = %d", previousPage, pgAutostart)
 	p.SavePrevious(previousPage)
 	return pgAutostart
 }
@@ -37,11 +37,14 @@ func (p *PageVOToken) Next(previousPage PageIndex) PageIndex {
 func (p *PageVOToken) Content() fyne.CanvasObject {
 	p.voneSettings = settings.NewVisionOne(&p.wiz.installer.config.VisionOne)
 
-	labelTop := widget.NewLabel("Please open Vision One console to get all nessesary parameters")
+	//labelTop := widget.NewLabel("Open Vision One console to get all nessesary parameters")
+
+	voneURL, _ := url.Parse("https://portal.xdr.trendmicro.com")
+	voneLink := widget.NewHyperlink("Open Vision One console to get all nessesary parameters", voneURL)
 
 	// https://docs.trendmicro.com/en-US/documentation/article/trend-vision-one-configuring-user-rol
 	// https://docs.trendmicro.com/en-us/documentation/article/trend-vision-one-api-keys
-	return container.NewVBox(labelTop, p.voneSettings.Widget())
+	return container.NewVBox(voneLink, p.voneSettings.Widget())
 }
 
 func (p *PageVOToken) Run() {

@@ -9,6 +9,7 @@ First installer page
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/url"
@@ -18,40 +19,19 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 
+	"sandboxer/pkg/config"
 	"sandboxer/pkg/globals"
 )
 
 const (
-	IntoText = globals.AppName + " provides ability to check files using Vision One sandbox. " +
-		"You will have to provide API Key to use this service."
+	IntoText = globals.AppName + " provides ability to check files using Vision One sandbox service or Deep Discovery Analyzer appliance."
 
 	NoteText = "Please close all MMC windows before continuing."
-
-	_License = `MIT License
-
-Copyright (c) 2024 Michael Kondrashin (mkondrashin@gmail.com)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.`
 )
 
 type PageIntro struct {
 	BasePage
+	sandboxRadio *widget.RadioGroup
 }
 
 var _ Page = &PageIntro{}
@@ -62,8 +42,24 @@ func (p *PageIntro) Name() string {
 
 func (p *PageIntro) Next(previousPage PageIndex) PageIndex {
 	p.SavePrevious(previousPage)
-	return pgVOToken
+	if p.sandboxRadio == nil {
+		return pgVOSettings
+	}
+	switch p.sandboxRadio.Selected {
+	case SandboxVisionOne:
+		return pgVOSettings
+	case SandboxDDAn:
+		return pgDDSettings
+	default:
+		return pgExit
+	}
+	//return pgVOSettings
 }
+
+const (
+	SandboxVisionOne = "Vision One Sandbox Service"
+	SandboxDDAn      = "Deep Discovery Analyzer"
+)
 
 func (p *PageIntro) Content() fyne.CanvasObject {
 	titleLabel := widget.NewLabelWithStyle(globals.AppName,
@@ -75,8 +71,12 @@ func (p *PageIntro) Content() fyne.CanvasObject {
 
 	report := widget.NewRichTextFromMarkdown(IntoText)
 	report.Wrapping = fyne.TextWrapWord
-	coneURL, _ := url.Parse("https://portal.xdr.trendmicro.com")
-	coneLink := widget.NewHyperlink("Open Vision One Console", coneURL)
+
+	chooseLabel := widget.NewLabel("Choose your sandbox:")
+	p.sandboxRadio = widget.NewRadioGroup(
+		[]string{SandboxVisionOne, SandboxDDAn},
+		nil,
+	)
 
 	noteMarkdown := widget.NewRichTextFromMarkdown(NoteText)
 	noteMarkdown.Wrapping = fyne.TextWrapWord
@@ -96,7 +96,9 @@ func (p *PageIntro) Content() fyne.CanvasObject {
 		titleLabel,
 		versionLabel,
 		report,
-		container.NewHBox(coneLink),
+		chooseLabel,
+		p.sandboxRadio,
+		//container.NewHBox(coneLink),
 		noteMarkdown,
 		container.NewHBox(repoLink, licenseButton),
 	)
@@ -104,7 +106,17 @@ func (p *PageIntro) Content() fyne.CanvasObject {
 
 //func (p *PageIntro) Run() {}
 
-//func (p *PageIntro) AquireData(installer *Installer) error {	return nil}
+func (p *PageIntro) AquireData(installer *Installer) error {
+	switch p.sandboxRadio.Selected {
+	case SandboxVisionOne:
+		installer.config.SandboxType = config.SandboxVisionOne
+	case SandboxDDAn:
+		installer.config.SandboxType = config.SandboxAnalyzer
+	default:
+		return errors.New("Choose the Sandbox to be used")
+	}
+	return nil
+}
 
 func LicenseText() string {
 	filePath := "embed/LICENSE"
