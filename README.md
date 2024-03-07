@@ -17,7 +17,7 @@ Sandboxer submissions window:
 
 
 ### Installation for Windows
-Download setup_windows_amd64.zip from [latest release](https://github.com/mpkondrashin/sandboxer/releases/latest), unpack zip file and run setup.exe.
+Download distributive file for your platform from [latest release](https://github.com/mpkondrashin/sandboxer/releases/latest), unpack zip file and run setup.exe (for Windows)SandboxerInstaller (for macOS).
 
 Installation and usage video:
 [![Installation and usage](https://img.youtube.com/vi/beRX6YXjC4k/0.jpg)](https://www.youtube.com/watch?v=beRX6YXjC4k)
