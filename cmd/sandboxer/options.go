@@ -32,8 +32,9 @@ type OptionsWindow struct {
 	ddanCheck    *widget.Check
 	ddanSettings *settings.DDAn
 
-	ignoreEntry   *widget.Entry
-	tasksKeepDays *widget.Entry
+	ignoreEntry       *widget.Entry
+	tasksKeepDays     *widget.Entry
+	showNotifications *widget.Check
 }
 
 func NewOptionsWindow(conf *config.Configuration) *OptionsWindow {
@@ -121,12 +122,15 @@ func (s *OptionsWindow) GeneralSettings() fyne.CanvasObject {
 	tasksKeepDaysFormItem := widget.NewFormItem("Delete tasks after: ", s.tasksKeepDays)
 	tasksKeepDaysFormItem.HintText = "Number of days"
 
-	settingsForm := widget.NewForm(ignoreFormItem, tasksKeepDaysFormItem)
+	s.showNotifications = widget.NewCheck("Show", nil)
+	s.showNotifications.Checked = s.conf.ShowNotifications
+	notificatonsFormItem := widget.NewFormItem("Notifications:", s.showNotifications)
+
+	settingsForm := widget.NewForm(ignoreFormItem, tasksKeepDaysFormItem, notificatonsFormItem)
 	return container.NewVBox(settingsLabel, settingsForm)
 }
 
 func (s *OptionsWindow) Save(w *ModalWindow) {
-
 	if s.ddanCheck.Checked {
 		s.conf.SandboxType = config.SandboxAnalyzer
 	}
@@ -148,6 +152,8 @@ func (s *OptionsWindow) Save(w *ModalWindow) {
 	}
 
 	s.ddanSettings.Aquire()
+
+	s.conf.ShowNotifications = s.showNotifications.Checked
 
 	if err := s.conf.Save(); err != nil {
 		logging.Errorf("Save Config: %v", err)

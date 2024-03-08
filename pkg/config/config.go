@@ -125,32 +125,34 @@ func GenerateUUID() (string, error) {
 }
 
 type Configuration struct {
-	filePath         string
-	Version          string
-	SandboxType      SandboxType   `yaml:"sandbox_type"`
-	VisionOne        VisionOne     `yaml:"vision_one"`
-	DDAn             DDAn          `yaml:"analyzer"`
-	Folder           string        `yaml:"folder"`
-	Ignore           []string      `yaml:"ignore"`
-	Sleep            time.Duration `yaml:"sleep"`
-	Periculosum      string        `yaml:"periculosum"`
-	ShowPasswordHint bool          `yaml:"show_password_hint"`
-	TasksKeepDays    int           `yaml:"task_keep_days"`
+	filePath          string
+	Version           string
+	SandboxType       SandboxType   `yaml:"sandbox_type"`
+	VisionOne         VisionOne     `yaml:"vision_one"`
+	DDAn              DDAn          `yaml:"analyzer"`
+	Folder            string        `yaml:"folder"`
+	Ignore            []string      `yaml:"ignore"`
+	Sleep             time.Duration `yaml:"sleep"`
+	Periculosum       string        `yaml:"periculosum"`
+	ShowPasswordHint  bool          `yaml:"show_password_hint"`
+	TasksKeepDays     int           `yaml:"task_keep_days"`
+	ShowNotifications bool          `yaml:"notifications"`
 }
 
 func New(filePath string) *Configuration {
 	return &Configuration{
-		filePath:         filePath,
-		Version:          "",
-		SandboxType:      SandboxVisionOne,
-		Folder:           xplatform.InstallFolder(),
-		Ignore:           []string{".DS_Store", "Thumbs.db"},
-		Periculosum:      "check",
-		ShowPasswordHint: true,
-		TasksKeepDays:    60,
-		Sleep:            5 * time.Second,
-		VisionOne:        VisionOne{},
-		DDAn:             NewDefaultDDAn(),
+		filePath:          filePath,
+		Version:           "",
+		SandboxType:       SandboxVisionOne,
+		Folder:            xplatform.InstallFolder(),
+		Ignore:            []string{".DS_Store", "Thumbs.db"},
+		Periculosum:       "check",
+		ShowPasswordHint:  true,
+		TasksKeepDays:     60,
+		Sleep:             5 * time.Second,
+		VisionOne:         VisionOne{},
+		DDAn:              NewDefaultDDAn(),
+		ShowNotifications: true,
 	}
 }
 

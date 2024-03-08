@@ -62,7 +62,7 @@ func (d *ResultDispatch) ProcessTask(tsk *task.Task) error {
 	default:
 		tsk.SetMessage(threatName)
 		tsk.SetChannel(task.ChReport)
-		if tsk.RiskLevel != sandbox.RiskLevelNoRisk {
+		if d.conf.ShowNotifications && tsk.RiskLevel != sandbox.RiskLevelNoRisk {
 			subtitle := fmt.Sprintf("%v threat found %s", tsk.RiskLevel, threatName)
 			d.Alert(subtitle, filepath.Base(tsk.Path))
 		}
