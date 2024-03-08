@@ -93,6 +93,7 @@ func NewStatsWindow(conf *config.Configuration) *StatsWindow {
 
 func (w *StatsWindow) Content(modal *ModalWindow) fyne.CanvasObject {
 	w.win = modal.win
+	topLabel := widget.NewLabel("Deep Discovery Analyzer Statistis")
 	totalLabel := widget.NewLabel("Average Total Processing Time\n(from the moment of submission,\nincluding queueing)")
 	totalForm := widget.NewForm(w.AvgTotalProcessingTime.FormItems()...)
 	vaLabel := widget.NewLabel("Average Analysis Time\n(by sandbox)\n")
@@ -102,6 +103,7 @@ func (w *StatsWindow) Content(modal *ModalWindow) fyne.CanvasObject {
 	dataHBox := container.NewHBox(totalVBox, vaVBox)
 	w.Reset()
 	return container.NewVBox(
+		topLabel,
 		dataHBox,
 		widget.NewButton("Update", func() {
 			w.Update()

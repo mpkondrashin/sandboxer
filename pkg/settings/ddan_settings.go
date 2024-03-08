@@ -3,13 +3,14 @@ package settings
 import (
 	"context"
 	"errors"
+	"image/color"
 	"net/url"
 	"sandboxer/pkg/config"
-	"sandboxer/pkg/logging"
 	"strings"
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 
@@ -22,7 +23,7 @@ type DDAn struct {
 	ddanURLEntry       *widget.Entry
 	ddanAPIKeyEntry    *widget.Entry
 	ddanIgnoreTLSCheck *widget.Check
-	ddanTest           *widget.Label
+	ddanTest           *canvas.Text //  *widget.Label
 	cancelTestDDAn     context.CancelFunc
 }
 
@@ -57,28 +58,42 @@ func (s *DDAn) Widget() fyne.CanvasObject {
 	}
 	ignoreTLSFormItem := widget.NewFormItem("TLS Errors: ", s.ddanIgnoreTLSCheck)
 
-	s.ddanTest = widget.NewLabel("")
+	s.ddanTest = canvas.NewText("", color.Black)
+	//s.ddanTest = widget.NewLabel("")
 	//s.ddanTest.Truncation = fyne.TextTruncateEllipsis
 
 	//stateText := canvas.NewText(tsk.GetChannel(), tsk.RiskLevel.Color())
 	//stateText.TextStyle = fyne.TextStyle{Bold: tsk.Active}
-
 	ddanForm := widget.NewForm(urlFormItem, apiKeyFormItem, ignoreTLSFormItem)
-	return container.NewVBox(ddanForm, s.ddanTest)
+	return container.NewVBox(ddanForm, container.NewHScroll(s.ddanTest))
 }
 
 func (s *DDAn) Update() {
 	s.TestAnalyzer()
 }
 
+/*
 const MaxLength = 64
 
-func LimitLength(s string) string {
-	logging.Errorf("DDAn Connection: %s", s)
-	if len(s) < MaxLength {
-		return "Error: " + s
+	func LimitLength(s string) string {
+		logging.Errorf("DDAn Connection: %s", s)
+		if len(s) < MaxLength {
+			return "Error: " + s
+		}
+		return "Error: ..." + s[len(s)-MaxLength+7:]
 	}
-	return "Error: ..." + s[len(s)-MaxLength+7:]
+*/
+
+func (s *DDAn) SetMessageError(message string) {
+	s.ddanTest.Text = "Error: " + message
+	s.ddanTest.Color = color.RGBA{255, 0, 0, 255}
+	s.ddanTest.Refresh()
+}
+
+func (s *DDAn) SetMessageOk(message string) {
+	s.ddanTest.Text = message
+	s.ddanTest.Color = color.Black
+	s.ddanTest.Refresh()
 }
 
 func (s *DDAn) TestAnalyzer() {
@@ -94,10 +109,13 @@ func (s *DDAn) TestAnalyzer() {
 			}
 			s.cancelTestDDAn = nil
 		}()
-		s.ddanTest.SetText("Checking connection...")
+		//s.ddanTest.SetText("Checking connection...")
+		s.SetMessageOk("Checking connection...")
+
 		u, err := url.Parse(s.GetDDAnURL())
 		if err != nil {
-			s.ddanTest.SetText(LimitLength(err.Error()))
+			s.SetMessageError(err.Error())
+			//s.ddanTest.SetText(err.Error()) //LimitLength(err.Error()))
 			return
 		}
 		apiKey := strings.TrimSpace(s.ddanAPIKeyEntry.Text)
@@ -111,13 +129,15 @@ func (s *DDAn) TestAnalyzer() {
 		if err != nil {
 			if !errors.Is(err, context.Canceled) {
 				if errors.Is(err, context.DeadlineExceeded) {
-					s.ddanTest.SetText("Connection timed out")
+					s.SetMessageError("Connection timed out")
+					//s.ddanTest.SetText("Connection timed out")
 				} else {
-					s.ddanTest.SetText(LimitLength(err.Error()))
+					s.SetMessageError(err.Error())
 				}
 			}
 		} else {
-			s.ddanTest.SetText("Connection is Ok")
+			s.SetMessageOk("Connection is Ok")
+			//s.ddanTest.SetText("Connection is Ok")
 		}
 	}()
 }

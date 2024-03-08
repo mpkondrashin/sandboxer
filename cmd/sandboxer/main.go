@@ -36,18 +36,9 @@ type TrayApp struct {
 
 type SandboxerApp struct {
 	TrayApp
-	// SUBMIT_FILE submitMenuItem     *fyne.MenuItem
-	//submissionsMenuItem *fyne.MenuItem
-	//quotaMenuItem *fyne.MenuItem
-	//optionsMenuItem     *fyne.MenuItem
-	//updateMenuItem *fyne.MenuItem
-	//aboutMenuItem *fyne.MenuItem
-
 	submissionsWindow *ModalWindow
-	//quotaWindow       *QuotaWindow
-	optionsWindow *ModalWindow
-	updateWindow  *ModalWindow
-	//aboutWindow  *AboutWindow
+	optionsWindow     *ModalWindow
+	updateWindow      *ModalWindow
 }
 
 func NewSandboxingApp(conf *config.Configuration, channels *task.Channels, list *task.TaskList) *SandboxerApp {
@@ -92,6 +83,7 @@ func NewSandboxingApp(conf *config.Configuration, channels *task.Channels, list 
 		// SUBMIT_FILE s.submitMenuItem,
 		submitWindow.MenuItem,
 		a.submissionsWindow.MenuItem,
+		fyne.NewMenuItemSeparator(),
 		quotaWindow.MenuItem,
 		statsWindow.MenuItem,
 		a.optionsWindow.MenuItem,
