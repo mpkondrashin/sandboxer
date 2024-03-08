@@ -15,6 +15,7 @@
 ###  Minor Features
 - Auto notification and download when new version is released.
 - Store analysis results for two months (this is configurable option).
+- Show notifications when malicious file is detected
 
 Sandboxer submissions window:
 
@@ -61,5 +62,9 @@ Run Sandboxer, if it is not yet running, and pick from its system tray icon menu
 ### To Get Results
 Pick from Sandboxer system tray icon menu "Submissions" item. Right click on the menu icon "⋮" and choose "Show Report" or "Investigation Package".
 
+
+## Bugs
+
+On Windows if notifications are disabled not by Sandboxer Options window, but using Notification Center, then it is not possible to turn them back on.
 
 Icon is taken from <a href="https://www.flaticon.com/free-icons/dog" title="dog icons">Dog icons created by Freepik - Flaticon</a>
