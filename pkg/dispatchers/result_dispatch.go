@@ -63,7 +63,8 @@ func (d *ResultDispatch) ProcessTask(tsk *task.Task) error {
 		tsk.SetChannel(task.ChReport)
 		if tsk.RiskLevel != sandbox.RiskLevelNoRisk {
 			subtitle := fmt.Sprintf("%v threat found %s", tsk.RiskLevel, threatName)
-			xplatform.Alert(globals.AppID, globals.AppName, subtitle, filepath.Base(tsk.Path))
+			err = xplatform.Alert(globals.AppID, globals.AppName, subtitle, filepath.Base(tsk.Path))
+			logging.LogError(err)
 		}
 	}
 	return err
