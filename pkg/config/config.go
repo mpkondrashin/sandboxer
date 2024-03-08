@@ -209,7 +209,7 @@ func (c *Configuration) Resource(fileName string) string {
 	if xplatform.IsWindows() {
 		return filepath.Join(c.Folder, globals.AppFolderName, fileName)
 	} else {
-		return filepath.Join(c.Folder, globals.AppFolderName+".app", "Contents", "Resource", fileName)
+		return filepath.Join(c.Folder, globals.AppFolderName+".app", "Contents", "Resources", fileName)
 	}
 }
 

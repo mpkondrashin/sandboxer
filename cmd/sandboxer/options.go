@@ -53,7 +53,6 @@ func (s *OptionsWindow) Name() string {
 }
 
 func (s *OptionsWindow) Content(w *ModalWindow) fyne.CanvasObject {
-
 	saveButton := widget.NewButton("Save", func() { s.Save(w) })
 	cancelButton := widget.NewButton("Cancel", w.Hide)
 	buttons := container.NewHBox(cancelButton, saveButton)

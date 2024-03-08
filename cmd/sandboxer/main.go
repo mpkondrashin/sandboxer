@@ -208,7 +208,7 @@ func main() {
 
 	fontFileName := "DroidSansHebrew-Regular.ttf"
 	os.Setenv("FYNE_FONT", conf.Resource(fontFileName))
-
+	//	logging.Debugf("FONT: %s", conf.Resource(fontFileName))
 	logging.Infof("%s Version %s Build %s Start", globals.AppName, globals.Version, globals.Build)
 	logging.Debugf("Configuration file: %s", configFilePath)
 	removePid, err := SavePid()

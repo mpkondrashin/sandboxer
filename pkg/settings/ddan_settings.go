@@ -5,12 +5,14 @@ import (
 	"errors"
 	"net/url"
 	"sandboxer/pkg/config"
+	"sandboxer/pkg/logging"
 	"strings"
 	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+
 	"github.com/mpkondrashin/ddan"
 )
 
@@ -56,6 +58,10 @@ func (s *DDAn) Widget() fyne.CanvasObject {
 	ignoreTLSFormItem := widget.NewFormItem("TLS Errors: ", s.ddanIgnoreTLSCheck)
 
 	s.ddanTest = widget.NewLabel("")
+	//s.ddanTest.Truncation = fyne.TextTruncateEllipsis
+
+	//stateText := canvas.NewText(tsk.GetChannel(), tsk.RiskLevel.Color())
+	//stateText.TextStyle = fyne.TextStyle{Bold: tsk.Active}
 
 	ddanForm := widget.NewForm(urlFormItem, apiKeyFormItem, ignoreTLSFormItem)
 	return container.NewVBox(ddanForm, s.ddanTest)
@@ -63,6 +69,16 @@ func (s *DDAn) Widget() fyne.CanvasObject {
 
 func (s *DDAn) Update() {
 	s.TestAnalyzer()
+}
+
+const MaxLength = 64
+
+func LimitLength(s string) string {
+	logging.Errorf("DDAn Connection: %s", s)
+	if len(s) < MaxLength {
+		return "Error: " + s
+	}
+	return "Error: ..." + s[len(s)-MaxLength+7:]
 }
 
 func (s *DDAn) TestAnalyzer() {
@@ -81,16 +97,14 @@ func (s *DDAn) TestAnalyzer() {
 		s.ddanTest.SetText("Checking connection...")
 		u, err := url.Parse(s.GetDDAnURL())
 		if err != nil {
-			s.ddanTest.SetText(err.Error())
+			s.ddanTest.SetText(LimitLength(err.Error()))
 			return
 		}
 		apiKey := strings.TrimSpace(s.ddanAPIKeyEntry.Text)
 		analyzer := ddan.NewClient(s.conf.ProductName, s.conf.Hostname).
 			SetAnalyzer(u, apiKey, s.ddanIgnoreTLSCheck.Checked)
-		//if s.conf.ProtocolVersion != "" {
-		//	log.Println("analyzer set version ", s.conf.ProtocolVersion)
 		analyzer.SetProtocolVersion(s.conf.ProtocolVersion)
-		//}
+
 		ctxTimeout, cancelTimeout := context.WithTimeout(ctx, 5*time.Second)
 		defer cancelTimeout()
 		err = analyzer.TestConnection(ctxTimeout)
@@ -99,7 +113,7 @@ func (s *DDAn) TestAnalyzer() {
 				if errors.Is(err, context.DeadlineExceeded) {
 					s.ddanTest.SetText("Connection timed out")
 				} else {
-					s.ddanTest.SetText(err.Error())
+					s.ddanTest.SetText(LimitLength(err.Error()))
 				}
 			}
 		} else {
