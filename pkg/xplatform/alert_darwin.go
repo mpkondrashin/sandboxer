@@ -7,7 +7,7 @@ import (
 	"os/exec"
 )
 
-func Alert(_, title, subtitle, message string) error {
+func Alert(title, subtitle, message, _ string) error {
 	osa, err := exec.LookPath("osascript")
 	if err != nil {
 		return err

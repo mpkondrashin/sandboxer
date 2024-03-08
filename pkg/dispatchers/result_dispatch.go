@@ -10,6 +10,7 @@ package dispatchers
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
@@ -63,9 +64,18 @@ func (d *ResultDispatch) ProcessTask(tsk *task.Task) error {
 		tsk.SetChannel(task.ChReport)
 		if tsk.RiskLevel != sandbox.RiskLevelNoRisk {
 			subtitle := fmt.Sprintf("%v threat found %s", tsk.RiskLevel, threatName)
-			err = xplatform.Alert(globals.AppID, globals.AppName, subtitle, filepath.Base(tsk.Path))
-			logging.LogError(err)
+			d.Alert(subtitle, filepath.Base(tsk.Path))
 		}
 	}
 	return err
+}
+
+func (d *ResultDispatch) Alert(subtitle, message string) {
+	iconPath := d.conf.Resource("icon_transparent.png")
+	_, err := os.Stat(iconPath)
+	if err != nil {
+		iconPath = ""
+	}
+	err = xplatform.Alert(globals.AppName, subtitle, message, iconPath)
+	logging.LogError(err)
 }
