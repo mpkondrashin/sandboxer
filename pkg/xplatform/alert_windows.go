@@ -9,7 +9,7 @@ func Alert(appID, title, subtitle, message string) error {
 		AppID:   appID,
 		Title:   title,
 		Message: subtitle + "\n" + message,
-		Icon:    "go.png", // This file must exist (remove this line if it doesn't)
+		//		Icon:    "go.png", // This file must exist (remove this line if it doesn't)
 		/*Actions: []toast.Action{
 			{"protocol", "I'm a button", ""},
 			{"protocol", "Me too!", ""},
