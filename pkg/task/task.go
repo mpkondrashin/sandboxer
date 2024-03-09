@@ -74,11 +74,6 @@ func LoadTask(filePath string) (*Task, error) {
 	return t, nil
 }
 
-//func (t *Task) lockUnlock() func() {
-//		t.mx.Lock()
-//		return t.mx.Unlock
-//}
-
 func (t *Task) SetChannel(newChannel Channel) {
 	logging.Debugf("SetChannel(%v)", newChannel)
 	t.Channel = newChannel

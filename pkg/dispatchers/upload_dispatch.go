@@ -28,8 +28,6 @@ func NewUploadDispatch(d BaseDispatcher) *UploadDispatch {
 }
 
 func (d *UploadDispatch) ProcessTask(tsk *task.Task) error {
-	//tsk.SetState(task.StateUpload)
-	//d.list.Updated()
 	sb, err := d.Sandbox()
 	if err != nil {
 		return err
@@ -45,9 +43,7 @@ func (d *UploadDispatch) ProcessTask(tsk *task.Task) error {
 	}
 	tsk.SetSandboxID(id)
 	logging.Infof("Accepted: %v", id)
-	//tsk.SetState(task.StateAccepted)
 	tsk.SetChannel(task.ChResult)
 	d.list.Updated()
-	//d.Channel(ChWait) <- tsk.Number
 	return nil
 }

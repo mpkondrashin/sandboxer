@@ -1,3 +1,11 @@
+/*
+Sandboxer (c) 2024 by Mikhail Kondrashin (mkondrashin@gmail.com)
+Software is distributed under MIT license as stated in LICENSE file
+
+ddan_settings.go
+
+Analyzer settings widgets
+*/
 package settings
 
 import (

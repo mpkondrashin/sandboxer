@@ -50,8 +50,6 @@ func (p *PageFolder) Content() fyne.CanvasObject {
 		container.NewBorder(nil, nil, nil, folderButton, p.folderEntry)) // p.folderEntry, folderButton)
 }
 
-//func (p *PageFolder) Run() {}
-
 func (p *PageFolder) AquireData(installer *Installer) error {
 	installer.config.Folder = p.folderEntry.Text
 	return nil

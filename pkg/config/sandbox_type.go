@@ -4,7 +4,7 @@ Software is distributed under MIT license as stated in LICENSE file
 
 sandbox_type.go
 
-Type of supported sandboxes
+Types of supported sandboxes
 */
 package config
 

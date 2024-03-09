@@ -4,7 +4,7 @@ Software is distributed under MIT license as stated in LICENSE file
 
 page_token.go
 
-Provide Vision One token
+Provide Vision One token and domain
 */
 package main
 

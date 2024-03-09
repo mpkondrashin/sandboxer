@@ -2,9 +2,9 @@
 Sandboxer (c) 2024 by Mikhail Kondrashin (mkondrashin@gmail.com)
 Software is distributed under MIT license as stated in LICENSE file
 
-page_intro.go
+page_reinstall.go
 
-First installer page
+Page show in case the same version is already installed
 */
 package main
 

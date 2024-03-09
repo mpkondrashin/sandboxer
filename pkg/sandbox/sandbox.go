@@ -1,3 +1,11 @@
+/*
+Sandboxer (c) 2024 by Mikhail Kondrashin (mkondrashin@gmail.com)
+Software is distributed under MIT license as stated in LICENSE file
+
+sandbox.go
+
+Unified sandbox interface
+*/
 package sandbox
 
 import "errors"
@@ -15,26 +23,7 @@ var (
 type Sandbox interface {
 	SubmitURL(url string) (string, error)
 	SubmitFile(filePath string) (string, error)
-	//HaveFinished(id string) (bool, error)
 	GetResult(id string) (RiskLevel, string, error)
 	GetReport(id string, filePath string) error
 	GetInvestigation(id string, filePath string) error
 }
-
-/*
-V1 Submit(filePath string) (string, error) {
-
-}
-Submit - GetStatus -      Get Result
-
-DDan
-Submit - GetBriefReport - [GetBriefReport - GetReport]
-
-V1
-Submit - [GetStatus - Get Result]
-
-DDan
-Submit - [GetBriefReport - GetReport]
-
-
-*/

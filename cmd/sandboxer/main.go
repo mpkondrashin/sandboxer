@@ -212,7 +212,7 @@ func main() {
 		os.Exit(globals.ExitSavePidError)
 	}
 	defer removePid()
-	logging.LogError(ExtractService())
+	//logging.LogError(ExtractService())
 	//list := task.NewList()
 	channels := task.NewChannels()
 	list := task.NewList()

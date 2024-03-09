@@ -104,8 +104,6 @@ func (p *PageIntro) Content() fyne.CanvasObject {
 	)
 }
 
-//func (p *PageIntro) Run() {}
-
 func (p *PageIntro) AquireData(installer *Installer) error {
 	switch p.sandboxRadio.Selected {
 	case SandboxVisionOne:

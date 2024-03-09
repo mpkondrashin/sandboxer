@@ -2,9 +2,9 @@
 Sandboxer (c) 2024 by Mikhail Kondrashin (mkondrashin@gmail.com)
 This software is distributed under MIT license as stated in LICENSE file
 
-page_autostart.go
+page_uninstall.go
 
-Copy files
+Run uninstallation
 */
 package main
 
@@ -64,7 +64,3 @@ func (p *PageUninstall) Run() {
 		dialog.ShowError(err, p.wiz.win)
 	}
 }
-
-//func (p *PageUninstall) AquireData(installer *Installer) error {
-//	return nil
-//}

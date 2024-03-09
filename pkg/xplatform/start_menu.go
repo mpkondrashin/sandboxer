@@ -1,3 +1,11 @@
+/*
+Sandboxer (c) 2024 by Mikhail Kondrashin (mkondrashin@gmail.com)
+Software is distributed under MIT license as stated in LICENSE file
+
+start_menu.go
+
+Add link to Windows start menu
+*/
 package xplatform
 
 import (

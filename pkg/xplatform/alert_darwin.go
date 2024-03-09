@@ -1,5 +1,14 @@
 //go:build darwin
 
+/*
+Sandboxer (c) 2024 by Mikhail Kondrashin (mkondrashin@gmail.com)
+Software is distributed under MIT license as stated in LICENSE file
+
+alert_darwin.go
+
+Show alert on macOS
+*/
+
 package xplatform
 
 import (

@@ -2,9 +2,9 @@
 Sandboxer (c) 2024 by Mikhail Kondrashin (mkondrashin@gmail.com)
 Software is distributed under MIT license as stated in LICENSE file
 
-quota.go
+ddan_stats.go
 
-Quota window
+Statistics from DDAn
 */
 package main
 

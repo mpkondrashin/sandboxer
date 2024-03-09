@@ -2,7 +2,7 @@
 Sandboxer (c) 2024 by Mikhail Kondrashin (mkondrashin@gmail.com)
 Software is distributed under MIT license as stated in LICENSE file
 
-fifo.go
+fifo_test.go
 
 FIFO tests
 */
