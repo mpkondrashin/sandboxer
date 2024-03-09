@@ -13,4 +13,5 @@ const (
 	ExitLoadConfigError              = 20
 	ExitSavePidError                 = 30
 	ExitGotSignal                    = 40
+	ExitNewInstaller                 = 40
 )

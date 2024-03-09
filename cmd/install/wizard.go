@@ -28,6 +28,7 @@ import (
 
 	"golang.org/x/mod/semver"
 
+	"sandboxer/pkg/fatal"
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
 )
@@ -106,7 +107,8 @@ func NewWizard(capturesFolder string) *Wizard {
 	installer, err := NewInstaller(globals.AppID)
 	if err != nil {
 		logging.LogError(err)
-		return nil // let it crash
+		fatal.Warning("Error", err.Error())
+		os.Exit(globals.ExitNewInstaller)
 	}
 	w := &Wizard{
 		app:            app.NewWithID(globals.AppID),
@@ -130,10 +132,8 @@ func NewWizard(capturesFolder string) *Wizard {
 }
 
 func (w *Wizard) Pages() PageIndex {
-	//logging.Debugf("Pages")
 	w.pages = make([]Page, pgExit)
 	w.pages[pgIntro] = &PageIntro{BasePage: NewBasePage(w)}
-	//w.pages[pgDelete] = &PageDelete{BasePage: NewBasePage(w)}
 	w.pages[pgDowngrade] = &PageDowngrade{BasePage: NewBasePage(w)}
 	w.pages[pgReinstall] = &PageReinstall{BasePage: NewBasePage(w)}
 	w.pages[pgUpgrade] = &PageUpgrade{BasePage: NewBasePage(w)}
@@ -151,7 +151,6 @@ func (w *Wizard) Pages() PageIndex {
 		if os.IsNotExist(err) {
 			return pgIntro
 		}
-		//if errors.Is(err, &yaml.TypeError{}) {	}
 		w.pages[pgDelete] = &PageDelete{
 			BasePage:     NewBasePage(w),
 			ErrorMessage: err.Error(),
@@ -188,13 +187,11 @@ func (c *Wizard) captureWindowContents(shortcut fyne.Shortcut) {
 	if err := png.Encode(f, image); err != nil {
 		dialog.ShowError(err, c.win)
 		return
-
 	}
 }
 
 /*
 // DELETE
-
 	func (c *NSHIControl) SaveScreenShots() {
 		time.Sleep(1 * time.Second)
 		for c.current = 0; c.current < len(c.pages); c.current++ {
@@ -205,6 +202,7 @@ func (c *Wizard) captureWindowContents(shortcut fyne.Shortcut) {
 		}
 	}
 */
+
 func (c *Wizard) Window() fyne.CanvasObject {
 	logging.Debugf("Window")
 	p := c.pages[c.currentPage]
@@ -222,7 +220,6 @@ func (c *Wizard) UpdatePagesList() {
 	image.SetMinSize(fyne.NewSize(52, 52))
 	image.FillMode = canvas.ImageFillContain
 	c.pagesList.Add(image)
-
 	previous := pgExit
 	i := c.firstPage
 	for {
@@ -255,9 +252,6 @@ func (c *Wizard) Buttons(first, last bool) (*widget.Button, *widget.Button) {
 	nextButton.IconPlacement = widget.ButtonIconTrailingText
 
 	if last {
-		//Button.Disable()
-		//nextButton.IconPlacement = widget.ButtonIconTrailingText
-		//quitButton.Disable()
 		nextButton = widget.NewButtonWithIcon("Quit", theme.CancelIcon(), c.Quit)
 	}
 	return prevButton, nextButton
@@ -270,7 +264,7 @@ func (c *Wizard) Quit() {
 		logging.Errorf("AquireData: %v", err)
 		dialog.ShowError(err, c.win)
 	}
-	//dialog.ShowConfirm()
+	//dialog.ShowConfirm("Sandboxer", "Exit?", )
 	c.app.Quit()
 }
 

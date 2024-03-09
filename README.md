@@ -42,7 +42,6 @@ If correct Domain value is not detected automatically, choose it from dropdown l
 <p align="center"><kbd><img src="resources/captures/page_11.png" width="500px"/></kbd></p>
 <p align="center">Press "Quit" button.</p>
 
-
 ## Usage
 
 ### To Submit File On macOS
@@ -61,7 +60,6 @@ Run Sandboxer, if it is not yet running, and pick from its system tray icon menu
 
 ### To Get Results
 Pick from Sandboxer system tray icon menu "Submissions" item. Right click on the menu icon "⋮" and choose "Show Report" or "Investigation Package".
-
 
 ## Bugs
 

@@ -14,7 +14,6 @@ import (
 	"os"
 	"path/filepath"
 	"time"
-	"unicode"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -22,6 +21,8 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+
+	"github.com/lutzky/go-bidi"
 
 	"github.com/mpkondrashin/fileicon"
 
@@ -236,56 +237,16 @@ func IconForFile(path string) fyne.CanvasObject {
 	return container.NewStack(icon, labelBorder)
 }
 
-func isHebrew(r rune) bool {
-	if unicode.Is(unicode.Hebrew, r) {
-		return true
-	}
-	if r == ' ' {
-		return true
-	}
-	return false
-}
-
-func ReverseHebrew(s string) string {
-	runes := []rune(s)
-	state := 0
-	i, j := 0, 0
-	for {
-		if i == len(runes) {
-			return string(runes)
-		}
-		switch state {
-		case 0: // seek for Hebrew
-			if isHebrew(runes[i]) {
-				j = i + 1
-				state = 1
-				continue
-			}
-			i++
-			if i == len(runes) {
-				return string(runes)
-			}
-		case 1: // seek for non hebrew
-			if j == len(runes) || !isHebrew(runes[j]) {
-				state = 0
-				for q, p := i, j-1; q < p; q, p = q+1, p-1 {
-					runes[q], runes[p] = runes[p], runes[q]
-				}
-				i = j
-				continue
-			} else {
-				j++
-			}
-		}
-	}
-
-}
-
 func (s *SubmissionsWindow) CardWidget(tsk *task.Task) fyne.CanvasObject {
 	path := tsk.Path
 	icon := IconForFile(path)
 
-	fileNameText := canvas.NewText(ReverseHebrew(tsk.Title()), color.Black)
+	bidiStr, err := bidi.Display(tsk.Title())
+	if err != nil {
+		logging.LogError(err)
+		bidiStr = tsk.Title()
+	}
+	fileNameText := canvas.NewText(bidiStr, color.Black)
 	//fileNameText.TextStyle = fyne.TextStyle{Bold: true}
 	stateText := canvas.NewText(tsk.GetChannel(), tsk.RiskLevel.Color())
 	stateText.TextStyle = fyne.TextStyle{Bold: tsk.Active}

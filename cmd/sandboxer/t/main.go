@@ -1,14 +1,16 @@
 package main
 
 import (
-	"sandboxer/pkg/globals"
-	"sandboxer/pkg/xplatform"
+	"log"
+	"os"
+	"path/filepath"
 	"strings"
 	"unicode"
 
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+	bd "github.com/lutzky/go-bidi"
 )
 
 // aa123aa1234aa1aaa
@@ -101,13 +103,19 @@ func split(s string) (result []string) {
 }
 
 func main() {
+	fontFileName := "DroidSansHebrew-Regular.ttf"
+	os.Setenv("FYNE_FONT", filepath.Join("../../../resources", fontFileName))
+
+	s := "ארכיון_חשבוניות_10_2020 עד_10_2023_7921117.csv"
+	//s1 := bidi.ReverseString(s)
+	s1, err := bd.Display(s)
+	log.Println(err)
 	a := app.New()
 	w := a.NewWindow("Hello World")
-	s1 := widget.NewLabel("s")
-	s2 := widget.NewLabel("sr")
-	s3 := widget.NewLabel("srr")
+	s1L := widget.NewLabel(s1)
+	s2L := widget.NewLabel(s)
 	b := widget.NewButton("Notification", func() {
-		xplatform.Alert(globals.AppID, "Sandboxer", "High risk treat detected", "abcd.exe")
+		//xplatform.Alert(globals.AppID, "Sandboxer", "High risk treat detected", "abcd.exe")
 		//notif := fyne.NewNotification("Title", "content")
 		//err := beeep.Notify("Title", "Message 1 body", "../../../resources/icon_transparent.png")
 		//if err != nil {
@@ -119,7 +127,7 @@ func main() {
 		//}
 		//a.SendNotification(notif)
 	})
-	vbox := container.NewVBox(s1, s2, s3, b)
+	vbox := container.NewVBox(s1L, s2L, b)
 	w.SetContent(vbox)
 	w.ShowAndRun()
 	return
