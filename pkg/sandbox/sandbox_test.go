@@ -11,7 +11,6 @@ package sandbox
 import (
 	"context"
 	"errors"
-	"net/url"
 	"os"
 	"os/exec"
 	"testing"
@@ -34,7 +33,11 @@ func GetVOne(t *testing.T) *vone.VOne {
 	if err := yaml.NewDecoder(f).Decode(conf); err != nil {
 		t.Fatalf("error parsing %s config: %v", configFile, err)
 	}
-	return vone.NewVOne(conf.Domain, conf.Token)
+	vOne, err := conf.VisionOneSandbox()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return vOne
 }
 
 func GetAnalyzer(t *testing.T) ddan.ClientInterface {
@@ -48,20 +51,9 @@ func GetAnalyzer(t *testing.T) ddan.ClientInterface {
 		t.Fatalf("error parsing %s config: %v", configFile, err)
 	}
 	t.Logf("Config: %v", conf)
-	hostname, err := os.Hostname()
+	d, err := conf.Analyzer()
 	if err != nil {
-		t.Fatal(err)
-	}
-	url, err := url.Parse(conf.URL)
-	if err != nil {
-		t.Fatal(err)
-	}
-	d := ddan.NewClient(conf.ProductName, hostname).
-		SetAnalyzer(url, conf.APIKey, conf.IgnoreTLSErrors).
-		SetUUID(conf.ClientUUID).
-		SetSource(conf.SourceID, conf.SourceName)
-	if conf.ProtocolVersion != "" {
-		d.SetProtocolVersion(conf.ProtocolVersion)
+		t.Fatalf("error parsing %s config: %v", configFile, err)
 	}
 	t.Logf("ddan: %v", d)
 	return d

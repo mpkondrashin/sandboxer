@@ -102,7 +102,7 @@ func (p *PrefilterDispatch) InspecfFolder(folderPath string) {
 
 func (p *PrefilterDispatch) MatchIgnoreMask(filePath string) string {
 	fileName := filepath.Base(filePath)
-	for _, mask := range p.conf.Ignore {
+	for _, mask := range p.conf.GetIgnore() {
 		result, err := filepath.Match(strings.ToLower(mask), strings.ToLower(fileName))
 		logging.LogError(err)
 		if result {

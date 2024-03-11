@@ -10,6 +10,7 @@
 .PHONY: clean tidy
 
 #GOOPTS := -ldflags="-extldflags=-static"
+GOOPTS=-race
 # -tags sqlite_omit_load_extension
 GOOS=$(shell go env GOOS)
 GOARCH=$(shell go env GOARCH)

@@ -36,7 +36,7 @@ func (p *PageFolder) Next(previousPage PageIndex) PageIndex {
 func (p *PageFolder) Content() fyne.CanvasObject {
 	labelFolder := widget.NewLabel("Base folder to install " + globals.AppName + ":")
 	p.folderEntry = widget.NewEntry()
-	p.folderEntry.SetText(p.wiz.installer.config.Folder)
+	p.folderEntry.SetText(p.wiz.installer.config.GetFolder())
 	folderButton := widget.NewButton("Change...", func() {
 		folderDialog := dialog.NewFolderOpen(func(uri fyne.ListableURI, err error) {
 			if uri == nil {
@@ -51,6 +51,6 @@ func (p *PageFolder) Content() fyne.CanvasObject {
 }
 
 func (p *PageFolder) AquireData(installer *Installer) error {
-	installer.config.Folder = p.folderEntry.Text
+	installer.config.SetFolder(p.folderEntry.Text)
 	return nil
 }

@@ -10,7 +10,6 @@ package settings
 
 import (
 	"context"
-	"errors"
 	"sandboxer/pkg/config"
 	"strings"
 
@@ -40,7 +39,7 @@ func NewVisionOne(conf *config.VisionOne) *VisionOne {
 func (s *VisionOne) Widget() fyne.CanvasObject {
 
 	s.tokenEntry = widget.NewMultiLineEntry()
-	s.tokenEntry.SetText(s.conf.Token)
+	s.tokenEntry.SetText(s.conf.GetToken())
 	s.tokenEntry.Wrapping = fyne.TextWrapBreak
 	s.tokenEntry.OnChanged = s.DetectDomain
 	tokenFormItem := widget.NewFormItem("Token:", s.tokenEntry)
@@ -58,8 +57,8 @@ func (s *VisionOne) Widget() fyne.CanvasObject {
 	}
 
 	s.visionOneDomains = widget.NewSelect(domains, nil)
-	if s.conf.Domain != "" {
-		s.visionOneDomains.SetSelected(s.conf.Domain)
+	if s.conf.GetDomain() != "" {
+		s.visionOneDomains.SetSelected(s.conf.GetDomain())
 	}
 	domainFormItem := widget.NewFormItem("Domain:", s.visionOneDomains)
 	optionsForm := widget.NewForm(
@@ -94,13 +93,11 @@ func (s *VisionOne) DetectDomain(token string) {
 }
 
 func (s *VisionOne) Aquire() error {
-	s.conf.Token = strings.TrimSpace(s.tokenEntry.Text)
-	if s.conf.Token == "" {
-		return errors.New("Vision One Token is empty")
+	c := config.NewVisionOne(s.visionOneDomains.Selected, strings.TrimSpace(s.tokenEntry.Text))
+	_, err := c.VisionOneSandbox()
+	if err != nil {
+		return err
 	}
-	if s.visionOneDomains.Selected == "" {
-		return errors.New("Vision One Domain is not selected")
-	}
-	s.conf.Domain = s.visionOneDomains.Selected
+	s.conf = c
 	return nil
 }

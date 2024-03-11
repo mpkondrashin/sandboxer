@@ -13,6 +13,7 @@ import (
 	"image/color"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -35,6 +36,7 @@ import (
 )
 
 type SubmissionsWindow struct {
+	mx sync.Mutex
 	//ModalWindow
 	win        fyne.Window
 	stopUpdate chan struct{}
@@ -183,7 +185,7 @@ func (s *SubmissionsWindow) RunOpen(path string) {
 }
 
 func (s *SubmissionsWindow) OpenInvestigation(investigation string) {
-	if !s.conf.ShowPasswordHint {
+	if !s.conf.GetShowPasswordHint() {
 		s.RunOpen(investigation)
 		return
 	}
@@ -191,7 +193,7 @@ func (s *SubmissionsWindow) OpenInvestigation(investigation string) {
 		"Password for archive is \"virus\". Show this note next time?",
 		func(yes bool) {
 			if !yes {
-				s.conf.ShowPasswordHint = false
+				s.conf.SetShowPasswordHint(false)
 				err := s.conf.Save()
 				if err != nil {
 					dialog.ShowError(err, s.win)
@@ -268,6 +270,8 @@ func (s *SubmissionsWindow) CardWidget(tsk *task.Task) fyne.CanvasObject {
 }
 
 func (s *SubmissionsWindow) Update() {
+	s.mx.Lock()
+	defer s.mx.Unlock()
 	to := s.from + s.count + 1
 	if to > s.list.Length() {
 		to = s.list.Length()
@@ -316,7 +320,7 @@ func (s *SubmissionsWindow) Update() {
 		s.buttonPrev.Disable()
 	}
 	s.pageLabel.Refresh()
-	s.vbox.Refresh()
+	//s.vbox.Refresh()
 }
 
 func (s *SubmissionsWindow) Show() {

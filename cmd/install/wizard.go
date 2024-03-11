@@ -157,8 +157,8 @@ func (w *Wizard) Pages() PageIndex {
 		}
 		return pgDelete
 	}
-	cmp := semver.Compare(globals.Version, w.installer.config.Version)
-	logging.Infof("Installer version: %s. Config version %s. Compare %d", globals.Version, w.installer.config.Version, cmp)
+	cmp := semver.Compare(globals.Version, w.installer.config.GetVersion())
+	logging.Infof("Installer version: %s. Config version %s. Compare %d", globals.Version, w.installer.config.GetVersion(), cmp)
 	switch cmp {
 	case -1:
 		return pgDowngrade

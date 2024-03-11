@@ -44,7 +44,7 @@ func NewDDAnSettings(conf *config.DDAn) *DDAn {
 func (s *DDAn) Widget() fyne.CanvasObject {
 
 	s.ddanURLEntry = widget.NewEntry()
-	s.ddanURLEntry.SetText(s.conf.URL)
+	s.ddanURLEntry.SetText(s.conf.GetURL())
 	s.ddanURLEntry.OnChanged = func(string) {
 		s.TestAnalyzer()
 	}
@@ -117,19 +117,17 @@ func (s *DDAn) TestAnalyzer() {
 			}
 			s.cancelTestDDAn = nil
 		}()
-		//s.ddanTest.SetText("Checking connection...")
 		s.SetMessageOk("Checking connection...")
 
 		u, err := url.Parse(s.GetDDAnURL())
 		if err != nil {
 			s.SetMessageError(err.Error())
-			//s.ddanTest.SetText(err.Error()) //LimitLength(err.Error()))
 			return
 		}
 		apiKey := strings.TrimSpace(s.ddanAPIKeyEntry.Text)
-		analyzer := ddan.NewClient(s.conf.ProductName, s.conf.Hostname).
+		analyzer := ddan.NewClient(s.conf.GetProductName(), s.conf.GetHostname()).
 			SetAnalyzer(u, apiKey, s.ddanIgnoreTLSCheck.Checked)
-		analyzer.SetProtocolVersion(s.conf.ProtocolVersion)
+		analyzer.SetProtocolVersion(s.conf.GetProtocolVersion())
 
 		ctxTimeout, cancelTimeout := context.WithTimeout(ctx, 5*time.Second)
 		defer cancelTimeout()
@@ -165,7 +163,7 @@ func (s *DDAn) Aquire() error {
 	if strings.TrimSpace(s.ddanURLEntry.Text) == "" {
 		return errors.New("Analyzer URL is empty")
 	}
-	s.conf.URL = s.GetDDAnURL()
+	s.conf.SetURL(s.GetDDAnURL())
 	apiKey := strings.TrimSpace(s.ddanAPIKeyEntry.Text)
 	if apiKey == "" {
 		return errors.New("Analyzer API Key is empty")

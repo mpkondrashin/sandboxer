@@ -107,7 +107,7 @@ func (s *OptionsWindow) GeneralSettings() fyne.CanvasObject {
 	ignoreFormItem.HintText = "Comma-separated list of file masks"
 
 	s.tasksKeepDays = widget.NewEntry()
-	s.tasksKeepDays.SetText(strconv.Itoa(s.conf.TasksKeepDays))
+	s.tasksKeepDays.SetText(strconv.Itoa(s.conf.GetTasksKeepDays()))
 	s.tasksKeepDays.OnChanged = func(str string) {
 		n := ""
 		for _, ch := range str {
@@ -123,7 +123,7 @@ func (s *OptionsWindow) GeneralSettings() fyne.CanvasObject {
 	tasksKeepDaysFormItem.HintText = "Number of days"
 
 	s.showNotifications = widget.NewCheck("Show", nil)
-	s.showNotifications.Checked = s.conf.ShowNotifications
+	s.showNotifications.Checked = s.conf.GetShowNotifications()
 	notificatonsFormItem := widget.NewFormItem("Notifications:", s.showNotifications)
 
 	settingsForm := widget.NewForm(ignoreFormItem, tasksKeepDaysFormItem, notificatonsFormItem)
@@ -148,12 +148,12 @@ func (s *OptionsWindow) Save(w *ModalWindow) {
 	}
 	days, err := strconv.Atoi(s.tasksKeepDays.Text)
 	if err == nil {
-		s.conf.TasksKeepDays = days
+		s.conf.SetTasksKeepDays(days)
 	}
 
 	s.ddanSettings.Aquire()
 
-	s.conf.ShowNotifications = s.showNotifications.Checked
+	s.conf.SetShowNotifications(s.showNotifications.Checked)
 
 	if err := s.conf.Save(); err != nil {
 		logging.Errorf("Save Config: %v", err)

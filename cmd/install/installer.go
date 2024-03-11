@@ -76,7 +76,7 @@ func (i *Installer) __LoadConfig() (ModusOperandi, error) {
 		//if errors.Is(err, &yaml.TypeError{}) {	}
 		return moError, err
 	}
-	switch semver.Compare(globals.Version, i.config.Version) {
+	switch semver.Compare(globals.Version, i.config.GetVersion()) {
 	case -1:
 		return moDowngrade, nil
 	case 0:
@@ -108,14 +108,14 @@ func (i *Installer) ConfigFileFolder() (string, error) {
 }
 
 func (i *Installer) Path(fileName string) string {
-	return filepath.Join(i.config.Folder, globals.AppFolderName, fileName)
+	return filepath.Join(i.config.GetFolder(), globals.AppFolderName, fileName)
 }
 
 func (i *Installer) InstallFolder() string {
 	if xplatform.IsWindows() {
-		return filepath.Join(i.config.Folder, globals.AppFolderName)
+		return filepath.Join(i.config.GetFolder(), globals.AppFolderName)
 	} else { // It is macOS
-		return filepath.Join(i.config.Folder, globals.AppName+".app")
+		return filepath.Join(i.config.GetFolder(), globals.AppName+".app")
 	}
 }
 
@@ -443,7 +443,7 @@ func (i *Installer) StageAutoStart() error {
 }
 
 func (i *Installer) AutoStart(dryRun bool) (string, error) {
-	appPath, err := xplatform.ExecutablePath(i.config.Folder, globals.AppName, globals.Name)
+	appPath, err := xplatform.ExecutablePath(i.config.GetFolder(), globals.AppName, globals.Name)
 	if err != nil {
 		return "", fmt.Errorf("ExecutablePath: %w", err)
 	}

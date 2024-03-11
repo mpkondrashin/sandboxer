@@ -58,7 +58,7 @@ func (p *PageUpgrade) Content() fyne.CanvasObject {
 		return p.content
 	}
 	titleLabel := widget.NewRichTextWithText(fmt.Sprintf(globals.AppName+" %s version is already installed on this system. Upgrade to %s?",
-		p.wiz.installer.config.Version, globals.Version))
+		p.wiz.installer.config.GetVersion(), globals.Version))
 	titleLabel.Wrapping = fyne.TextWrapWord
 	p.reinstallRadio = widget.NewRadioGroup([]string{upgrade, abort, uninstall}, p.radioChanged)
 	p.reinstallRadio.SetSelected(upgrade)

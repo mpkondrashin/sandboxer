@@ -30,7 +30,7 @@ const submitLog = "submit.log"
 var ErrUnsupportedOS = errors.New("unsupported OS")
 
 func SubmissionsExecutablePath(conf *config.Configuration) (string, error) {
-	return xplatform.ExecutablePath(conf.Folder, globals.AppName, globals.Name)
+	return xplatform.ExecutablePath(conf.GetFolder(), globals.AppName, globals.Name)
 }
 
 func LaunchSandboxer(conf *config.Configuration) {

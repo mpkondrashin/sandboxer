@@ -46,8 +46,8 @@ func (d *ResultDispatch) ProcessTask(tsk *task.Task) error {
 	case sandbox.RiskLevelNotReady:
 		tsk.Deactivate()
 		d.list.Updated()
-		logging.Debugf("Seleep %v for %v", d.conf.Sleep, tsk)
-		time.Sleep(d.conf.Sleep)
+		logging.Debugf("Seleep %v for %v", d.conf.GetSleep(), tsk)
+		time.Sleep(d.conf.GetSleep())
 		tsk.SetChannel(task.ChResult)
 	case sandbox.RiskLevelUnsupported:
 		if err != nil {
@@ -62,7 +62,7 @@ func (d *ResultDispatch) ProcessTask(tsk *task.Task) error {
 	default:
 		tsk.SetMessage(threatName)
 		tsk.SetChannel(task.ChReport)
-		if d.conf.ShowNotifications && tsk.RiskLevel != sandbox.RiskLevelNoRisk {
+		if d.conf.GetShowNotifications() && tsk.RiskLevel != sandbox.RiskLevelNoRisk {
 			subtitle := fmt.Sprintf("%v threat found %s", tsk.RiskLevel, threatName)
 			d.Alert(subtitle, filepath.Base(tsk.Path))
 		}
