@@ -146,10 +146,6 @@ func (s *SandboxerApp) Quit() {
 	s.app.Quit()
 }
 
-func IconPath(s task.State) string {
-	return fmt.Sprintf("../../resources/%s.svg", s.String())
-}
-
 func SavePid() (func(), error) {
 	pidFilePath, err := globals.PidFilePath()
 	if err != nil {

@@ -67,16 +67,19 @@ func (d *DDAn) Analyzer() (*ddan.Client, error) {
 }
 
 func (d *DDAn) AnalyzerWithUUID() (*ddan.Client, error) {
-	var err error
-	if d.ClientUUID == "" {
-		if d.ClientUUID == "" {
-			d.ClientUUID, err = GenerateUUID()
-			if err != nil {
-				return nil, err
-			}
-		}
+	if err := d.ProvideUUID(); err != nil {
+		return nil, err
 	}
 	return d.Analyzer()
+}
+
+func (d *DDAn) ProvideUUID() (err error) {
+	d.mx.Lock()
+	defer d.mx.Unlock()
+	if d.ClientUUID == "" {
+		d.ClientUUID, err = GenerateUUID()
+	}
+	return
 }
 
 func GenerateUUID() (string, error) {
