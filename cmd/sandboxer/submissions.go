@@ -326,6 +326,7 @@ func (s *SubmissionsWindow) Update() {
 func (s *SubmissionsWindow) Show() {
 	fps := time.Millisecond * 300
 	go func() {
+		logging.Debugf("Submissions Show")
 		haveChanges := true
 		for {
 			select {

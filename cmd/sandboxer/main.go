@@ -124,6 +124,7 @@ func (s *SandboxerApp) Run() {
 }
 
 func (s *SandboxerApp) CheckUpdate() {
+	logging.Debugf("Run check update")
 	need, err := update.NeedUpdateWindow()
 	if err != nil {
 		logging.LogError(err)
@@ -164,6 +165,7 @@ func HandleSignals() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
+		logging.Debugf("Run wait for signal")
 		<-c
 		logging.Debugf("Got signal")
 		os.Exit(globals.ExitGotSignal)

@@ -89,6 +89,7 @@ func (s *UpdateWindow) Reset() {
 }
 
 func (s *UpdateWindow) Update() {
+	logging.Debugf("Run for update")
 	s.Reset()
 	var err error
 	s.version, err = CheckUpdate()

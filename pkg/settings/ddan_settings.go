@@ -14,6 +14,7 @@ import (
 	"image/color"
 	"net/url"
 	"sandboxer/pkg/config"
+	"sandboxer/pkg/logging"
 	"strings"
 	"time"
 
@@ -106,6 +107,7 @@ func (s *DDAn) SetMessageOk(message string) {
 
 func (s *DDAn) TestAnalyzer() {
 	go func() {
+		logging.Debugf("Run Analyzer test")
 		if s.cancelTestDDAn != nil {
 			s.cancelTestDDAn()
 		}

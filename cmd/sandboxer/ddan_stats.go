@@ -14,7 +14,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 	"github.com/mpkondrashin/ddan"
@@ -24,39 +23,39 @@ import (
 )
 
 type StatStruct struct {
-	Last4Hours  binding.String
-	Last24Hours binding.String
-	Last7Days   binding.String
-	Last30Days  binding.String
-	Last90Days  binding.String
+	Last4Hours  *widget.Label
+	Last24Hours *widget.Label
+	Last7Days   *widget.Label
+	Last30Days  *widget.Label
+	Last90Days  *widget.Label
 }
 
 func NewStatStruct() *StatStruct {
 	return &StatStruct{
-		Last4Hours:  binding.NewString(),
-		Last24Hours: binding.NewString(),
-		Last7Days:   binding.NewString(),
-		Last30Days:  binding.NewString(),
-		Last90Days:  binding.NewString(),
+		Last4Hours:  widget.NewLabel(""),
+		Last24Hours: widget.NewLabel(""),
+		Last7Days:   widget.NewLabel(""),
+		Last30Days:  widget.NewLabel(""),
+		Last90Days:  widget.NewLabel(""),
 	}
 }
 
 func (s *StatStruct) FormItems() []*widget.FormItem {
 	return []*widget.FormItem{
-		widget.NewFormItem("Last 4 Hours:", widget.NewLabelWithData(s.Last4Hours)),
-		widget.NewFormItem("Last 24 Hours:", widget.NewLabelWithData(s.Last24Hours)),
-		widget.NewFormItem("Last 7 Days:", widget.NewLabelWithData(s.Last7Days)),
-		widget.NewFormItem("Last 30 Days:", widget.NewLabelWithData(s.Last30Days)),
-		widget.NewFormItem("Last 90 Days:", widget.NewLabelWithData(s.Last90Days)),
+		widget.NewFormItem("Last 4 Hours:", s.Last4Hours),
+		widget.NewFormItem("Last 24 Hours:", s.Last24Hours),
+		widget.NewFormItem("Last 7 Days:", s.Last7Days),
+		widget.NewFormItem("Last 30 Days:", s.Last30Days),
+		widget.NewFormItem("Last 90 Days:", s.Last90Days),
 	}
 }
 
 func (s *StatStruct) Reset() {
-	s.Last4Hours.Set("?")
-	s.Last24Hours.Set("?")
-	s.Last7Days.Set("?")
-	s.Last30Days.Set("?")
-	s.Last90Days.Set("?")
+	s.Last4Hours.SetText("?")
+	s.Last24Hours.SetText("?")
+	s.Last7Days.SetText("?")
+	s.Last30Days.SetText("?")
+	s.Last90Days.SetText("?")
 }
 
 func toString(v int) string {
@@ -67,11 +66,11 @@ func toString(v int) string {
 }
 
 func (s *StatStruct) Set(t *ddan.AvgTime) {
-	s.Last4Hours.Set(toString(t.Last4Hours))
-	s.Last24Hours.Set(toString(t.Last24Hours))
-	s.Last7Days.Set(toString(t.Last7Days))
-	s.Last30Days.Set(toString(t.Last30Days))
-	s.Last90Days.Set(toString(t.Last90Days))
+	s.Last4Hours.SetText(toString(t.Last4Hours))
+	s.Last24Hours.SetText(toString(t.Last24Hours))
+	s.Last7Days.SetText(toString(t.Last7Days))
+	s.Last30Days.SetText(toString(t.Last30Days))
+	s.Last90Days.SetText(toString(t.Last90Days))
 }
 
 type StatsWindow struct {
@@ -121,6 +120,7 @@ func (s *StatsWindow) Reset() {
 }
 
 func (s *StatsWindow) Update() {
+	logging.Debugf("Run DDAn Stats update")
 	s.Reset()
 	analyzer, err := s.conf.DDAn.AnalyzerWithUUID()
 	if err != nil {

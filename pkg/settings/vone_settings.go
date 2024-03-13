@@ -11,6 +11,7 @@ package settings
 import (
 	"context"
 	"sandboxer/pkg/config"
+	"sandboxer/pkg/logging"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -74,6 +75,7 @@ func (s *VisionOne) Update() {
 
 func (s *VisionOne) DetectDomain(token string) {
 	go func() {
+		logging.Debugf("Run Vision One domain detection")
 		if s.cancelDetect != nil {
 			s.cancelDetect()
 		}
