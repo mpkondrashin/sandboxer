@@ -29,7 +29,7 @@ const (
 	RiskLevelError
 )
 
-func RiskLevelThreat(r RiskLevel) bool {
+func (r RiskLevel) IsThreat() bool {
 	return r == RiskLevelLow || r == RiskLevelMedium || r == RiskLevelHigh
 }
 
