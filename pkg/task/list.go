@@ -131,6 +131,16 @@ func (l *TaskList) Process(callback func([]ID)) {
 	callback(keys)
 }
 
+func (l *TaskList) SortTasks() {
+	defer l.lockUnlock()()
+	keys := l.GetIDs()
+	sort.Slice(keys, func(i, j int) bool {
+		return l.Tasks[keys[i]].SubmitTime.After(l.Tasks[keys[j]].SubmitTime)
+	})
+	//logging.Debugf("slice: %v", keys)
+	//l.
+}
+
 func (l *TaskList) CountActiveTasks() (count int) {
 	for _, t := range l.Tasks {
 		if t.Channel != ChDone {

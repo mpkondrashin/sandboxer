@@ -17,17 +17,17 @@ import (
 
 type contextMenuIcon struct {
 	widget.Icon
-	menu *fyne.Menu
+	Menu *fyne.Menu
 }
 
 func (b *contextMenuIcon) Tapped(e *fyne.PointEvent) {
 	logging.Debugf("%v contextMenuIcon Tapped(%v)", b, e)
-	widget.ShowPopUpMenuAtPosition(b.menu, fyne.CurrentApp().Driver().CanvasForObject(b), e.AbsolutePosition)
+	widget.ShowPopUpMenuAtPosition(b.Menu, fyne.CurrentApp().Driver().CanvasForObject(b), e.AbsolutePosition)
 }
 
 func newContextMenuIcon(res fyne.Resource, menu *fyne.Menu) *contextMenuIcon {
 	b := &contextMenuIcon{
-		menu: menu,
+		Menu: menu,
 	}
 	b.Resource = res
 	b.ExtendBaseWidget(b)

@@ -29,6 +29,10 @@ const (
 	RiskLevelError
 )
 
+func RiskLevelThreat(r RiskLevel) bool {
+	return r == RiskLevelLow || r == RiskLevelMedium || r == RiskLevelHigh
+}
+
 var RiskLevelString = [...]string{
 	"Unknown",
 	"Not Ready",
