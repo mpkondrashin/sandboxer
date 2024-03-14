@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/mpkondrashin/ddan"
 
@@ -112,6 +113,10 @@ func (w *StatsWindow) Content(modal *ModalWindow) fyne.CanvasObject {
 
 func (w *StatsWindow) Name() string {
 	return "Analyzer Statistics"
+}
+
+func (s *StatsWindow) Icon() fyne.Resource {
+	return theme.BrokenImageIcon()
 }
 
 func (s *StatsWindow) Reset() {

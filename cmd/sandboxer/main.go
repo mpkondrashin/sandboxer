@@ -19,6 +19,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/theme"
 
 	"sandboxer/pkg/config"
 	"sandboxer/pkg/dispatchers"
@@ -79,6 +80,9 @@ func NewSandboxingApp(conf *config.Configuration, channels *task.Channels, list 
 	*/
 	a.optionsWindow = NewModalWindow(NewOptionsWindow(conf), &a.TrayApp)
 
+	quitItem := fyne.NewMenuItem("Quit", a.Quit)
+	quitItem.Icon = theme.CancelIcon()
+
 	a.menu = fyne.NewMenu(globals.AppName,
 		// SUBMIT_FILE s.submitMenuItem,
 		submitWindow.MenuItem,
@@ -91,7 +95,7 @@ func NewSandboxingApp(conf *config.Configuration, channels *task.Channels, list 
 		a.updateWindow.MenuItem,
 		aboutWindow.MenuItem,
 		fyne.NewMenuItemSeparator(),
-		fyne.NewMenuItem("Quit", a.Quit),
+		quitItem,
 	)
 	deskApp.SetSystemTrayIcon(a.Icon())
 	deskApp.SetSystemTrayMenu(a.menu)

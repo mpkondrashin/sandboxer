@@ -14,6 +14,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"sandboxer/pkg/logging"
@@ -41,7 +42,11 @@ func (s *SubmitURLWindow) Show() {
 func (s *SubmitURLWindow) Hide() {}
 
 func (s *SubmitURLWindow) Name() string {
-	return "Submit URL"
+	return "Inspect URL"
+}
+
+func (s *SubmitURLWindow) Icon() fyne.Resource {
+	return theme.SearchIcon() //UploadIcon()
 }
 
 func (s *SubmitURLWindow) Content(w *ModalWindow) fyne.CanvasObject {

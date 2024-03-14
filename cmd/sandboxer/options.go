@@ -16,6 +16,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"sandboxer/pkg/config"
@@ -51,6 +52,10 @@ func (s *OptionsWindow) Hide() {}
 
 func (s *OptionsWindow) Name() string {
 	return "Options"
+}
+
+func (s *OptionsWindow) Icon() fyne.Resource {
+	return theme.SettingsIcon()
 }
 
 func (s *OptionsWindow) Content(w *ModalWindow) fyne.CanvasObject {

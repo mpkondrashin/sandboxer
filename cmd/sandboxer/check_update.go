@@ -20,6 +20,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"golang.org/x/mod/semver"
 
@@ -47,6 +48,10 @@ func NewUpdateWindow() *UpdateWindow {
 
 func (s *UpdateWindow) Name() string {
 	return "Check for Updates"
+}
+
+func (s *UpdateWindow) Icon() fyne.Resource {
+	return theme.DownloadIcon()
 }
 
 func (s *UpdateWindow) Content(w *ModalWindow) fyne.CanvasObject {

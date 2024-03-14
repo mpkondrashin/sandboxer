@@ -14,6 +14,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"sandboxer/pkg/globals"
@@ -41,6 +42,10 @@ func (w *AboutWindow) Content(modal *ModalWindow) fyne.CanvasObject {
 
 func (s *AboutWindow) Name() string {
 	return "About"
+}
+
+func (s *AboutWindow) Icon() fyne.Resource {
+	return theme.InfoIcon()
 }
 
 func (s *AboutWindow) Show() {}

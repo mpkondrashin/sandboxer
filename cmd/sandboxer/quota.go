@@ -14,6 +14,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"sandboxer/pkg/config"
@@ -67,6 +68,10 @@ func (w *QuotaWindow) Content(modal *ModalWindow) fyne.CanvasObject {
 
 func (w *QuotaWindow) Name() string {
 	return "Vision One Quota"
+}
+
+func (s *QuotaWindow) Icon() fyne.Resource {
+	return theme.WarningIcon()
 }
 
 func (s *QuotaWindow) Reset() {

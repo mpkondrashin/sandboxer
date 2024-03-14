@@ -14,6 +14,7 @@ import (
 
 type ModalWindowContent interface {
 	Name() string
+	Icon() fyne.Resource
 	Content(w *ModalWindow) fyne.CanvasObject
 	Show()
 	Hide()
@@ -34,6 +35,7 @@ func NewModalWindow(content ModalWindowContent, trayApp *TrayApp) *ModalWindow {
 	}
 
 	w.MenuItem = fyne.NewMenuItem(content.Name()+"...", w.Show)
+	w.MenuItem.Icon = content.Icon()
 	w.win.SetCloseIntercept(w.Hide)
 	w.win.SetContent(content.Content(w))
 	return w

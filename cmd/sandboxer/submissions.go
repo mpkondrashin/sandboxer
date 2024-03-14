@@ -13,7 +13,6 @@ import (
 	"image/color"
 	"os"
 	"path/filepath"
-	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -36,7 +35,6 @@ import (
 )
 
 type SubmissionsWindow struct {
-	mx            sync.Mutex
 	win           fyne.Window
 	stopUpdate    chan struct{}
 	conf          *config.Configuration
@@ -62,32 +60,28 @@ func NewSubmissionsWindow(channels *task.Channels, list *task.TaskList, conf *co
 		statusLabel: widget.NewLabel(""),
 		list:        list,
 		channels:    channels,
-		//vbox:        container.NewVBox(widget.NewLabel("No Sumbissions")),
 	}
 	s.cardsList = widget.NewList(
 		s.CardsListLength,
 		s.CardsListCreateItem,
 		s.CardsListUpdateItem,
 	)
-	//s.cardsList.OnSelected = func(id widget.ListItemID) {
-	//	menu := s.PopUpMenu(task.NewTask(0, task.FileTask, "placeholder"))
-	//s.cardsList.
-	//	widget.ShowPopUpMenuAtPosition(menu, fyne.CurrentApp().Driver().CanvasForObject(s.cardsList), fyne.NewPos(0, 0)) // e.AbsolutePosition)
-
-	//	fmt.Println("Onselected", id)
-	//}
-	s.buttonPrev = widget.NewButton("<", s.Prev)
+	s.buttonPrev = widget.NewButton(" < ", s.Prev)
 	s.buttonPrev.Disable()
-	s.buttonNext = widget.NewButton(">", s.Next)
+	s.buttonNext = widget.NewButton(" > ", s.Next)
 	s.buttonNext.Disable()
 
-	//TMPs.pageLabel.TextSize = 12
+	s.pageLabel.TextSize = 12
 	s.PopulateOnScreenTasks()
 	return s
 }
 
 func (s *SubmissionsWindow) Name() string {
 	return "Submissions"
+}
+
+func (s *SubmissionsWindow) Icon() fyne.Resource {
+	return theme.StorageIcon()
 }
 
 func (s *SubmissionsWindow) Content(w *ModalWindow) fyne.CanvasObject {
@@ -234,15 +228,17 @@ func (s *SubmissionsWindow) UpdateWidget(tsk *task.Task, object fyne.CanvasObjec
 }
 
 func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
-	downloadItem := fyne.NewMenuItem("Show Report", func() {
+	reportItem := fyne.NewMenuItem("Show Report", func() {
 		s.RunOpen(tsk.Report)
 	})
-	downloadItem.Disabled = tsk.Report == ""
+	reportItem.Disabled = tsk.Report == ""
+	reportItem.Icon = theme.BrokenImageIcon()
 
-	downloadInvestigation := fyne.NewMenuItem("Investigation Package", func() {
+	investigationItem := fyne.NewMenuItem("Investigation Package", func() {
 		s.OpenInvestigation(tsk.Investigation)
 	})
-	downloadInvestigation.Disabled = tsk.Investigation == ""
+	investigationItem.Disabled = tsk.Investigation == ""
+	investigationItem.Icon = theme.ListIcon()
 
 	var deleteFileItem *fyne.MenuItem
 	deleteFileAction := func() {
@@ -265,6 +261,8 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 	deleteFileItem.Disabled = tsk.RiskLevel != sandbox.RiskLevelHigh &&
 		tsk.RiskLevel != sandbox.RiskLevelMedium &&
 		tsk.RiskLevel != sandbox.RiskLevelLow
+	deleteFileItem.Icon = theme.DeleteIcon()
+
 	recheckAction := func() {
 		tsk.SetMessage("")
 		tsk.SetRiskLevel(sandbox.RiskLevelUnknown)
@@ -272,14 +270,18 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 		s.channels.TaskChannel[task.ChPrefilter] <- tsk.Number
 	}
 	recheckItem := fyne.NewMenuItem("Recheck File", recheckAction)
+	recheckItem.Icon = theme.SearchReplaceIcon()
+
 	//recheckItem.Disabled = (tsk.RiskLevel != sandbox.RiskLevelError) && (tsk.RiskLevel != sandbox.RiskLevelUnsupported)
+	deleteTaskItem := fyne.NewMenuItem("Delete Task", func() {
+		s.DeleteTask(tsk)
+	})
+	deleteTaskItem.Icon = theme.CancelIcon()
 	return fyne.NewMenu(globals.AppName,
-		downloadItem,
-		downloadInvestigation,
+		reportItem,
+		investigationItem,
 		recheckItem,
-		fyne.NewMenuItem("Delete Task", func() {
-			s.DeleteTask(tsk)
-		}),
+		deleteTaskItem,
 		deleteFileItem)
 }
 
@@ -320,53 +322,27 @@ func (s *SubmissionsWindow) OpenInvestigation(investigation string) {
 		}, s.win)
 }
 
-func IconForFile(path string) fyne.CanvasObject {
-	iconData, err := fileicon.FileIcon(path)
-	if err != nil {
-		iconData = fileicon.VanilaIcon()
-	}
+func IconWidget() fyne.CanvasObject {
+	iconData := fileicon.VanilaIcon()
 	iconResource := &fyne.StaticResource{
-		StaticName:    filepath.Base(path),
+		StaticName:    "some file path",
 		StaticContent: []byte(iconData),
 	}
-	icon := canvas.NewImageFromResource(iconResource)
-	icon.SetMinSize(fyne.NewSize(26, 26))
-	icon.FillMode = canvas.ImageFillContain
-	if err == nil {
-		return icon
-	}
-	ext := filepath.Ext(path)
-	if len(ext) > 0 {
-		ext = ext[1:]
-	}
-	var maxSize float32 = 10
-	var size float32
-	if len(ext) > 0 {
-		size = maxSize * 3 / float32(len(ext))
-	}
-	if size > maxSize {
-		size = maxSize
-	}
-	t := canvas.NewText(ext, color.RGBA{128, 128, 128, 255})
-	t.TextStyle = fyne.TextStyle{
-		Bold: true,
-	}
-	t.TextSize = size
+	image := canvas.NewImageFromResource(iconResource)
+	image.SetMinSize(fyne.NewSize(26, 26))
+	image.FillMode = canvas.ImageFillContain
+	t := canvas.NewText(".", color.RGBA{128, 128, 128, 255})
+	t.TextStyle = fyne.TextStyle{Bold: true}
+	t.TextSize = 10.0
 	labelBorder := container.NewCenter(t)
-	return container.NewStack(icon, labelBorder)
+	return container.NewStack(image, labelBorder)
 }
 
 func (s *SubmissionsWindow) CardWidget() fyne.CanvasObject {
 	path := "Example Of File.some extension"
-	icon := IconForFile(path)
-
-	/*bidiStr, err := bidi.Display(tsk.Title())
-	if err != nil {
-		logging.LogError(err)
-		bidiStr = tsk.Title()
-	}*/
+	icon := IconWidget()
 	fileNameText := canvas.NewText(path, color.Black)
-	//fileNameText.TextStyle = fyne.TextStyle{Bold: true}
+
 	stateText := canvas.NewText(task.ChResult.String(), color.Black)
 	stateText.TextStyle = fyne.TextStyle{Bold: false}
 
@@ -381,7 +357,7 @@ func (s *SubmissionsWindow) CardWidget() fyne.CanvasObject {
 	))
 	menuIcon := newContextMenuIcon(
 		theme.DefaultTheme().Icon(theme.IconNameMoreVertical),
-		nil, //s.PopUpMenu(tsk),
+		nil,
 	)
 	return container.NewHBox(menuIcon, container.NewPadded(icon), vbox)
 }
@@ -402,61 +378,6 @@ func ExtAndSize(path string) (string, float32) {
 	return ext, size
 }
 
-/*
-	func (s *SubmissionsWindow) Update() {
-		s.mx.Lock()
-		defer s.mx.Unlock()
-		to := s.from + s.count + 1
-		if to > s.list.Length() {
-			to = s.list.Length()
-		}
-		s.vbox.RemoveAll()
-		s.list.Process(func(ids []task.ID) {
-			count := s.list.CountActiveTasks()
-			activeTasks := "No active task"
-			if count > 0 {
-				activeTasks = fmt.Sprintf("Active tasks: %d", s.list.CountActiveTasks())
-			}
-			s.statusLabel.SetText(activeTasks)
-			for i := s.from; i < s.from+s.count && i < len(ids); i++ {
-				idx := ids[i]
-				_ = s.list.Task(idx, func(tsk *task.Task) error {
-					//if tsk == nil {
-					//tsk = task.NewTask(0, "placeholder")
-					//}
-					card := s.CardWidget(tsk)
-					s.vbox.Add(card) // padded
-					s.vbox.Add(canvas.NewLine(color.RGBA{158, 158, 158, 255}))
-					return nil
-				})
-			}
-			if s.from > 0 {
-				s.buttonPrev.Enable()
-			} else {
-				s.buttonPrev.Disable()
-			}
-			if s.from+s.count < len(ids) {
-				s.buttonNext.Enable()
-			} else {
-				s.buttonNext.Disable()
-			}
-		})
-		if s.from > 0 || s.from+s.count < s.list.Length() {
-			s.pageLabel.Text = fmt.Sprintf("Submissions %d - %d out of %d", s.from+1, to, s.list.Length())
-		} else {
-			s.pageLabel.Text = ""
-		}
-		if len(s.vbox.Objects) == 0 {
-			s.vbox.Add(container.NewCenter(widget.NewLabel("No submissions")))
-			s.pageLabel.Text = ""
-			s.statusLabel.SetText("")
-			s.buttonNext.Disable()
-			s.buttonPrev.Disable()
-		}
-		s.pageLabel.Refresh()
-		//s.vbox.Refresh()
-	}
-*/
 func (s *SubmissionsWindow) Show() {
 	fps := time.Millisecond * 300
 	go func() {
