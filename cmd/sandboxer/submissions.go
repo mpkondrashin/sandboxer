@@ -179,8 +179,8 @@ func (s *SubmissionsWindow) CardsListLength() int {
 }
 
 func (s *SubmissionsWindow) CardsListCreateItem() fyne.CanvasObject {
-	tsk := task.NewTask(0, task.FileTask, "placeholder")
-	return s.CardWidget(tsk)
+	//tsk := task.NewTask(0, task.FileTask, "placeholder")
+	return s.CardWidget()
 }
 
 func (s *SubmissionsWindow) CardsListUpdateItem(itemID widget.ListItemID, object fyne.CanvasObject) {
@@ -356,21 +356,21 @@ func IconForFile(path string) fyne.CanvasObject {
 	return container.NewStack(icon, labelBorder)
 }
 
-func (s *SubmissionsWindow) CardWidget(tsk *task.Task) fyne.CanvasObject {
-	path := tsk.Path
+func (s *SubmissionsWindow) CardWidget() fyne.CanvasObject {
+	path := "Example Of File.some extension"
 	icon := IconForFile(path)
 
-	bidiStr, err := bidi.Display(tsk.Title())
+	/*bidiStr, err := bidi.Display(tsk.Title())
 	if err != nil {
 		logging.LogError(err)
 		bidiStr = tsk.Title()
-	}
-	fileNameText := canvas.NewText(bidiStr, color.Black)
+	}*/
+	fileNameText := canvas.NewText(path, color.Black)
 	//fileNameText.TextStyle = fyne.TextStyle{Bold: true}
-	stateText := canvas.NewText(tsk.GetChannel(), tsk.RiskLevel.Color())
-	stateText.TextStyle = fyne.TextStyle{Bold: tsk.Active}
+	stateText := canvas.NewText(task.ChResult.String(), color.Black)
+	stateText.TextStyle = fyne.TextStyle{Bold: false}
 
-	messageText := canvas.NewText(tsk.Message, tsk.RiskLevel.Color())
+	messageText := canvas.NewText("Unsupported file type", color.Black)
 	messageText.TextStyle = fyne.TextStyle{Italic: true}
 	messageText.TextSize = 10
 
@@ -381,7 +381,7 @@ func (s *SubmissionsWindow) CardWidget(tsk *task.Task) fyne.CanvasObject {
 	))
 	menuIcon := newContextMenuIcon(
 		theme.DefaultTheme().Icon(theme.IconNameMoreVertical),
-		s.PopUpMenu(tsk),
+		nil, //s.PopUpMenu(tsk),
 	)
 	return container.NewHBox(menuIcon, container.NewPadded(icon), vbox)
 }
