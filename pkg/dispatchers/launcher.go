@@ -97,10 +97,10 @@ func (l *Launcher) RunDispatcher(disp Dispatcher, wg *sync.WaitGroup) {
 		_ = l.list.Task(id, func(tsk *task.Task) error { // Simple Get(id) could be used
 			logging.Debugf("Got from %v task %v", ch, tsk)
 			tsk.Activate()
-			logging.Debugf("Activate")
+			//logging.Debugf("Activate")
 			l.list.Updated()
 			err := disp.ProcessTask(tsk)
-			logging.Debugf("Deactivate")
+			//logging.Debugf("Deactivate")
 			tsk.Deactivate()
 			l.list.Updated()
 			if err != nil {

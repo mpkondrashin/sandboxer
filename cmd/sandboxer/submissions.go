@@ -243,7 +243,7 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 	var deleteFileItem *fyne.MenuItem
 	deleteFileAction := func() {
 		dialog.ShowConfirm("Delete file",
-			fmt.Sprintf("Following file will be deleted: %s", tsk.Path), func(yes bool) {
+			fmt.Sprintf("Following file will be deleted:\n%s", tsk.Path), func(yes bool) {
 				if !yes {
 					return
 				}
