@@ -67,7 +67,6 @@ func (l *TaskList) NewTask(taskType TaskType, path string) (ID, error) {
 		tsk.SubmitTime = time.Now()
 		l.Updated()
 		return 0, fmt.Errorf("%s: %w", path, ErrAlreadyExists)
-
 	}
 	logging.Debugf("NewTask %d, %s", l.TasksCount, path)
 	tsk = NewTask(l.TasksCount, taskType, path)

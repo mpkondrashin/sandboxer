@@ -91,11 +91,10 @@ func (l *Launcher) LoadTasks() {
 }
 
 func (l *Launcher) RunDispatcher(disp Dispatcher, wg *sync.WaitGroup) {
-	//ctx, cancel := context.WithCancel(context.TODO())
 	logging.Debugf("Start %T", disp)
 	ch := disp.InboundChannel()
 	for id := range l.channels.TaskChannel[ch] {
-		_ = l.list.Task(id, func(tsk *task.Task) error {
+		_ = l.list.Task(id, func(tsk *task.Task) error { // Simple Get(id) could be used
 			logging.Debugf("Got from %v task %v", ch, tsk)
 			tsk.Activate()
 			logging.Debugf("Activate")

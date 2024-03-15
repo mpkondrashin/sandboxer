@@ -30,13 +30,13 @@ import (
 type ID int64
 
 type Task struct {
-	Number        ID
+	Number        ID `json:"-"`
 	Type          TaskType
 	SubmitTime    time.Time
 	Path          string
 	Channel       Channel
 	RiskLevel     sandbox.RiskLevel
-	Active        bool
+	Active        bool `json:"-"`
 	Message       string
 	SandboxID     string
 	MD5           string
