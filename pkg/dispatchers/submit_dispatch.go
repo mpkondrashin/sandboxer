@@ -9,7 +9,6 @@ Send files from FIFO to prefilter channel
 package dispatchers
 
 import (
-	"errors"
 	"log"
 	"sync"
 
@@ -50,9 +49,9 @@ func (d *SubmitDispatch) Run(wg *sync.WaitGroup) {
 		//		logging.Debugf("SEND %s to %d", s, ChPrefilter)
 		tsk, err := d.list.NewTask(task.FileTask, s)
 		if err != nil {
-			if !errors.Is(err, task.ErrAlreadyExists) {
-				logging.LogError(err)
-			}
+			//if !errors.Is(err, task.ErrAlreadyExists) {
+			logging.LogError(err)
+			//}
 			continue
 		}
 		d.Channel(task.ChPrefilter) <- tsk

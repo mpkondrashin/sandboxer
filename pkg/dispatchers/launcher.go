@@ -97,12 +97,9 @@ func (l *Launcher) RunDispatcher(disp Dispatcher, wg *sync.WaitGroup) {
 	for id := range l.channels.TaskChannel[ch] {
 		_ = l.list.Task(id, func(tsk *task.Task) error {
 			logging.Debugf("Got from %v task %v", ch, tsk)
-			//tsk := l.list.Get(id)
 			tsk.Activate()
 			logging.Debugf("Activate")
 			l.list.Updated()
-			//defer func() {
-			//}()
 			err := disp.ProcessTask(tsk)
 			logging.Debugf("Deactivate")
 			tsk.Deactivate()

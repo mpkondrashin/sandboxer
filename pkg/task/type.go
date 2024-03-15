@@ -52,7 +52,7 @@ func (t *TaskType) UnmarshalJSON(data []byte) error {
 	}
 	result, ok := mapTypeFromString[strings.ToLower(v)]
 	if !ok {
-		return fmt.Errorf("%w: %s", ErrUnknownState, v)
+		return fmt.Errorf("%w: %s", ErrUnknownType, v)
 	}
 	*t = result
 	return nil

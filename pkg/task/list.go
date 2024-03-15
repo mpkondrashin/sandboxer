@@ -43,7 +43,7 @@ func NewList() *TaskList {
 }
 
 func (l *TaskList) Updated() {
-	logging.Debugf("Updated")
+	//logging.Debugf("Updated")
 	if len(l.changed) > 0 {
 		return
 	}
@@ -62,20 +62,30 @@ var ErrAlreadyExists = errors.New("task already exist")
 
 func (l *TaskList) NewTask(taskType TaskType, path string) (ID, error) {
 	defer l.lockUnlock()()
-	for _, tsk := range l.Tasks {
-		if path == tsk.Path {
-			logging.Debugf("NewTask. Same path: %s", path)
-			tsk.SubmitTime = time.Now()
-			l.Updated()
-			return 0, fmt.Errorf("%s: %w", path, ErrAlreadyExists)
-		}
+	tsk := l.FindTask(path)
+	if tsk != nil {
+		tsk.SubmitTime = time.Now()
+		l.Updated()
+		return 0, fmt.Errorf("%s: %w", path, ErrAlreadyExists)
+
 	}
 	logging.Debugf("NewTask %d, %s", l.TasksCount, path)
-	tsk := NewTask(l.TasksCount, taskType, path)
+	tsk = NewTask(l.TasksCount, taskType, path)
 	l.Tasks[tsk.Number] = tsk
 	l.Updated()
 	l.TasksCount++
 	return tsk.Number, nil
+}
+
+func (l *TaskList) FindTask(path string) *Task {
+	// More sophisticated paths comparison algoritm could be used or
+	// os.SameFile function
+	for _, tsk := range l.Tasks {
+		if path == tsk.Path {
+			return tsk
+		}
+	}
+	return nil
 }
 
 func (l *TaskList) DelByID(id ID) {
@@ -101,12 +111,12 @@ func (l *TaskList) Task(num ID, callback func(tsk *Task) error) error {
 }
 
 func (l *TaskList) lockUnlock() func() {
-	logging.Debugf("Lock %p", l)
+	//logging.Debugf("Lock %p", l)
 	l.mx.Lock()
 	return l.unlock // func() {} //
 }
 func (l *TaskList) unlock() {
-	logging.Debugf("Unlock %p", l)
+	//logging.Debugf("Unlock %p", l)
 	l.mx.Unlock()
 }
 
@@ -127,7 +137,7 @@ func (l *TaskList) Process(callback func([]ID)) {
 	sort.Slice(keys, func(i, j int) bool {
 		return l.Tasks[keys[i]].SubmitTime.After(l.Tasks[keys[j]].SubmitTime)
 	})
-	logging.Debugf("slice: %v", keys)
+	//logging.Debugf("slice: %v", keys)
 	callback(keys)
 }
 
