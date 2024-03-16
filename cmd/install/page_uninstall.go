@@ -14,7 +14,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -22,6 +21,7 @@ type PageUninstall struct {
 	BasePage
 	progressBar *widget.ProgressBar
 	statusLabel *widget.Label
+	errorsLabel *widget.Label
 }
 
 var _ Page = &PageUninstall{}
@@ -38,29 +38,28 @@ func (p *PageUninstall) Next(previousPage PageIndex) PageIndex {
 func (p *PageUninstall) Content() fyne.CanvasObject {
 	p.progressBar = widget.NewProgressBar()
 	p.statusLabel = widget.NewLabel("")
+	p.errorsLabel = widget.NewLabel("")
+	scroll := container.NewScroll(p.errorsLabel)
+	scroll.SetMinSize(fyne.NewSize(0, 10*10))
 	return container.NewVBox(
 		p.progressBar,
 		p.statusLabel,
-		//copyButton,
+		scroll,
 	)
 }
 
 func (p *PageUninstall) Run() {
-	total := float64(len(p.wiz.installer.UninstallStages()) - 1)
-	index := 0
-	stageName := ""
-	err := p.wiz.installer.Uninstall(func(name string) error {
-		stageName = name
+	stages := p.wiz.installer.UninstallStages()
+	total := float64(len(stages) - 1)
+	for index, stage := range stages {
+		logging.Infof("Uninstall stage %s", stage.Name())
 		p.progressBar.SetValue(float64(index) / total)
-		p.statusLabel.SetText(name)
-		index++
-		return nil
-	})
-	p.statusLabel.SetText("Done")
-	if err != nil {
-		p.statusLabel.SetText(stageName + " Failed")
-		err = fmt.Errorf("%s: %w", stageName, err)
+		p.statusLabel.SetText(stage.Name())
+		err := stage.Execute()
 		logging.LogError(err)
-		dialog.ShowError(err, p.wiz.win)
+		if err != nil {
+			line := fmt.Sprintf("\n%s: %v", stage.Name(), err.Error())
+			p.errorsLabel.SetText(p.errorsLabel.Text + line)
+		}
 	}
 }

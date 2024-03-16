@@ -9,8 +9,6 @@ Icon with context menu
 package main
 
 import (
-	"sandboxer/pkg/logging"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
 )
@@ -21,7 +19,7 @@ type contextMenuIcon struct {
 }
 
 func (b *contextMenuIcon) Tapped(e *fyne.PointEvent) {
-	logging.Debugf("%v contextMenuIcon Tapped(%v)", b, e)
+	//logging.Debugf("%v contextMenuIcon Tapped(%v)", b, e)
 	widget.ShowPopUpMenuAtPosition(b.Menu, fyne.CurrentApp().Driver().CanvasForObject(b), e.AbsolutePosition)
 }
 

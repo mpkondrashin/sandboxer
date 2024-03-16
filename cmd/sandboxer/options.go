@@ -9,6 +9,7 @@ Options window
 package main
 
 import (
+	"context"
 	"strconv"
 	"strings"
 	"unicode"
@@ -64,7 +65,7 @@ func (s *OptionsWindow) Content(w *ModalWindow) fyne.CanvasObject {
 	buttons := container.NewHBox(cancelButton, saveButton)
 	// add link to open v1 console(?)
 
-	ddanTab := container.NewTabItem("Analyzer", s.DDAnSettings())
+	ddanTab := container.NewTabItem("Analyzer", s.DDAnSettings(w))
 	voneTab := container.NewTabItem("Vision One", s.VisionOneSettings())
 	tabs := container.NewAppTabs(
 		container.NewTabItem("Settings", s.GeneralSettings()),
@@ -82,15 +83,29 @@ func (s *OptionsWindow) Content(w *ModalWindow) fyne.CanvasObject {
 	return container.NewVBox(tabs, buttons)
 }
 
-func (s *OptionsWindow) DDAnSettings() fyne.CanvasObject {
+func (s *OptionsWindow) DDAnSettings(w *ModalWindow) fyne.CanvasObject {
 	labelTop := widget.NewLabel("Deep Discovery Analyzer settings")
 
 	s.ddanCheck = widget.NewCheck("Use Analyzer sandbox", func(checked bool) {
 		s.voneCheck.Checked = !checked
 	})
 	s.ddanCheck.Checked = s.conf.SandboxType == config.SandboxAnalyzer
-
-	return container.NewVBox(s.ddanCheck, labelTop, s.ddanSettings.Widget())
+	unregisterButton := widget.NewButton("Unregister", func() {
+		logging.Infof("Unregister from Analyzer")
+		analyzer, err := s.conf.DDAn.Analyzer()
+		if err != nil {
+			logging.LogError(err)
+			dialog.ShowError(err, w.win)
+			return
+		}
+		if err := analyzer.Unregister(context.TODO()); err != nil {
+			logging.LogError(err)
+			dialog.ShowError(err, w.win)
+			return
+		}
+		dialog.ShowInformation("Analyzer", "Successfully unregistered", w.win)
+	})
+	return container.NewVBox(s.ddanCheck, labelTop, s.ddanSettings.Widget(), unregisterButton)
 }
 
 func (s *OptionsWindow) VisionOneSettings() fyne.CanvasObject {

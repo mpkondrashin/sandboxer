@@ -16,7 +16,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -169,47 +168,61 @@ func (i *Installer) Install(callback func(name string) error) error {
 	return nil
 }
 
-type UninstallStage struct {
-	Name string
-	Path string
+type UninstallStage interface {
+	Name() string
+	Execute() error
 }
 
 func (i *Installer) UninstallStages() (stages []UninstallStage) {
 	stages = []UninstallStage{
-		{"Program", i.InstallFolder()},
+		NewUninstallStageStopProcess(),
+		NewUninstallStageUnregister(&i.config.DDAn),
+		NewUninstallStageDelete("Program", i.InstallFolder()),
 	}
 	configFolder, err := i.ConfigFileFolder()
 	if err == nil {
-		stages = append(stages, UninstallStage{"User Data", configFolder})
+		stages = append(stages, NewUninstallStageDelete("User Data", configFolder))
 	}
 	autoStartPath, err := i.AutoStart(false)
 	if err == nil {
-		stages = append(stages, UninstallStage{"Autostart", autoStartPath})
+		stages = append(stages, NewUninstallStageDelete("Autostart", autoStartPath))
 	}
 	sendTo, err := i.ExtendSendTo(true)
 	if err == nil {
-		stages = append(stages, UninstallStage{"RightClick", sendTo})
+		stages = append(stages, NewUninstallStageDelete("Right Click", sendTo))
 	}
 	if xplatform.IsWindows() {
 		path, err := i.AddToStartMenu(true)
 		if err == nil {
-			stages = append(stages, UninstallStage{
-				"Start Menu", path,
-			})
+			stages = append(stages, NewUninstallStageDelete("Start Menu", path))
 		}
 	}
+	stages = append(stages, NewUninstallStageDone())
 	return
 }
 
-func (i *Installer) Uninstall(callback func(name string) error) error {
-	logging.LogError(i.StopProgram())
-	message := ""
-	for _, stage := range i.UninstallStages() {
-		logging.Debugf("Uninstall %s. Remove \"%s\"", stage.Name, stage.Path)
-		if err := callback(stage.Name); err != nil {
+/*
+	func (i *Installer) UnregisterAnalyzer() error {
+		logging.Infof("Unregister from Analyzer")
+		analyzer, err := i.config.DDAn.Analyzer()
+		if err != nil {
 			return err
 		}
-		if err := os.RemoveAll(stage.Path); err != nil {
+		if err := analyzer.Unregister(context.TODO()); err != nil {
+			return err
+		}
+		return nil
+	}
+*/
+/*
+func (i *Installer) Uninstall(callback func(name string) error) error {
+	message := ""
+	for _, stage := range i.UninstallStages() {
+		logging.Debugf("Uninstall Stage %s", stage.Name())
+		if err := callback(stage.Name()); err != nil {
+			return err
+		}
+		if err := stage.Execute(); err != nil {
 			message += err.Error() + "\n"
 		}
 	}
@@ -217,7 +230,7 @@ func (i *Installer) Uninstall(callback func(name string) error) error {
 		return fmt.Errorf("%s", message)
 	}
 	return nil
-}
+}*/
 
 const uninstallScriptName = "uninstall"
 
@@ -286,37 +299,7 @@ func (i *Installer) StageCreateConfig() error {
 
 func (i *Installer) StageStopProgram() error {
 	logging.Debugf("Install: Stop " + globals.AppName)
-	return i.StopProgram()
-}
-
-func (i *Installer) StopProgram() error {
-	pidFilePath, err := globals.PidFilePath()
-	if err != nil {
-		return err
-	}
-	data, err := os.ReadFile(pidFilePath)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			logging.Errorf("Stop "+globals.AppName+": %s: %v", pidFilePath, err)
-			return nil
-		}
-		return err
-	}
-	pid, err := strconv.Atoi(string(data))
-	if err != nil {
-		logging.Errorf("Stop"+globals.AppName+": %s: %v", string(data), err)
-		return nil
-	}
-	proc, err := os.FindProcess(pid)
-	if err != nil {
-		logging.Errorf("Stop"+globals.AppName+": FindProcess(%d): %v", pid, err)
-		return nil
-	}
-	if err := proc.Kill(); err != nil {
-		logging.Errorf("Stop"+globals.AppName+": Kill %d: %v", pid, err)
-		return nil
-	}
-	return nil
+	return NewUninstallStageStopProcess().Execute()
 }
 
 func (i *Installer) StageWaitServiceToStop() error {

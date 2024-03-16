@@ -18,7 +18,6 @@ import (
 )
 
 const (
-	//abort  = "Abort installation"
 	upgrade = "Upgrade"
 )
 
@@ -45,12 +44,9 @@ func (p *PageUpgrade) Next(previousPage PageIndex) PageIndex {
 	case abort:
 		return pgExit
 	case uninstall:
-		return pgUninstall //&PageUninstall{BasePage{wiz: p.wiz}}
+		return pgUninstall
 	}
 	return pgFinish
-	//p.w.UpdatePagesList(p)
-
-	//return &PageFinish{BasePage{wiz: p.wiz}}
 }
 
 func (p *PageUpgrade) Content() fyne.CanvasObject {
@@ -70,8 +66,6 @@ func (p *PageUpgrade) Content() fyne.CanvasObject {
 
 }
 
-//func (p *PageUpgrade) Run() {}
-
 func (p *PageUpgrade) AquireData(installer *Installer) error {
 	switch p.reinstallRadio.Selected {
 	case reinstall, uninstall:
@@ -81,10 +75,10 @@ func (p *PageUpgrade) AquireData(installer *Installer) error {
 	}
 	return nil
 }
+
 func (p *PageUpgrade) radioChanged(s string) {
 	if p.reinstallRadio == nil {
 		return
 	}
 	p.wiz.UpdatePagesList()
-	// update page
 }

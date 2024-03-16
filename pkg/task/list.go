@@ -121,7 +121,6 @@ func (l *TaskList) unlock() {
 
 func (l *TaskList) GetIDs() []ID {
 	keys := make([]ID, len(l.Tasks))
-	logging.Debugf("keys len = %d", len(l.Tasks))
 	i := 0
 	for k := range l.Tasks {
 		keys[i] = k
@@ -136,7 +135,6 @@ func (l *TaskList) Process(callback func([]ID)) {
 	sort.Slice(keys, func(i, j int) bool {
 		return l.Tasks[keys[i]].SubmitTime.After(l.Tasks[keys[j]].SubmitTime)
 	})
-	//logging.Debugf("slice: %v", keys)
 	callback(keys)
 }
 
@@ -146,8 +144,6 @@ func (l *TaskList) SortTasks() {
 	sort.Slice(keys, func(i, j int) bool {
 		return l.Tasks[keys[i]].SubmitTime.After(l.Tasks[keys[j]].SubmitTime)
 	})
-	//logging.Debugf("slice: %v", keys)
-	//l.
 }
 
 func (l *TaskList) CountActiveTasks() (count int) {

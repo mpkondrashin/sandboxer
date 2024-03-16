@@ -258,9 +258,7 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 	}
 
 	deleteFileItem = fyne.NewMenuItem("Delete File", deleteFileAction)
-	deleteFileItem.Disabled = tsk.RiskLevel != sandbox.RiskLevelHigh &&
-		tsk.RiskLevel != sandbox.RiskLevelMedium &&
-		tsk.RiskLevel != sandbox.RiskLevelLow
+	deleteFileItem.Disabled = !tsk.RiskLevel.IsThreat()
 	deleteFileItem.Icon = theme.DeleteIcon()
 
 	recheckAction := func() {
