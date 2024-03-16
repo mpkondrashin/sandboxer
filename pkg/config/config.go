@@ -25,8 +25,8 @@ type Configuration struct {
 	filePath          string
 	Version           string
 	SandboxType       SandboxType   `yaml:"sandbox_type"`
-	VisionOne         VisionOne     `yaml:"vision_one" gsetter:"-"`
-	DDAn              DDAn          `yaml:"analyzer" gsetter:"-"`
+	VisionOne         *VisionOne    `yaml:"vision_one" gsetter:"-"`
+	DDAn              *DDAn         `yaml:"analyzer" gsetter:"-"`
 	Folder            string        `yaml:"folder"`
 	Ignore            []string      `yaml:"ignore"`
 	Sleep             time.Duration `yaml:"sleep"`
@@ -47,7 +47,7 @@ func New(filePath string) *Configuration {
 		ShowPasswordHint:  true,
 		TasksKeepDays:     60,
 		Sleep:             5 * time.Second,
-		VisionOne:         VisionOne{},
+		VisionOne:         &VisionOne{},
 		DDAn:              NewDefaultDDAn(),
 		ShowNotifications: true,
 	}

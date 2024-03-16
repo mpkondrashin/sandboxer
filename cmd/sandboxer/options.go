@@ -42,8 +42,8 @@ type OptionsWindow struct {
 func NewOptionsWindow(conf *config.Configuration) *OptionsWindow {
 	return &OptionsWindow{
 		conf:         conf,
-		voneSettings: settings.NewVisionOne(&conf.VisionOne),
-		ddanSettings: settings.NewDDAnSettings(&conf.DDAn),
+		voneSettings: settings.NewVisionOne(conf.VisionOne),
+		ddanSettings: settings.NewDDAnSettings(conf.DDAn),
 	}
 }
 

@@ -35,7 +35,7 @@ func (p *PageVOToken) Next(previousPage PageIndex) PageIndex {
 }
 
 func (p *PageVOToken) Content() fyne.CanvasObject {
-	p.voneSettings = settings.NewVisionOne(&p.wiz.installer.config.VisionOne)
+	p.voneSettings = settings.NewVisionOne(p.wiz.installer.config.VisionOne)
 
 	//labelTop := widget.NewLabel("Open Vision One console to get all nessesary parameters")
 
@@ -57,5 +57,10 @@ func (p *PageVOToken) Run() {
 }
 
 func (p *PageVOToken) AquireData(installer *Installer) error {
-	return p.voneSettings.Aquire()
+	err := p.voneSettings.Aquire()
+	if err != nil {
+		return err
+	}
+	installer.config.VisionOne = p.voneSettings.Conf
+	return nil
 }

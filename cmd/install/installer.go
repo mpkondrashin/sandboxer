@@ -51,17 +51,6 @@ func NewInstaller(appID string) (*Installer, error) {
 	}, nil
 }
 
-type ModusOperandi int
-
-const (
-	//ModusOperandi
-	moError ModusOperandi = iota
-	moInstall
-	moDowngrade
-	moReinstall
-	moUpgrade
-)
-
 /*
 	func (i *Installer) __LoadConfig() (ModusOperandi, error) {
 		err := i.config.Load()
@@ -170,7 +159,7 @@ type UninstallStage interface {
 func (i *Installer) UninstallStages() (stages []UninstallStage) {
 	stages = []UninstallStage{
 		NewUninstallStageStopProcess(),
-		NewUninstallStageUnregister(&i.config.DDAn),
+		NewUninstallStageUnregister(i.config.DDAn),
 		NewUninstallStageDelete("Program", i.InstallFolder()),
 	}
 	configFolder, err := i.ConfigFileFolder()

@@ -33,7 +33,7 @@ func (p *PageDDAnSettings) Next(previousPage PageIndex) PageIndex {
 }
 
 func (p *PageDDAnSettings) Content() fyne.CanvasObject {
-	p.ddanSettings = settings.NewDDAnSettings(&p.wiz.installer.config.DDAn)
+	p.ddanSettings = settings.NewDDAnSettings(p.wiz.installer.config.DDAn)
 
 	labelTop := widget.NewLabel("Please provide your Deep Discovery Analyzer parameters")
 

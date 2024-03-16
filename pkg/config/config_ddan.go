@@ -26,12 +26,12 @@ type DDAn struct {
 	ClientUUID      string       `yaml:"-"`
 }
 
-func NewDefaultDDAn() DDAn {
+func NewDefaultDDAn() *DDAn {
 	hostname, err := os.Hostname()
 	if err != nil {
 		hostname = err.Error()
 	}
-	return DDAn{
+	return &DDAn{
 		ProtocolVersion: "1.8",
 		UserAgent:       globals.Name + "/" + globals.Version,
 		ProductName:     globals.AppName,
