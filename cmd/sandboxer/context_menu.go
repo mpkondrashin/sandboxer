@@ -19,7 +19,6 @@ type contextMenuIcon struct {
 }
 
 func (b *contextMenuIcon) Tapped(e *fyne.PointEvent) {
-	//logging.Debugf("%v contextMenuIcon Tapped(%v)", b, e)
 	widget.ShowPopUpMenuAtPosition(b.Menu, fyne.CurrentApp().Driver().CanvasForObject(b), e.AbsolutePosition)
 }
 

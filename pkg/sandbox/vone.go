@@ -43,7 +43,7 @@ func (s *VOneSandbox) SubmitURL(url string) (string, error) {
 func (s *VOneSandbox) SubmitFile(filePath string) (string, error) {
 	f, err := s.vOne.SandboxSubmitFile().SetFilePath(filePath)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Vision One ", err)
 	}
 	response, _, err := f.Do(context.TODO())
 	if err != nil {

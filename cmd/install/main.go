@@ -23,10 +23,6 @@ import (
 
 const installWizardLog = globals.Name + "_setup_wizard.log"
 
-// TODO:
-// show fatal.Warning in case of error
-// change 10 to globals constant
-
 func SetupLogging(logFileName string) (func(), error) {
 	logging.SetLevel(logging.DEBUG)
 	path, err := os.Executable()
@@ -53,7 +49,7 @@ func main() {
 		msg := fmt.Sprintf("NewFileLog: %v", err)
 		fmt.Fprintln(os.Stderr, msg)
 		fatal.Warning("SetupLogging Error", msg)
-		os.Exit(10)
+		os.Exit(globals.ExitSetupLogging)
 	}
 	defer func() {
 		logging.Debugf("Close log file")
