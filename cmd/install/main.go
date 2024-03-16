@@ -17,6 +17,7 @@ import (
 	"sandboxer/pkg/fatal"
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
+	"sandboxer/pkg/xplatform"
 
 	"github.com/virtuald/go-paniclog"
 )
@@ -30,6 +31,11 @@ func SetupLogging(logFileName string) (func(), error) {
 		return nil, err
 	}
 	logFolder := filepath.Dir(path)
+	if !xplatform.IsWindows() {
+		logFolder = filepath.Dir(logFolder)
+		logFolder = filepath.Dir(logFolder)
+		logFolder = filepath.Dir(logFolder)
+	}
 	logging.SetLevel(logging.DEBUG)
 	file, err := logging.OpenRotated(logFolder, logFileName, 0644, globals.MaxLogFileSize, globals.LogsKeep)
 	if err != nil {

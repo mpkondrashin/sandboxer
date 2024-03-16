@@ -11,7 +11,6 @@ package main
 import (
 	"bytes"
 	"embed"
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -24,20 +23,17 @@ import (
 	"sandboxer/pkg/fifo"
 	"sandboxer/pkg/globals"
 	"sandboxer/pkg/logging"
-	"sandboxer/pkg/script"
 	"sandboxer/pkg/xplatform"
-
-	"golang.org/x/mod/semver"
 )
 
 //go:embed embed/*.tar.gz
 var embedFS embed.FS
 
 type Installer struct {
-	appID           string
-	config          *config.Configuration
-	autostart       bool
-	uninstallScript *script.Script
+	appID     string
+	config    *config.Configuration
+	autostart bool
+	// uninstallScript *script.Script
 }
 
 func NewInstaller(appID string) (*Installer, error) {
@@ -66,26 +62,26 @@ const (
 	moUpgrade
 )
 
-func (i *Installer) __LoadConfig() (ModusOperandi, error) {
-	err := i.config.Load()
-	if err != nil {
-		if os.IsNotExist(err) {
-			return moInstall, nil
+/*
+	func (i *Installer) __LoadConfig() (ModusOperandi, error) {
+		err := i.config.Load()
+		if err != nil {
+			if os.IsNotExist(err) {
+				return moInstall, nil
+			}
+			return moError, err
 		}
-		//if errors.Is(err, &yaml.TypeError{}) {	}
-		return moError, err
+		switch semver.Compare(globals.Version, i.config.GetVersion()) {
+		case -1:
+			return moDowngrade, nil
+		case 0:
+			return moReinstall, nil
+		case 1:
+			return moUpgrade, nil
+		}
+		return moError, errors.New("version error")
 	}
-	switch semver.Compare(globals.Version, i.config.GetVersion()) {
-	case -1:
-		return moDowngrade, nil
-	case 0:
-		return moReinstall, nil
-	case 1:
-		return moUpgrade, nil
-	}
-	return moError, errors.New("version error")
-}
-
+*/
 func (i *Installer) SaveConfig() error {
 	logging.Debugf("Save config")
 	folder, err := i.ConfigFileFolder()
@@ -95,7 +91,6 @@ func (i *Installer) SaveConfig() error {
 	if err := os.MkdirAll(folder, 0700); err != nil {
 		return err
 	}
-	//filePath := filepath.Join(folder, globals.ConfigFileName)
 	if err := i.config.Save(); err != nil {
 		return err
 	}
@@ -141,17 +136,16 @@ type InstallStage struct {
 
 func (i *Installer) Stages() []InstallStage {
 	return []InstallStage{
-		{"Uninstall script", i.StageCreateUninstallScript},
+		//{"Uninstall script", i.StageCreateUninstallScript},
 		{"Create folders", i.StageCreateFolders},
 		{"Generate config", i.StageCreateConfig},
 		{"Stop " + globals.AppName, i.StageStopProgram},
 		{"Wait for service to stop", i.StageWaitServiceToStop},
-		//{"Uninstall service", i.StageUninstallService},
 		{"Extract executables", i.StageExtractFiles},
 		{"Extend Send To menu", i.StageExtendSendTo},
 		{"Add to Start menu", i.StageAddToStartMenu},
 		{"Install service", i.StageAutoStart},
-		{"Stop Running " + globals.AppName, i.StageUninstall},
+		//{"Stop Running " + globals.AppName, i.StageUninstall},
 	}
 }
 
@@ -201,39 +195,9 @@ func (i *Installer) UninstallStages() (stages []UninstallStage) {
 	return
 }
 
-/*
-	func (i *Installer) UnregisterAnalyzer() error {
-		logging.Infof("Unregister from Analyzer")
-		analyzer, err := i.config.DDAn.Analyzer()
-		if err != nil {
-			return err
-		}
-		if err := analyzer.Unregister(context.TODO()); err != nil {
-			return err
-		}
-		return nil
-	}
-*/
-/*
-func (i *Installer) Uninstall(callback func(name string) error) error {
-	message := ""
-	for _, stage := range i.UninstallStages() {
-		logging.Debugf("Uninstall Stage %s", stage.Name())
-		if err := callback(stage.Name()); err != nil {
-			return err
-		}
-		if err := stage.Execute(); err != nil {
-			message += err.Error() + "\n"
-		}
-	}
-	if message != "" {
-		return fmt.Errorf("%s", message)
-	}
-	return nil
-}*/
+//const uninstallScriptName = "uninstall"
 
-const uninstallScriptName = "uninstall"
-
+/*
 func (i *Installer) StageCreateUninstallScript() error {
 	logging.Debugf("Install: StageCreateUninstallScript")
 	scriptName := uninstallScriptName + script.Get().Extension()
@@ -246,7 +210,7 @@ func (i *Installer) StageCreateUninstallScript() error {
 	logging.Debugf("Install: uninstall script path: %s", uninstallScriptPath)
 	i.uninstallScript = script.New(uninstallScriptPath, script.Get().Comment("Uninstallation script"))
 	return nil
-}
+}*/
 
 func (i *Installer) StageCreateFolders() error {
 	logging.Debugf("Install: StageCreateFolders")
@@ -270,10 +234,10 @@ func (i *Installer) StageCreateFolders() error {
 		if err := os.MkdirAll(f, 0755); err != nil {
 			return err
 		}
-		err := i.uninstallScript.AddLine(script.Get().RemoveDir(f))
+		/*err := i.uninstallScript.AddLine(script.Get().RemoveDir(f))
 		if err != nil {
 			return err
-		}
+		}*/
 	}
 	return nil
 }
@@ -288,13 +252,11 @@ func (i *Installer) StageCreateConfig() error {
 	if err := os.MkdirAll(folder, 0500); err != nil {
 		return fmt.Errorf("os.MkdirAll: %w", err)
 	}
-	i.uninstallScript.AddLine(script.Get().RemoveDir(folder))
-	//filePath := filepath.Join(folder, globals.ConfigFileName)
-	//logging.Debugf("Install: CreateConfig: Save to %s", filePath)
-	if err := i.config.Save(); err != nil {
+	//i.uninstallScript.AddLine(script.Get().RemoveDir(folder))
+	return i.config.Save() /*; err != nil {
 		return err
 	}
-	return i.uninstallScript.AddLine(script.Get().RemoveDir(i.config.GetFilePath()))
+	return i.uninstallScript.AddLine(script.Get().RemoveDir(i.config.GetFilePath()))*/
 }
 
 func (i *Installer) StageStopProgram() error {
@@ -326,12 +288,9 @@ func (i *Installer) StageExtractFiles() error {
 	if err := extract.Untar(embedFS, targetPath, path); err != nil {
 		return err
 	}
-	//	if !xplatform.IsWindows() {
-	//		targetPath = filepath.Join(i.InstallFolder(), globals.AppName+".app")
-	//	}
-	if err := i.uninstallScript.AddLine(script.Get().RemoveDir(targetPath)); err != nil {
-		return err
-	}
+	//if err := i.uninstallScript.AddLine(script.Get().RemoveDir(targetPath)); err != nil {
+	//	return err
+	//}
 	logging.Debugf("Extracted: %s", targetPath)
 	return nil
 }
@@ -343,11 +302,12 @@ func (i *Installer) StageExtractPericulosum() error {
 
 func (i *Installer) StageExtendSendTo() error {
 	logging.Debugf("Install: ExtendSendTo")
-	path, err := i.ExtendSendTo(false)
+	_, err := i.ExtendSendTo(false)
 	if err != nil {
 		return err
 	}
-	return i.uninstallScript.AddLine(script.Get().RemoveDir(path))
+	return err
+	//return i.uninstallScript.AddLine(script.Get().RemoveDir(path))
 }
 
 func (i *Installer) ExtendSendTo(dryRun bool) (string, error) {
@@ -375,10 +335,11 @@ func (i *Installer) StageAddToStartMenu() error {
 		logging.Infof("AddToStartMenu. This is not Windows. Skip")
 		return nil
 	}
-	path, err := i.AddToStartMenu(false)
-	if err != nil {
-		return err
-	}
+	_, err := i.AddToStartMenu(false)
+	return err
+	//if err != nil {
+	//	return err
+	//}
 	/*
 		appPath := filepath.Join(i.InstallFolder(), xplatform.ExecutableName(globals.Name))
 		_, err := xplatform.LinkToStartMenu(false, globals.AppName, globals.AppName, appPath, false)
@@ -390,11 +351,12 @@ func (i *Installer) StageAddToStartMenu() error {
 		if err != nil {
 			return err
 		}*/
-	if err := i.uninstallScript.AddLine(script.Get().RemoveDir(path)); err != nil {
-		return err
-	}
-	return nil
+	//if err := i.uninstallScript.AddLine(script.Get().RemoveDir(path)); err != nil {
+	//	return err
+	//}
+	//return nil
 }
+
 func (i *Installer) AddToStartMenu(dryRun bool) (string, error) {
 	appPath := filepath.Join(i.InstallFolder(), xplatform.ExecutableName(globals.Name))
 	path, err := xplatform.LinkToStartMenu(dryRun, globals.AppName, globals.AppName, appPath, false)
@@ -404,11 +366,11 @@ func (i *Installer) AddToStartMenu(dryRun bool) (string, error) {
 	if dryRun {
 		return filepath.Dir(path), nil
 	}
-	scriptPath := i.Path(uninstallScriptName + script.Get().Extension())
-	_, err = xplatform.LinkToStartMenu(false, globals.AppName, "Uninstall", scriptPath, true)
-	if err != nil {
-		return "", err
-	}
+	//scriptPath := i.Path(uninstallScriptName + script.Get().Extension())
+	//_, err = xplatform.LinkToStartMenu(false, globals.AppName, "Uninstall", scriptPath, true)
+	//if err != nil {
+	//		return "", err
+	//	}
 	return filepath.Dir(path), nil
 }
 
@@ -418,11 +380,12 @@ func (i *Installer) StageAutoStart() error {
 		logging.Debugf("Install: StageAutostart: Skip")
 		return nil
 	}
-	path, err := i.AutoStart(false)
+	_, err := i.AutoStart(false)
 	if err != nil {
 		return fmt.Errorf("AutoStart: %w", err)
 	}
-	return i.uninstallScript.AddLine(script.Get().RemoveDir(path))
+	return nil
+	//return i.uninstallScript.AddLine(script.Get().RemoveDir(path))
 }
 
 func (i *Installer) AutoStart(dryRun bool) (string, error) {
@@ -437,35 +400,35 @@ func (i *Installer) AutoStart(dryRun bool) (string, error) {
 	return path, err
 }
 
-func (i *Installer) StageUninstall() error {
-	logging.Debugf("Install: Uninstall")
-	pidPath, err := globals.PidFilePath()
-	if err != nil {
-		return err
-	}
-	err = i.uninstallScript.AddLine(script.Get().RemoveDir(pidPath))
-	if err != nil {
-		return err
-	}
-	if err := i.uninstallScript.AddLine(script.Get().StopProcess(pidPath)); err != nil {
-		return err
-	}
-	/*scriptName := uninstallScriptName + script.Get().Extension()
-	var scriptPath string
-	if xplatform.IsWindows() {
-		scriptPath = i.Path(scriptName)
-	} else {
-		scriptPath, err = xplatform.ExecutablePath(xplatform.InstallFolder(), globals.AppName, scriptName)
-		if err != nil {
-			return err
-		}
-	}
-	/*if err := os.Rename(i.uninstallScript.FilePath, scriptPath); err != nil {
-		return err
-	}*/
-	// remove folder
-	return nil
+/*func (i *Installer) StageUninstall() error {
+logging.Debugf("Install: Uninstall")
+pidPath, err := globals.PidFilePath()
+if err != nil {
+	return err
 }
+err = i.uninstallScript.AddLine(script.Get().RemoveDir(pidPath))
+if err != nil {
+	return err
+}
+if err := i.uninstallScript.AddLine(script.Get().StopProcess(pidPath)); err != nil {
+	return err
+}*/
+/*scriptName := uninstallScriptName + script.Get().Extension()
+var scriptPath string
+if xplatform.IsWindows() {
+	scriptPath = i.Path(scriptName)
+} else {
+	scriptPath, err = xplatform.ExecutablePath(xplatform.InstallFolder(), globals.AppName, scriptName)
+	if err != nil {
+		return err
+	}
+}
+/*if err := os.Rename(i.uninstallScript.FilePath, scriptPath); err != nil {
+	return err
+}*/
+// remove folder
+//return nil
+//}
 
 /*
 	func (m *Model) ConfigExists() (bool, error) {
