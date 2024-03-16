@@ -68,11 +68,7 @@ func (s *DDAn) Widget() fyne.CanvasObject {
 	ignoreTLSFormItem := widget.NewFormItem("TLS Errors: ", s.ddanIgnoreTLSCheck)
 
 	s.ddanTest = canvas.NewText("", color.Black)
-	//s.ddanTest = widget.NewLabel("")
-	//s.ddanTest.Truncation = fyne.TextTruncateEllipsis
 
-	//stateText := canvas.NewText(tsk.GetChannel(), tsk.RiskLevel.Color())
-	//stateText.TextStyle = fyne.TextStyle{Bold: tsk.Active}
 	ddanForm := widget.NewForm(urlFormItem, apiKeyFormItem, ignoreTLSFormItem)
 	return container.NewVBox(ddanForm, container.NewHScroll(s.ddanTest))
 }
@@ -80,18 +76,6 @@ func (s *DDAn) Widget() fyne.CanvasObject {
 func (s *DDAn) Update() {
 	s.TestAnalyzer()
 }
-
-/*
-const MaxLength = 64
-
-	func LimitLength(s string) string {
-		logging.Errorf("DDAn Connection: %s", s)
-		if len(s) < MaxLength {
-			return "Error: " + s
-		}
-		return "Error: ..." + s[len(s)-MaxLength+7:]
-	}
-*/
 
 func (s *DDAn) SetMessageError(message string) {
 	s.ddanTest.Text = "Error: " + message
@@ -119,6 +103,11 @@ func (s *DDAn) TestAnalyzer() {
 			}
 			s.cancelTestDDAn = nil
 		}()
+		if s.ddanURLEntry.Text == "" || s.ddanAPIKeyEntry.Text == "" {
+			s.SetMessageOk("")
+			return
+		}
+
 		s.SetMessageOk("Checking connection...")
 
 		u, err := url.Parse(s.GetDDAnURL())
