@@ -107,7 +107,6 @@ func (s *DDAn) TestAnalyzer() {
 			s.SetMessageOk("")
 			return
 		}
-
 		s.SetMessageOk("Checking connection...")
 
 		u, err := url.Parse(s.GetDDAnURL())
