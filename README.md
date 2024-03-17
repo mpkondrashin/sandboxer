@@ -70,7 +70,8 @@ On Windows if notifications are disabled not by Sandboxer Options window, but us
 For now proxy is not supported to connect to Vision One and/or Deep Discovery Analyzer
 
 ### Unregistration
-If  unregistration is not performed from Options dialog and during uninstallation Deep Discovery Analyzer connection was not available, then Sandboxer will be kept on the submitters list and the only option will be to remove it using Web UI. Sandboxer after installing it once more, will register one more submitter.
+If  unregistration is not performed from Options dialog and/or during uninstallation Deep Discovery Analyzer connection was not available, then Sandboxer will be kept on the submitters list and the only option will be to remove it using Web UI. After installing Sandboxer once more, it will just register one more submitter.
 
+#### Boxer picture
 Icon is taken from <a href="https://www.flaticon.com/free-icons/dog" title="dog icons">Dog icons created by Freepik - Flaticon</a>
 
