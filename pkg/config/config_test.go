@@ -8,7 +8,11 @@ Small test
 */
 package config
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"testing"
+)
 
 func TestSave(t *testing.T) {
 	c := New("testing_config.yaml")
@@ -21,6 +25,83 @@ func TestSave(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+var configTest = `
+sandbox_type: VisionOne
+vision_one:
+    token: "abc"
+    aws_region: "www.com"
+analyzer:
+    url: ""
+    protocol_version: "1.7"
+    user_agent: sandboxer/v0.1.5
+    product_name: Sandboxer
+    hostname: Mikhails-MacBook-Pro.local
+    temp_folder: /var/folders/6d/2m86w1vx7hqf411p_05rpq7m0000gn/T/
+    source_id: "303"
+    source_name: sandboxer
+    api_key: ""
+    ignore_tls_errors: false
+    client_id: ""
+proxy:
+    type: NTLM
+    url: "http://1.1.1.1:8080"
+    username: "mike"
+    password: "test1234"
+    domain: "test.local"
+    keepalive: 30s
+folder: /Applications
+ignore:
+    - .DS_Store
+    - Thumbs.db
+sleep: 5s
+periculosum: check
+show_password_hint: true
+`
+
+func TestLoad(t *testing.T) {
+	fileName := "config_test_data.yaml"
+	folderName := "testing_load_config"
+	if err := os.MkdirAll(folderName, 0755); err != nil {
+		t.Fatal(err)
+	}
+	filePath := filepath.Join(folderName, fileName)
+	if err := os.WriteFile(filePath, []byte(configTest), 0644); err != nil {
+		t.Fatal(err)
+	}
+	c := New(filePath)
+	if c.Proxy != c.VisionOne.Proxy {
+		t.Fatalf("Proxy is %p, but VisionOne.Proxy is %p", c.Proxy, c.VisionOne.Proxy)
+	}
+	if c.Proxy != c.DDAn.Proxy {
+		t.Fatalf("Proxy is %p, but DDAn.Proxy is %p", c.Proxy, c.DDAn.Proxy)
+	}
+	if err := c.Load(); err != nil {
+		t.Fatal(err)
+	}
+	t.Run("v1 token", func(t *testing.T) {
+		actual := c.VisionOne.Token
+		expected := "abc"
+		if actual != expected {
+			t.Errorf("Expected %v, but got %v", expected, actual)
+		}
+	})
+	t.Run("proxy type", func(t *testing.T) {
+		actual := c.Proxy.Type
+		expected := AuthTypeNTLM
+		if actual != expected {
+			t.Errorf("Expected %v, but got %v", expected, actual)
+		}
+	})
+	t.Run("v1 proxy type", func(t *testing.T) {
+		actual := c.VisionOne.Proxy.Type
+		expected := AuthTypeNTLM
+		if actual != expected {
+			t.Errorf("Expected %v, but got %v", expected, actual)
+		}
+	})
+
 }
 
 /*

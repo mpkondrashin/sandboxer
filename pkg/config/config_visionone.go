@@ -11,6 +11,7 @@ type VisionOne struct {
 	mx     sync.RWMutex `gsetter:"-"`
 	Token  string       `yaml:"token"`
 	Domain string       `yaml:"domain"`
+	Proxy  *Proxy       `yaml:"-"`
 }
 
 func NewVisionOne(domain, token string) *VisionOne {
@@ -31,5 +32,14 @@ func (s *VisionOne) VisionOneSandbox() (*vone.VOne, error) {
 	if domain == "" {
 		return nil, errors.New("domain is not set")
 	}
-	return vone.NewVOne(domain, token), nil
+	v := vone.NewVOne(domain, token)
+	if s.Proxy == nil {
+		return v, nil
+	}
+	modifier, err := s.Proxy.Modifier()
+	if err != nil {
+		return nil, err
+	}
+	v.AddTransportModifier(modifier)
+	return v, nil
 }

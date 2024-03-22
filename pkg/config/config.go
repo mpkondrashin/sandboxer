@@ -27,6 +27,7 @@ type Configuration struct {
 	SandboxType       SandboxType   `yaml:"sandbox_type"`
 	VisionOne         *VisionOne    `yaml:"vision_one" gsetter:"-"`
 	DDAn              *DDAn         `yaml:"analyzer" gsetter:"-"`
+	Proxy             *Proxy        `yaml:"proxy"`
 	Folder            string        `yaml:"folder"`
 	Ignore            []string      `yaml:"ignore"`
 	Sleep             time.Duration `yaml:"sleep"`
@@ -37,6 +38,7 @@ type Configuration struct {
 }
 
 func New(filePath string) *Configuration {
+	proxy := new(Proxy)
 	return &Configuration{
 		filePath:          filePath,
 		Version:           "",
@@ -47,8 +49,9 @@ func New(filePath string) *Configuration {
 		ShowPasswordHint:  true,
 		TasksKeepDays:     60,
 		Sleep:             5 * time.Second,
-		VisionOne:         &VisionOne{},
-		DDAn:              NewDefaultDDAn(),
+		VisionOne:         &VisionOne{Proxy: proxy},
+		DDAn:              NewDefaultDDAn(proxy),
+		Proxy:             proxy,
 		ShowNotifications: true,
 	}
 }

@@ -1,29 +1,52 @@
 package main
 
-import (
-	"time"
+import "fmt"
 
-	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/widget"
-)
+type Struct struct {
+	s string
+}
 
-func updateTime(clock *widget.Label) {
-	formatted := time.Now().Format("Time: 03:04:05")
-	clock.SetText(formatted)
+type modifier func(*Struct)
+
+type X struct {
+	m modifier
+}
+
+func (x *X) AddModifier(m modifier) {
+	if x.m == nil {
+		x.m = m
+		return
+	}
+	original := x.m
+	x.m = func(s *Struct) {
+		original(s)
+		m(s)
+	}
+}
+
+func (x *X) Run() {
+	s := &Struct{
+		s: "ABC",
+	}
+	if x.m != nil {
+		x.m(s)
+	}
+	fmt.Println(s)
 }
 
 func main() {
-	a := app.New()
-	w := a.NewWindow("Clock")
+	x := &X{}
+	fmt.Println("1")
+	x.Run()
 
-	clock := widget.NewLabel("")
-	updateTime(clock)
+	x.AddModifier(func(s *Struct) {
+		s.s += "A"
+	})
+	fmt.Println("2")
+	x.Run()
 
-	w.SetContent(clock)
-	go func() {
-		for range time.Tick(time.Second) {
-			updateTime(clock)
-		}
-	}()
-	w.ShowAndRun()
+	x.AddModifier(func(s *Struct) {
+		s.s += "B"
+	})
+	x.Run()
 }

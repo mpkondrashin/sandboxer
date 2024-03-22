@@ -24,9 +24,10 @@ type DDAn struct {
 	APIKey          string       `yaml:"api_key"`
 	IgnoreTLSErrors bool         `yaml:"ignore_tls_errors"`
 	ClientUUID      string       `yaml:"-"`
+	Proxy           *Proxy       `yaml:"-"`
 }
 
-func NewDefaultDDAn() *DDAn {
+func NewDefaultDDAn(proxy *Proxy) *DDAn {
 	hostname, err := os.Hostname()
 	if err != nil {
 		hostname = err.Error()
@@ -39,9 +40,8 @@ func NewDefaultDDAn() *DDAn {
 		TempFolder:      os.TempDir(),
 		SourceID:        "303",
 		SourceName:      globals.Name,
-		//		APIKey          string `yaml:"api_key"`
 		IgnoreTLSErrors: false,
-		//ClientUUID      string `yaml:"client_uuid"`
+		Proxy:           proxy,
 	}
 }
 
@@ -63,6 +63,16 @@ func (d *DDAn) Analyzer() (*ddan.Client, error) {
 	analyzer.SetSource(d.SourceID, d.SourceName)
 	analyzer.SetUUID(d.ClientUUID)
 	analyzer.SetProtocolVersion(d.ProtocolVersion)
+
+	if d.Proxy == nil {
+		return analyzer, nil
+	}
+	modifier, err := d.Proxy.Modifier()
+	if err != nil {
+		return nil, err
+	}
+	analyzer.ModifyTransport(modifier)
+
 	return analyzer, nil
 }
 

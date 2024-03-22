@@ -8,9 +8,11 @@ require (
 	github.com/go-ole/go-ole v1.3.0
 	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4
 	github.com/google/uuid v1.6.0
-	github.com/mpkondrashin/ddan v0.0.84
+	github.com/launchdarkly/go-ntlm-proxy-auth v1.0.1
+	github.com/lutzky/go-bidi v0.0.0-20200803103754-215e47c2f5df
+	github.com/mpkondrashin/ddan v0.0.87
 	github.com/mpkondrashin/fileicon v0.0.7
-	github.com/mpkondrashin/vone v0.0.22
+	github.com/mpkondrashin/vone v0.0.27
 	github.com/virtuald/go-paniclog v0.0.0-20190812204905-43a7fa316459
 	golang.org/x/mod v0.15.0
 	golang.org/x/text v0.14.0
@@ -33,7 +35,7 @@ require (
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/jsummers/gobmp v0.0.0-20151104160322-e2ba15ffa76e // indirect
-	github.com/lutzky/go-bidi v0.0.0-20200803103754-215e47c2f5df // indirect
+	github.com/launchdarkly/go-ntlmssp v1.0.1 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -42,9 +44,10 @@ require (
 	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/tevino/abool v1.2.0 // indirect
 	github.com/yuin/goldmark v1.5.5 // indirect
+	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/image v0.11.0 // indirect
 	golang.org/x/mobile v0.0.0-20230531173138-3c911d8e3eda // indirect
-	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	honnef.co/go/js/dom v0.0.0-20210725211120-f030747120f2 // indirect
 )
