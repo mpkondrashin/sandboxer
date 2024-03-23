@@ -81,6 +81,7 @@ const (
 	pgDowngrade
 	pgReinstall
 	pgUpgrade
+	pgProxy
 	pgVOSettings
 	pgDDSettings
 	pgAutostart
@@ -137,6 +138,7 @@ func (w *Wizard) Pages() PageIndex {
 	w.pages[pgDowngrade] = &PageDowngrade{BasePage: NewBasePage(w)}
 	w.pages[pgReinstall] = &PageReinstall{BasePage: NewBasePage(w)}
 	w.pages[pgUpgrade] = &PageUpgrade{BasePage: NewBasePage(w)}
+	w.pages[pgProxy] = &PageProxy{BasePage: NewBasePage(w)}
 	w.pages[pgVOSettings] = &PageVOToken{BasePage: NewBasePage(w)}
 	w.pages[pgDDSettings] = &PageDDAnSettings{BasePage: NewBasePage(w)}
 	w.pages[pgAutostart] = &PageAutostart{BasePage: NewBasePage(w)}

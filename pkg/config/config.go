@@ -27,7 +27,7 @@ type Configuration struct {
 	SandboxType       SandboxType   `yaml:"sandbox_type"`
 	VisionOne         *VisionOne    `yaml:"vision_one" gsetter:"-"`
 	DDAn              *DDAn         `yaml:"analyzer" gsetter:"-"`
-	Proxy             *Proxy        `yaml:"proxy"`
+	Proxy             *Proxy        `yaml:"proxy" gsetter:"-"`
 	Folder            string        `yaml:"folder"`
 	Ignore            []string      `yaml:"ignore"`
 	Sleep             time.Duration `yaml:"sleep"`

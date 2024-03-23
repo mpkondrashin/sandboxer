@@ -136,4 +136,7 @@ func main() {
 	if err := Generate(config.VisionOne{}, "../../pkg/config"); err != nil {
 		panic(err)
 	}
+	if err := Generate(config.Proxy{}, "../../pkg/config"); err != nil {
+		panic(err)
+	}
 }

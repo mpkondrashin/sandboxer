@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/launchdarkly/go-ntlm-proxy-auth"
@@ -34,7 +35,7 @@ const (
 	AuthTypeNTLM
 )
 
-var AuthTypeString = [...]string{
+var AuthTypeString = []string{
 	"None",
 	"Basic",
 	"NTLM",
@@ -46,11 +47,21 @@ func (r AuthType) String() string {
 
 var (
 	ErrUnknownAuthType   = errors.New("unknown auth type")
+	ErrMissingScheme     = errors.New("missing proxy scheme")
 	ErrMissingURL        = errors.New("missing proxy username")
 	ErrMissingUsername   = errors.New("missing proxy username")
 	ErrMissingPassword   = errors.New("missing proxy password")
 	ErrMissingNTLMDomain = errors.New("missing NTLM domain")
 )
+
+func AuthTypeFromString(s string) (AuthType, error) {
+	for i, t := range AuthTypeString {
+		if strings.EqualFold(t, s) {
+			return AuthType(i), nil
+		}
+	}
+	return 0, fmt.Errorf("%w: %s", ErrUnknownAuthType, s)
+}
 
 // UnmarshalJSON implements the Unmarshaler interface of the json package for AuthType.
 func (a *AuthType) UnmarshalJSON(data []byte) error {
@@ -58,13 +69,12 @@ func (a *AuthType) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &v); err != nil {
 		return err
 	}
-	for i, s := range AuthTypeString {
-		if strings.EqualFold(s, v) {
-			*a = AuthType(i)
-			return nil
-		}
+	authType, err := AuthTypeFromString(v)
+	if err != nil {
+		return err
 	}
-	return fmt.Errorf("%w: %s", ErrUnknownAuthType, v)
+	*a = authType
+	return nil
 }
 
 // MarshalJSON implements the Marshaler interface of the json package for AuthType.
@@ -77,30 +87,34 @@ func (a AuthType) MarshalJSON() ([]byte, error) {
 
 // MarshalYAML implements the Marshaler interface of the yaml.v3 package for AuthType.
 func (s AuthType) MarshalYAML() (interface{}, error) {
-	return fmt.Sprintf("\"%v\"", s), nil
+	return s.String(), nil
 }
 
 // UnmarshalYAML implements the Unmarshaler interface of the yaml.v3 package for AuthType.
-func (s *AuthType) UnmarshalYAML(value *yaml.Node) error {
+func (a *AuthType) UnmarshalYAML(value *yaml.Node) error {
 	var v string
 	err := value.Decode(&v)
 	if err != nil {
 		return err
 	}
-	for i, t := range AuthTypeString {
-		if strings.EqualFold(t, v) {
-			*s = AuthType(i)
-			return nil
-		}
+	authType, err := AuthTypeFromString(v)
+	if err != nil {
+		return err
 	}
-	return fmt.Errorf("%w: %s", ErrUnknownSandboxType, v)
+	*a = authType
+	return nil
 }
 
 type YAMLURL struct {
 	*url.URL
 }
 
-func (j *YAMLURL) UnmarshalYAML(value *yaml.Node) error {
+// MarshalYAML implements the Marshaler interface of the yaml.v3 package for YAMLURL.
+func (u YAMLURL) MarshalYAML() (interface{}, error) {
+	return u.URL.String(), nil
+}
+
+func (y *YAMLURL) UnmarshalYAML(value *yaml.Node) error {
 	var v string
 	err := value.Decode(&v)
 	if err != nil {
@@ -110,11 +124,13 @@ func (j *YAMLURL) UnmarshalYAML(value *yaml.Node) error {
 	if err != nil {
 		return err
 	}
-	j.URL = url
+	y.URL = url
 	return nil
 }
 
 type Proxy struct {
+	mx        sync.RWMutex `gsetter:"-"`
+	Active    bool
 	Type      AuthType
 	URL       YAMLURL
 	Username  string
@@ -126,9 +142,25 @@ type Proxy struct {
 
 func NewProxy(URL *url.URL) *Proxy {
 	return &Proxy{
-		Type: AuthTypeNone,
-		URL:  YAMLURL{URL},
+		Active:    false,
+		Type:      AuthTypeNone,
+		URL:       YAMLURL{URL},
+		Timeout:   30 * time.Second,
+		KeepAlive: 30 * time.Second,
 	}
+}
+
+func (p *Proxy) Update(newProxy *Proxy) {
+	p.mx.Lock()
+	defer p.mx.Unlock()
+	newProxy.mx.RLock()
+	defer newProxy.mx.RUnlock()
+	p.Active = newProxy.Active
+	p.URL = newProxy.URL
+	p.Type = newProxy.Type
+	p.Username = newProxy.Username
+	p.Password = newProxy.Password
+	p.Domain = newProxy.Domain
 }
 
 func (p *Proxy) BasicAuth(Username string, Password string) *Proxy {
@@ -147,7 +179,13 @@ func (p *Proxy) NTLMAuth(Username string, Password string, Domain string) *Proxy
 }
 
 func (p *Proxy) Modifier() (func(*http.Transport), error) {
-	if p.URL.URL == nil {
+	if !p.Active {
+		return NullTransportModifier, nil
+	}
+	if p.URL.URL.Scheme == "" {
+		return nil, ErrMissingScheme
+	}
+	if p.URL.URL.Host == "" {
 		return nil, ErrMissingURL
 	}
 	if p.Type == AuthTypeNone {
@@ -171,7 +209,9 @@ func (p *Proxy) Modifier() (func(*http.Transport), error) {
 	return nil, ErrUnknownAuthType
 }
 
+/*
 func (p *Proxy) ChangeTransport(t *http.Transport) {
+
 	switch p.Type {
 	default:
 		fallthrough
@@ -182,7 +222,7 @@ func (p *Proxy) ChangeTransport(t *http.Transport) {
 	case AuthTypeNTLM:
 		p.TransportNTLM(t)
 	}
-}
+}*/
 
 func (p *Proxy) TransportNoAuth(t *http.Transport) {
 	t.Proxy = http.ProxyURL(p.URL.URL)
@@ -205,10 +245,11 @@ func (p *Proxy) TransportBasic(t *http.Transport) {
 	t.Proxy = http.ProxyURL(&u)
 }
 
-/*
-func DummyTransportModifier(*http.Transport) TransportModifier {
-	return DummyTransportModifier
+func NullTransportModifier(*http.Transport) {
 }
+
+/*
+
 
 func (p *Proxy) ConfigureProxy() (TransportModifier, error) {
 	if p.URL.URL == nil {

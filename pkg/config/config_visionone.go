@@ -11,7 +11,7 @@ type VisionOne struct {
 	mx     sync.RWMutex `gsetter:"-"`
 	Token  string       `yaml:"token"`
 	Domain string       `yaml:"domain"`
-	Proxy  *Proxy       `yaml:"-"`
+	Proxy  *Proxy       `yaml:"-" gsetter:"-"`
 }
 
 func NewVisionOne(domain, token string) *VisionOne {
@@ -19,6 +19,15 @@ func NewVisionOne(domain, token string) *VisionOne {
 		Domain: domain,
 		Token:  token,
 	}
+}
+
+func (v *VisionOne) Update(newVOne *VisionOne) {
+	v.mx.Lock()
+	defer v.mx.Unlock()
+	newVOne.mx.RLock()
+	defer newVOne.mx.RUnlock()
+	v.Token = newVOne.Token
+	v.Domain = newVOne.Domain
 }
 
 func (s *VisionOne) VisionOneSandbox() (*vone.VOne, error) {

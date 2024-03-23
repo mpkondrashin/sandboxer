@@ -24,7 +24,7 @@ type DDAn struct {
 	APIKey          string       `yaml:"api_key"`
 	IgnoreTLSErrors bool         `yaml:"ignore_tls_errors"`
 	ClientUUID      string       `yaml:"-"`
-	Proxy           *Proxy       `yaml:"-"`
+	Proxy           *Proxy       `yaml:"-" gsetter:"-"`
 }
 
 func NewDefaultDDAn(proxy *Proxy) *DDAn {
@@ -43,6 +43,16 @@ func NewDefaultDDAn(proxy *Proxy) *DDAn {
 		IgnoreTLSErrors: false,
 		Proxy:           proxy,
 	}
+}
+
+func (d *DDAn) Update(newDDAn *DDAn) {
+	d.mx.Lock()
+	defer d.mx.Unlock()
+	newDDAn.mx.RLock()
+	defer newDDAn.mx.RUnlock()
+	d.URL = newDDAn.URL
+	d.APIKey = newDDAn.APIKey
+	d.IgnoreTLSErrors = newDDAn.IgnoreTLSErrors
 }
 
 func (d *DDAn) Analyzer() (*ddan.Client, error) {

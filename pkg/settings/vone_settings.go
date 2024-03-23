@@ -75,7 +75,7 @@ func (s *VisionOne) Update() {
 
 func (s *VisionOne) DetectDomain(token string) {
 	go func() {
-		logging.Debugf("Run Vision One domain detection")
+		logging.Debugf("Run Vision One domain detection %v", s.cancelDetect)
 		if s.cancelDetect != nil {
 			s.cancelDetect()
 		}
@@ -87,7 +87,11 @@ func (s *VisionOne) DetectDomain(token string) {
 			}
 			s.cancelDetect = nil
 		}()
-		domain := vone.DetectVisionOneDomain(ctx, token)
+		modifier, err := s.Conf.Proxy.Modifier()
+		if err != nil {
+			logging.LogError(err)
+		}
+		domain := vone.DetectVisionOneDomain(ctx, token, modifier)
 		if domain != "" {
 			s.visionOneDomains.SetSelected(domain)
 		}
@@ -100,6 +104,6 @@ func (s *VisionOne) Aquire() error {
 	if err != nil {
 		return err
 	}
-	s.Conf = c
+	s.Conf.Update(c)
 	return nil
 }

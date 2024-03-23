@@ -32,6 +32,7 @@ const (
 type PageIntro struct {
 	BasePage
 	sandboxRadio *widget.RadioGroup
+	proxyCheck   *widget.Check
 }
 
 var _ Page = &PageIntro{}
@@ -44,6 +45,9 @@ func (p *PageIntro) Next(previousPage PageIndex) PageIndex {
 	p.SavePrevious(previousPage)
 	if p.sandboxRadio == nil {
 		return pgVOSettings
+	}
+	if p.proxyCheck != nil && p.proxyCheck.Checked {
+		return pgProxy
 	}
 	switch p.sandboxRadio.Selected {
 	case SandboxVisionOne:
@@ -77,6 +81,16 @@ func (p *PageIntro) Content() fyne.CanvasObject {
 		[]string{SandboxVisionOne, SandboxDDAn},
 		nil,
 	)
+	p.sandboxRadio.Required = true
+	switch p.wiz.installer.config.SandboxType {
+	case config.SandboxVisionOne:
+		p.sandboxRadio.SetSelected(SandboxVisionOne)
+	case config.SandboxAnalyzer:
+		p.sandboxRadio.SetSelected(SandboxDDAn)
+	}
+
+	p.proxyCheck = widget.NewCheck("Use proxy", p.proxyChanged)
+	p.proxyCheck.Checked = p.wiz.installer.config.Proxy.Active
 
 	noteMarkdown := widget.NewRichTextFromMarkdown(NoteText)
 	noteMarkdown.Wrapping = fyne.TextWrapWord
@@ -98,10 +112,23 @@ func (p *PageIntro) Content() fyne.CanvasObject {
 		report,
 		chooseLabel,
 		p.sandboxRadio,
-		//container.NewHBox(coneLink),
+		p.proxyCheck,
 		noteMarkdown,
 		container.NewHBox(repoLink, licenseButton),
 	)
+}
+
+func (p *PageIntro) Run() {
+	fmt.Println("Run" + p.Name())
+	fmt.Println("Type ", p.wiz.installer.config.SandboxType.String())
+	//p.sandboxRadio.SetSelected(p.wiz.installer.config.SandboxType.String())
+}
+
+func (p *PageIntro) proxyChanged(checked bool) {
+	if p.proxyCheck == nil {
+		return
+	}
+	p.wiz.UpdatePagesList()
 }
 
 func (p *PageIntro) AquireData(installer *Installer) error {
@@ -113,6 +140,7 @@ func (p *PageIntro) AquireData(installer *Installer) error {
 	default:
 		return errors.New("Choose the Sandbox to be used")
 	}
+	p.wiz.installer.config.Proxy.Active = p.proxyCheck.Checked
 	return nil
 }
 

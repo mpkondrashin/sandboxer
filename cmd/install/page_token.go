@@ -9,6 +9,7 @@ Provide Vision One token and domain
 package main
 
 import (
+	"fmt"
 	"net/url"
 
 	"fyne.io/fyne/v2"
@@ -54,6 +55,7 @@ func (p *PageVOToken) Run() {
 	//		logging.Errorf("LoadConfig: %v", err)
 	//		dialog.ShowError(err, win)
 	//	}
+	fmt.Println("Run" + p.Name())
 }
 
 func (p *PageVOToken) AquireData(installer *Installer) error {

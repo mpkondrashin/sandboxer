@@ -6,7 +6,7 @@ func (s *VisionOne) GetToken() string {
 	return s.Token
 }
 
-func (s *VisionOne) SetToken(value string) {
+func (s *VisionOne) SetToken(value string ) {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 	s.Token = value
@@ -18,8 +18,9 @@ func (s *VisionOne) GetDomain() string {
 	return s.Domain
 }
 
-func (s *VisionOne) SetDomain(value string) {
+func (s *VisionOne) SetDomain(value string ) {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 	s.Domain = value
 }
+

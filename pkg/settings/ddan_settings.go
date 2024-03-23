@@ -119,6 +119,12 @@ func (s *DDAn) TestAnalyzer() {
 			SetAnalyzer(u, apiKey, s.ddanIgnoreTLSCheck.Checked)
 		analyzer.SetProtocolVersion(s.conf.GetProtocolVersion())
 
+		modifier, err := s.conf.Proxy.Modifier()
+		if err != nil {
+			logging.LogError(err)
+		}
+		analyzer.ModifyTransport(modifier)
+
 		ctxTimeout, cancelTimeout := context.WithTimeout(ctx, 5*time.Second)
 		defer cancelTimeout()
 		err = analyzer.TestConnection(ctxTimeout)
@@ -153,12 +159,12 @@ func (s *DDAn) Aquire() error {
 	if strings.TrimSpace(s.ddanURLEntry.Text) == "" {
 		return errors.New("Analyzer URL is empty")
 	}
-	s.conf.SetURL(s.GetDDAnURL())
 	apiKey := strings.TrimSpace(s.ddanAPIKeyEntry.Text)
 	if apiKey == "" {
 		return errors.New("Analyzer API Key is empty")
 	}
-	s.conf.APIKey = apiKey
-	s.conf.IgnoreTLSErrors = s.ddanIgnoreTLSCheck.Checked
+	s.conf.SetURL(s.GetDDAnURL())
+	s.conf.SetAPIKey(apiKey)
+	s.conf.SetIgnoreTLSErrors(s.ddanIgnoreTLSCheck.Checked)
 	return nil
 }
