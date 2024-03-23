@@ -9,7 +9,6 @@ Vision One sandbox settings widgets
 package settings
 
 import (
-	"fmt"
 	"net/url"
 	"sandboxer/pkg/config"
 
@@ -38,7 +37,6 @@ func NewProxy(conf *config.Proxy) *Proxy {
 }
 
 func (s *Proxy) Widget() fyne.CanvasObject {
-	fmt.Println("Proxy Widget ", s.Conf)
 	s.activeCheck = widget.NewCheck("Use proxy", func(check bool) {
 		s.AuthTypeChange(s.authTypeRadio.Selected)
 	})
@@ -60,7 +58,6 @@ func (s *Proxy) Widget() fyne.CanvasObject {
 	s.usernameEntry = widget.NewEntry()
 	s.usernameEntry.SetText(s.Conf.Username)
 	usernameFormItem := widget.NewFormItem("Username:", s.usernameEntry)
-	fmt.Println("Username: ", s.usernameEntry.Text)
 
 	s.passwordEntry = widget.NewEntry()
 	s.passwordEntry.SetText(s.Conf.Password)
