@@ -98,6 +98,11 @@ func (s *OptionsWindow) DDAnSettings(w *ModalWindow) fyne.CanvasObject {
 	s.ddanCheck.Checked = s.conf.SandboxType == config.SandboxAnalyzer
 	unregisterButton := widget.NewButton("Unregister", func() {
 		logging.Infof("Unregister from Analyzer")
+		if err := s.conf.DDAn.LoadClientUUID(); err != nil {
+			logging.LogError(err)
+			dialog.ShowError(err, w.win)
+			return
+		}
 		analyzer, err := s.conf.DDAn.Analyzer()
 		if err != nil {
 			logging.LogError(err)

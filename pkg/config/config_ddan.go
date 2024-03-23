@@ -103,6 +103,9 @@ func (d *DDAn) ProvideUUID() (err error) {
 }
 
 func (d *DDAn) LoadClientUUID() (err error) {
+	if d.ClientUUID != "" {
+		return nil
+	}
 	path, err := globals.AnalyzerClientUUIDFilePath()
 	if err != nil {
 		return err

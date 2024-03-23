@@ -9,6 +9,8 @@ Vision One sandbox settings widgets
 package settings
 
 import (
+	"errors"
+	"fmt"
 	"net/url"
 	"sandboxer/pkg/config"
 
@@ -130,10 +132,17 @@ func (s *Proxy) Update() {
 	//s.DetectDomain(s.tokenEntry.Text)
 }
 
+var ErrUsupportedScheme = errors.New("unsupported scheme")
+
 func (s *Proxy) Aquire() error {
 	u, err := url.Parse(s.urlEntry.Text)
 	if err != nil {
 		return err
+	}
+	switch u.Scheme {
+	case "socks", "http", "https":
+	default:
+		return fmt.Errorf("%s: %w", u.Scheme, ErrUsupportedScheme)
 	}
 	p := config.NewProxy(u)
 	p.Active = s.activeCheck.Checked

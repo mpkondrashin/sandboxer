@@ -26,7 +26,7 @@ import (
 	"sandboxer/pkg/xplatform"
 )
 
-//go:embed embed/*.tar.gz
+//go:embed embed/*.tar.gz embed/LICENSE
 var embedFS embed.FS
 
 type Installer struct {

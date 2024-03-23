@@ -48,7 +48,7 @@ func (r AuthType) String() string {
 var (
 	ErrUnknownAuthType   = errors.New("unknown auth type")
 	ErrMissingScheme     = errors.New("missing proxy scheme")
-	ErrMissingURL        = errors.New("missing proxy username")
+	ErrMissingURL        = errors.New("missing URL")
 	ErrMissingUsername   = errors.New("missing proxy username")
 	ErrMissingPassword   = errors.New("missing proxy password")
 	ErrMissingNTLMDomain = errors.New("missing NTLM domain")
@@ -209,21 +209,6 @@ func (p *Proxy) Modifier() (func(*http.Transport), error) {
 	return nil, ErrUnknownAuthType
 }
 
-/*
-func (p *Proxy) ChangeTransport(t *http.Transport) {
-
-	switch p.Type {
-	default:
-		fallthrough
-	case AuthTypeNone:
-		p.TransportNoAuth(t)
-	case AuthTypeBasic:
-		p.TransportBasic(t)
-	case AuthTypeNTLM:
-		p.TransportNTLM(t)
-	}
-}*/
-
 func (p *Proxy) TransportNoAuth(t *http.Transport) {
 	t.Proxy = http.ProxyURL(p.URL.URL)
 }
@@ -247,38 +232,3 @@ func (p *Proxy) TransportBasic(t *http.Transport) {
 
 func NullTransportModifier(*http.Transport) {
 }
-
-/*
-
-
-func (p *Proxy) ConfigureProxy() (TransportModifier, error) {
-	if p.URL.URL == nil {
-		return DummyTransportModifier, nil
-	}
-	proxy := config.NewProxy(p.URL.URL)
-	if p.Username == "" {
-		return proxy,
-	} viper.GetString(flagProxyUser) != "" {
-			if viper.GetString(flagProxyPassword) == "" {
-				log.Fatal("missing proxy password")
-			}
-			if viper.GetString(flagProxyDomain) != "" {
-				log.Println("Use NTLM proxy auth")
-				proxy.NTLMAuth(
-					viper.GetString(flagProxyUser),
-					viper.GetString(flagProxyPassword),
-					viper.GetString(flagProxyDomain),
-				)
-			} else {
-				log.Println("Use basic proxy auth")
-				proxy.BasicAuth(
-					viper.GetString(flagProxyUser),
-					viper.GetString(flagProxyPassword),
-				)
-			}
-		}
-		c.visionOne.AddTransportModifier(proxy.GetModifier())
-	}
-
-}
-*/

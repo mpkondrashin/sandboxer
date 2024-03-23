@@ -29,7 +29,7 @@ setup_$(GOOS)_$(GOARCH).zip: SandboxerInstall.app/Contents/MacOS/install
 #Sandboxer.dmg: output/SandboxerInstall.app/Contents/MacOS/install
 #	hdiutil create -volname "Sandboxer" -srcfolder "output" -ov -format UDZO "Sandboxer.dmg"
 
-SandboxerInstall.app/Contents/MacOS/install: $(wildcard cmd/install/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go  cmd/install/resource.go cmd/install/embed/sandboxer.tar.gz cmd/install/embed/sandboxer_submit.tar.gz
+SandboxerInstall.app/Contents/MacOS/install: $(wildcard cmd/install/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go  cmd/install/resource.go cmd/install/embed/sandboxer.tar.gz cmd/install/embed/sandboxer_submit.tar.gz cmd/install/embed/LICENSE
 	fyne package --os darwin --name SandboxerInstall --appID in.kondrash.sandboxer --appVersion $(VERSION) --appBuild $(BUILD) --icon ../../resources/icon.png --release --sourceDir ./cmd/install
 
 cmd/install/resource.go: resources/icon_transparent.png 
@@ -40,6 +40,9 @@ cmd/install/embed/sandboxer_submit.tar.gz: resources/sandboxer_submit.tar.gz
 
 cmd/install/embed/sandboxer.tar.gz: Sandboxer.app/Contents/MacOS/sandboxer Sandboxer.app/Contents/MacOS/submit Sandboxer.app/Contents/Resources/LICENSE Sandboxer.app/Contents/Resources/DroidSansHebrew-Regular.ttf
 	tar cfvz $@ Sandboxer.app
+
+cmd/install/embed/LICENSE: LICENSE
+	cp $< $@
 
 Sandboxer.app/Contents/Resources/LICENSE: LICENSE Sandboxer.app/Contents/MacOS/sandboxer
 	cp $< $@
