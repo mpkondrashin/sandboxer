@@ -111,6 +111,9 @@ type YAMLURL struct {
 
 // MarshalYAML implements the Marshaler interface of the yaml.v3 package for YAMLURL.
 func (u YAMLURL) MarshalYAML() (interface{}, error) {
+	if u.URL == nil {
+		return "", nil
+	}
 	return u.URL.String(), nil
 }
 
