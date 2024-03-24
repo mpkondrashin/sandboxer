@@ -59,8 +59,11 @@ cmd/setup/setup.syso: cmd/setup/setup.exe.manifest
 cmd/setup/embed/install.exe.gz: cmd/install/install.exe
 	gzip -fc $< > $@
 
-cmd/install/install.exe: cmd/install/embed/sandboxer.tar.gz $(wildcard cmd/install/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go resources/icon.png cmd/install/resource.go
+cmd/install/install.exe: cmd/install/embed/sandboxer.tar.gz cmd/install/embed/LICENSE $(wildcard cmd/install/*.go) $(wildcard pkg/*/*.go) pkg/globals/version.go resources/icon.png cmd/install/resource.go
 	fyne package --os $(GOOS) --name install --appID in.kondrash.sandboxer --appVersion $(VERSION) --appBuild $(BUILD) --icon ../../resources/icon.png --release --sourceDir ./cmd/install
+
+cmd/install/embed/LICENSE: LICENSE
+	cp $< $@
 
 cmd/install/resource.go: resources/icon_transparent.png 
 	fyne bundle --name ApplicationIcon --package main --output cmd/install/resource.go resources/icon_transparent.png 
