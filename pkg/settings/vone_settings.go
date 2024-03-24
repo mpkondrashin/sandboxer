@@ -91,7 +91,11 @@ func (s *VisionOne) DetectDomain(token string) {
 		if err != nil {
 			logging.LogError(err)
 		}
-		domain := vone.DetectVisionOneDomain(ctx, token, modifier)
+		domain, err := vone.DetectVisionOneDomain(ctx, token, modifier)
+		if err != nil {
+			logging.LogError(err)
+			return
+		}
 		if domain != "" {
 			s.visionOneDomains.SetSelected(domain)
 		}

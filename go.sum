@@ -272,6 +272,8 @@ github.com/mpkondrashin/vone v0.0.28 h1:Rskl7rpEOY94MfPPF+plBuY6yhB2tmEheIMB9xoB
 github.com/mpkondrashin/vone v0.0.28/go.mod h1:tYcqkQ5aJ1ct6To/RR563j87godZ+/Fn824VBwLPpXY=
 github.com/mpkondrashin/vone v0.0.29 h1:NPjZN48f7n24XMmwgBwDFfiYtdCg19IqKu9rOiWVTQc=
 github.com/mpkondrashin/vone v0.0.29/go.mod h1:tYcqkQ5aJ1ct6To/RR563j87godZ+/Fn824VBwLPpXY=
+github.com/mpkondrashin/vone v0.0.30 h1:oTK7EGUvVxutOIKuj/R5scpxk9s9yw0Rh47Ut1SOHmI=
+github.com/mpkondrashin/vone v0.0.30/go.mod h1:tYcqkQ5aJ1ct6To/RR563j87godZ+/Fn824VBwLPpXY=
 github.com/neelance/astrewrite v0.0.0-20160511093645-99348263ae86/go.mod h1:kHJEU3ofeGjhHklVoIGuVj85JJwZ6kWPaJwCIxgnFmo=
 github.com/neelance/sourcemap v0.0.0-20200213170602-2833bce08e4c/go.mod h1:Qr6/a/Q4r9LP1IltGz7tA7iOK1WonHEYhu1HRBA7ZiM=
 github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d h1:VhgPp6v9qf9Agr/56bj7Y/xa04UccTW04VP0Qed4vnQ=

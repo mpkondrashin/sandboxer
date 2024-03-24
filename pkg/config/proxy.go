@@ -107,77 +107,6 @@ func (a *AuthType) UnmarshalYAML(value *yaml.Node) error {
 	return nil
 }
 
-// Proxy Type
-
-type ProxyType int
-
-const (
-	ProxyTypeNone ProxyType = iota
-	ProxyTypeHTTP
-	ProxyTypeSocks
-)
-
-var ProxyTypeString = []string{
-	"None",
-	"HTTP",
-	"SOCKS",
-}
-
-func (r ProxyType) String() string {
-	return AuthTypeString[r]
-}
-
-func ProxyTypeFromString(s string) (ProxyType, error) {
-	for i, t := range ProxyTypeString {
-		if strings.EqualFold(t, s) {
-			return ProxyType(i), nil
-		}
-	}
-	return 0, fmt.Errorf("%w: %s", ErrUnknownProxyType, s)
-}
-
-// UnmarshalJSON implements the Unmarshaler interface of the json package for ProxyType.
-func (a *ProxyType) UnmarshalJSON(data []byte) error {
-	var v string
-	if err := json.Unmarshal(data, &v); err != nil {
-		return err
-	}
-	authType, err := ProxyTypeFromString(v)
-	if err != nil {
-		return err
-	}
-	*a = authType
-	return nil
-}
-
-// MarshalJSON implements the Marshaler interface of the json package for AuthType.
-func (a ProxyType) MarshalJSON() ([]byte, error) {
-	if a < 0 || a > ProxyTypeSocks {
-		return nil, fmt.Errorf("%d: %w", a, ErrUnknownProxyType)
-	}
-	return []byte(fmt.Sprintf("\"%s\"", a.String())), nil
-}
-
-// MarshalYAML implements the Marshaler interface of the yaml.v3 package for AuthType.
-func (s ProxyType) MarshalYAML() (interface{}, error) {
-	return s.String(), nil
-}
-
-// UnmarshalYAML implements the Unmarshaler interface of the yaml.v3 package for AuthType.
-func (a *ProxyType) UnmarshalYAML(value *yaml.Node) error {
-	var v string
-	err := value.Decode(&v)
-	if err != nil {
-		return err
-	}
-	proxyType, err := ProxyTypeFromString(v)
-	if err != nil {
-		return err
-	}
-	*a = proxyType
-	return nil
-}
-
 // YAMLURL
 /*
 type YAMLURL struct {
@@ -208,7 +137,7 @@ func (y *YAMLURL) UnmarshalYAML(value *yaml.Node) error {
 */
 type Proxy struct {
 	mx        sync.RWMutex `gsetter:"-"`
-	ProxyType ProxyType
+	Active    bool
 	Address   string
 	Port      int
 	AuthType  AuthType
@@ -221,7 +150,7 @@ type Proxy struct {
 
 func NewProxy() *Proxy {
 	return &Proxy{
-		ProxyType: ProxyTypeNone,
+		Active:    false,
 		AuthType:  AuthTypeNone,
 		Timeout:   30 * time.Second,
 		KeepAlive: 30 * time.Second,
@@ -233,7 +162,7 @@ func (p *Proxy) Update(newProxy *Proxy) {
 	defer p.mx.Unlock()
 	newProxy.mx.RLock()
 	defer newProxy.mx.RUnlock()
-	p.ProxyType = newProxy.ProxyType
+	p.Active = newProxy.Active
 	p.Address = newProxy.Address
 	p.Port = newProxy.Port
 	p.AuthType = newProxy.AuthType
@@ -242,24 +171,8 @@ func (p *Proxy) Update(newProxy *Proxy) {
 	p.Domain = newProxy.Domain
 }
 
-/*
-	func (p *Proxy) BasicAuth(Username string, Password string) *Proxy {
-		p.AuthType = AuthTypeBasic
-		p.Username = Username
-		p.Password = Password
-		return p
-	}
-
-	func (p *Proxy) NTLMAuth(Username string, Password string, Domain string) *Proxy {
-		p.AuthType = AuthTypeNTLM
-		p.Username = Username
-		p.Password = Password
-		p.Domain = Domain
-		return p
-	}
-*/
 func (p *Proxy) Modifier() (func(*http.Transport), error) {
-	if p.ProxyType == ProxyTypeNone {
+	if !p.Active {
 		return NullTransportModifier, nil
 	}
 	if p.Address == "" {
@@ -294,16 +207,16 @@ func NullTransportModifier(*http.Transport) {
 
 func (p *Proxy) TransportNoAuth(t *http.Transport) {
 	u := &url.URL{
-		Scheme: p.ProxyType.String(),
-		Host:   p.Address,
+		Scheme: "http",
+		Host:   fmt.Sprintf("%s:%d", p.Address, p.Port),
 	}
 	t.Proxy = http.ProxyURL(u)
 }
 
 func (p *Proxy) TransportBasic(t *http.Transport) {
 	u := &url.URL{
-		Scheme: p.ProxyType.String(),
-		Host:   p.Address,
+		Scheme: "http",
+		Host:   fmt.Sprintf("%s:%d", p.Address, p.Port),
 		User:   url.UserPassword(p.Username, p.Password),
 	}
 	t.Proxy = http.ProxyURL(u)
@@ -315,8 +228,8 @@ func (p *Proxy) TransportNTLM(t *http.Transport) {
 		KeepAlive: p.KeepAlive,
 	}
 	u := url.URL{
-		Scheme: p.ProxyType.String(),
-		Host:   p.Address,
+		Scheme: "http",
+		Host:   fmt.Sprintf("%s:%d", p.Address, p.Port),
 	}
 	ntlmDialContext := ntlm.NewNTLMProxyDialContext(dialer, u, p.Username, p.Password, p.Domain, nil)
 	t.Proxy = nil

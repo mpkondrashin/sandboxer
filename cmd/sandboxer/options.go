@@ -209,7 +209,7 @@ func (s *OptionsWindow) Save(w *ModalWindow) {
 	if err := s.proxySettings.Aquire(); err != nil {
 		err = fmt.Errorf("Proxy Setting: %v", err)
 		logging.LogError(err)
-		if s.conf.Proxy.ProxyType != config.ProxyTypeNone {
+		if s.conf.Proxy.Active {
 			dialog.ShowError(err, w.win)
 			return
 		}

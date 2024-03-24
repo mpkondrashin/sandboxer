@@ -12,7 +12,7 @@ require (
 	github.com/lutzky/go-bidi v0.0.0-20200803103754-215e47c2f5df
 	github.com/mpkondrashin/ddan v0.0.87
 	github.com/mpkondrashin/fileicon v0.0.7
-	github.com/mpkondrashin/vone v0.0.29
+	github.com/mpkondrashin/vone v0.0.30
 	github.com/virtuald/go-paniclog v0.0.0-20190812204905-43a7fa316459
 	golang.org/x/mod v0.16.0
 	golang.org/x/text v0.14.0
