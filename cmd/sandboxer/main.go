@@ -56,7 +56,10 @@ func NewSandboxingApp(conf *config.Configuration, channels *task.Channels, list 
 	//	if conf.SandboxType != config.SandboxVisionOne {
 	//		quotaWindow.MenuItem.Disabled = true
 	//	}
-	statsWindow := NewModalWindow(NewStatsWindow(conf), &a.TrayApp)
+
+	// remove Stats Window:
+	// statsWindow := NewModalWindow(NewStatsWindow(conf), &a.TrayApp)
+
 	a.submissionsWindow = NewModalWindow(NewSubmissionsWindow(
 		channels,
 		list,
@@ -89,7 +92,7 @@ func NewSandboxingApp(conf *config.Configuration, channels *task.Channels, list 
 		a.submissionsWindow.MenuItem,
 		fyne.NewMenuItemSeparator(),
 		quotaWindow.MenuItem,
-		statsWindow.MenuItem,
+		//statsWindow.MenuItem, // remove Stats Window:
 		a.optionsWindow.MenuItem,
 		fyne.NewMenuItemSeparator(),
 		a.updateWindow.MenuItem,
