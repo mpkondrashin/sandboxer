@@ -88,14 +88,14 @@ func TestLoad(t *testing.T) {
 		}
 	})
 	t.Run("proxy type", func(t *testing.T) {
-		actual := c.Proxy.Type
+		actual := c.Proxy.AuthType
 		expected := AuthTypeNTLM
 		if actual != expected {
 			t.Errorf("Expected %v, but got %v", expected, actual)
 		}
 	})
 	t.Run("v1 proxy type", func(t *testing.T) {
-		actual := c.VisionOne.Proxy.Type
+		actual := c.VisionOne.Proxy.AuthType
 		expected := AuthTypeNTLM
 		if actual != expected {
 			t.Errorf("Expected %v, but got %v", expected, actual)

@@ -168,7 +168,6 @@ func (s *OptionsWindow) GeneralSettings() fyne.CanvasObject {
 }
 
 func (s *OptionsWindow) Save(w *ModalWindow) {
-
 	s.conf.Ignore = nil
 	for _, ign := range strings.Split(s.ignoreEntry.Text, ",") {
 		ign := strings.TrimSpace(ign)
@@ -192,22 +191,28 @@ func (s *OptionsWindow) Save(w *ModalWindow) {
 	if err := s.voneSettings.Aquire(); err != nil {
 		err = fmt.Errorf("Vision One Setting: %v", err)
 		logging.LogError(err)
-		dialog.ShowError(err, w.win)
-		return
+		if s.conf.SandboxType == config.SandboxVisionOne {
+			dialog.ShowError(err, w.win)
+			return
+		}
 	}
 
 	if err = s.ddanSettings.Aquire(); err != nil {
 		err = fmt.Errorf("Analyzer Settings: %v", err)
 		logging.LogError(err)
-		dialog.ShowError(err, w.win)
-		return
+		if s.conf.SandboxType == config.SandboxAnalyzer {
+			dialog.ShowError(err, w.win)
+			return
+		}
 	}
 
 	if err := s.proxySettings.Aquire(); err != nil {
 		err = fmt.Errorf("Proxy Setting: %v", err)
 		logging.LogError(err)
-		dialog.ShowError(err, w.win)
-		return
+		if s.conf.Proxy.ProxyType != config.ProxyTypeNone {
+			dialog.ShowError(err, w.win)
+			return
+		}
 	}
 
 	if err := s.conf.Save(); err != nil {

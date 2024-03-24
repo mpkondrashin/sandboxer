@@ -90,7 +90,7 @@ func (p *PageIntro) Content() fyne.CanvasObject {
 	}
 
 	p.proxyCheck = widget.NewCheck("Use proxy", p.proxyChanged)
-	p.proxyCheck.Checked = p.wiz.installer.config.Proxy.Active
+	p.proxyCheck.Checked = p.wiz.installer.config.Proxy.ProxyType != config.ProxyTypeNone
 
 	noteMarkdown := widget.NewRichTextFromMarkdown(NoteText)
 	noteMarkdown.Wrapping = fyne.TextWrapWord
@@ -140,7 +140,9 @@ func (p *PageIntro) AquireData(installer *Installer) error {
 	default:
 		return errors.New("Choose the Sandbox to be used")
 	}
-	p.wiz.installer.config.Proxy.Active = p.proxyCheck.Checked
+	if p.proxyCheck.Checked {
+		p.wiz.installer.config.Proxy.ProxyType = config.ProxyTypeHTTP
+	}
 	return nil
 }
 

@@ -11,8 +11,9 @@ package settings
 import (
 	"errors"
 	"fmt"
-	"net/url"
 	"sandboxer/pkg/config"
+	"strconv"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -22,13 +23,15 @@ import (
 type Proxy struct {
 	Conf *config.Proxy
 
-	activeCheck   *widget.Check
-	urlEntry      *widget.Entry
-	authTypeRadio *widget.RadioGroup
-	usernameEntry *widget.Entry
-	passwordEntry *widget.Entry
-	domainEntry   *widget.Entry
-	form          *widget.Form
+	//activeCheck   *widget.Check
+	proxyTypeRadio *widget.RadioGroup
+	addressEntry   *widget.Entry
+	portEntry      *widget.Entry
+	authTypeRadio  *widget.RadioGroup
+	usernameEntry  *widget.Entry
+	passwordEntry  *widget.Entry
+	domainEntry    *widget.Entry
+	form           *widget.Form
 	// cancelDetect     context.CancelFunc
 }
 
@@ -39,22 +42,22 @@ func NewProxy(conf *config.Proxy) *Proxy {
 }
 
 func (s *Proxy) Widget() fyne.CanvasObject {
-	s.activeCheck = widget.NewCheck("Use proxy", func(check bool) {
-		s.AuthTypeChange(s.authTypeRadio.Selected)
-	})
-	s.activeCheck.Checked = s.Conf.Active
+	s.proxyTypeRadio = widget.NewRadioGroup(config.ProxyTypeString, s.AuthTypeChange)
+	s.proxyTypeRadio.Horizontal = true
+	s.proxyTypeRadio.SetSelected(s.Conf.ProxyType.String())
 
-	s.urlEntry = widget.NewEntry()
-	if s.Conf.URL.URL != nil {
-		s.urlEntry.SetText(s.Conf.URL.String())
-	}
-	urlFormItem := widget.NewFormItem("URL:", s.urlEntry)
-	urlFormItem.HintText = "scheme://address:port, where scheme = socks, http, https"
+	s.addressEntry = widget.NewEntry()
+	s.addressEntry.SetText(s.Conf.Address)
+	addressFormItem := widget.NewFormItem("Address:", s.addressEntry)
+	//addressFormItem.HintText = "scheme://address:port, where scheme = socks, http, https"
+	s.portEntry = widget.NewEntry()
+	s.portEntry.SetText(strconv.Itoa(s.Conf.Port))
+	portFormItem := widget.NewFormItem("Port:", s.portEntry)
 
 	s.authTypeRadio = widget.NewRadioGroup(config.AuthTypeString, s.AuthTypeChange)
 	s.authTypeRadio.Horizontal = true
 	s.authTypeRadio.Required = true
-	s.authTypeRadio.SetSelected(s.Conf.Type.String())
+	s.authTypeRadio.SetSelected(s.Conf.AuthType.String())
 	authTypeFormItem := widget.NewFormItem("Auth Type:", s.authTypeRadio)
 
 	s.usernameEntry = widget.NewEntry()
@@ -71,7 +74,8 @@ func (s *Proxy) Widget() fyne.CanvasObject {
 	domainFormItem := widget.NewFormItem("Domain:", s.domainEntry)
 
 	s.form = widget.NewForm(
-		urlFormItem,
+		addressFormItem,
+		portFormItem,
 		authTypeFormItem,
 		usernameFormItem,
 		passwordFormItem,
@@ -79,13 +83,20 @@ func (s *Proxy) Widget() fyne.CanvasObject {
 	)
 	s.AuthTypeChange(s.authTypeRadio.Selected)
 	return container.NewVBox(
-		s.activeCheck,
+		s.proxyTypeRadio,
 		s.form,
 	)
 }
 
 func (s *Proxy) AuthTypeChange(choice string) {
-	if s.activeCheck == nil {
+	fmt.Println("AuthTypeChange: ", choice)
+	if s.proxyTypeRadio == nil {
+		return
+	}
+	if s.addressEntry == nil {
+		return
+	}
+	if s.portEntry == nil {
 		return
 	}
 	if s.form == nil {
@@ -100,8 +111,9 @@ func (s *Proxy) AuthTypeChange(choice string) {
 	if s.domainEntry == nil {
 		return
 	}
-	if !s.activeCheck.Checked {
-		s.urlEntry.Disable()
+	if s.proxyTypeRadio.Selected == config.ProxyTypeNone.String() {
+		s.addressEntry.Disable()
+		s.portEntry.Disable()
 		s.authTypeRadio.Disable()
 		s.usernameEntry.Disable()
 		s.passwordEntry.Disable()
@@ -110,7 +122,8 @@ func (s *Proxy) AuthTypeChange(choice string) {
 		return
 	}
 	s.authTypeRadio.Enable()
-	s.urlEntry.Enable()
+	s.addressEntry.Enable()
+	s.portEntry.Enable()
 	switch choice {
 	case config.AuthTypeNone.String():
 		s.usernameEntry.Disable()
@@ -135,24 +148,28 @@ func (s *Proxy) Update() {
 var ErrUsupportedScheme = errors.New("unsupported scheme")
 
 func (s *Proxy) Aquire() error {
-	u, err := url.Parse(s.urlEntry.Text)
+	port, err := strconv.Atoi(strings.TrimSpace(s.portEntry.Text))
+	if err != nil {
+		return fmt.Errorf("wrong port number: %w", err)
+	}
+	proxyType, err := config.ProxyTypeFromString(s.proxyTypeRadio.Selected)
 	if err != nil {
 		return err
 	}
-	switch u.Scheme {
-	case "socks", "http", "https":
-	default:
-		return fmt.Errorf("%s: %w", u.Scheme, ErrUsupportedScheme)
-	}
-	p := config.NewProxy(u)
-	p.Active = s.activeCheck.Checked
-	p.Type, err = config.AuthTypeFromString(s.authTypeRadio.Selected)
+	authType, err := config.AuthTypeFromString(s.authTypeRadio.Selected)
 	if err != nil {
 		return err
 	}
-	p.Username = s.usernameEntry.Text
-	p.Password = s.passwordEntry.Text
-	p.Domain = s.domainEntry.Text
+	p := &config.Proxy{
+		ProxyType: proxyType,
+		Address:   strings.TrimSpace(s.addressEntry.Text),
+		Port:      port,
+		AuthType:  authType,
+		Username:  strings.TrimSpace(s.usernameEntry.Text),
+		Password:  strings.TrimSpace(s.passwordEntry.Text),
+		Domain:    strings.TrimSpace(s.domainEntry.Text),
+	}
+
 	_, err = p.Modifier()
 	if err != nil {
 		return err
