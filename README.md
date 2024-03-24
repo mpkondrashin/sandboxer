@@ -15,7 +15,9 @@
 ###  Minor Features
 - Auto notification and download when new version is released.
 - Store analysis results for two months (this is configurable option).
-- Show notifications when malicious file is detected
+- Show system notifications when malicious file is detected
+- Show Vision One sandbox quota
+- Support HTTP proxy server including basic and NTLM authentication
 
 Sandboxer submissions window:
 
@@ -66,8 +68,8 @@ Pick from Sandboxer system tray icon menu "Submissions" item. Right click on the
 ### Notifications
 On Windows if notifications are disabled not by Sandboxer Options window, but using Notification Center, then it is not possible to turn them back on.
 
-### Proxy
-For now proxy is not supported to connect to Vision One and/or Deep Discovery Analyzer
+### New version update
+When Sandboxer shows that new version is available, but upon downloading it shows error, it means that user has to wait several minutes and try again.
 
 ### Unregistration
 If  unregistration is not performed from Options dialog and/or during uninstallation Deep Discovery Analyzer connection was not available, then Sandboxer will be kept on the submitters list and the only option will be to remove it using Web UI. After installing Sandboxer once more, it will just register one more submitter.
