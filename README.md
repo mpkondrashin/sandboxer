@@ -74,6 +74,14 @@ When Sandboxer shows that new version is available, but upon downloading it show
 ### Unregistration
 If  unregistration is not performed from Options dialog and/or during uninstallation Deep Discovery Analyzer connection was not available, then Sandboxer will be kept on the submitters list and the only option will be to remove it using Web UI. After installing Sandboxer once more, it will just register one more submitter.
 
+### Install error
+If dufing files copy phase you encounter some error, try to return to previous install phase and try again.
+
+### Install crash
+To make sure that your installation completed, check sandboxer_setup_wizard.log log file genearted along the installer executable. Last line should contain the following "... INFO G0001 Close Logging ...". If not, try to run installer once more.
+
+
+
 #### Boxer picture
 Icon is taken from <a href="https://www.flaticon.com/free-icons/dog" title="dog icons">Dog icons created by Freepik - Flaticon</a>
 
