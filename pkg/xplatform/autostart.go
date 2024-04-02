@@ -59,7 +59,7 @@ var plistTemplate = `
           <key>Program</key>
           <string>%s</string>
           <key>KeepAlive</key>
-          <true/>
+          <false/>
 </dict>
 </plist>
 `

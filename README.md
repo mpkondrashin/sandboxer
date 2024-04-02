@@ -72,7 +72,7 @@ On Windows if notifications are disabled not by Sandboxer Options window, but us
 When Sandboxer shows that new version is available, but upon downloading it shows error, it means that user has to wait several minutes and try again.
 
 ### Unregistration
-If  unregistration is not performed from Options dialog and/or during uninstallation Deep Discovery Analyzer connection was not available, then Sandboxer will be kept on the submitters list and the only option will be to remove it using Web UI. After installing Sandboxer once more, it will just register one more submitter.
+If  unregistration is not performed from Options dialog and/or during uninstallation Deep Discovery Analyzer connection was not available, then Sandboxer will be kept on the submitters list and the only option will be to remove it using Analyzer Web UI. After installing Sandboxer once more, it will just register one more submitter.
 
 ### Install error
 If dufing files copy phase you encounter some error, try to return to previous install phase and try again.
@@ -80,7 +80,8 @@ If dufing files copy phase you encounter some error, try to return to previous i
 ### Install crash
 To make sure that your installation completed, check sandboxer_setup_wizard.log log file genearted along the installer executable. Last line should contain the following "... INFO G0001 Close Logging ...". If not, try to run installer once more.
 
-
+### macOS dark theme
+If macOS uses dark theme, it will be har to see some text on the UI
 
 #### Boxer picture
 Icon is taken from <a href="https://www.flaticon.com/free-icons/dog" title="dog icons">Dog icons created by Freepik - Flaticon</a>
