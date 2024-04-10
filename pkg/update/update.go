@@ -69,8 +69,12 @@ func LatestVersion(repo string) (string, error) {
 
 var ErrNotFound = errors.New("not found")
 
+func ReleaseURL(name, version, filename string) string {
+	return fmt.Sprintf("https://github.com/mpkondrashin/%s/releases/download/%s/%s", name, version, filename)
+}
+
 func DownloadRelease(version, filename, folder string, progress func(float32) error) error {
-	url := fmt.Sprintf("https://github.com/mpkondrashin/sandboxer/releases/download/%s/%s", version, filename)
+	url := ReleaseURL(globals.Name, version, filename)
 	client := http.Client{}
 	resp, err := client.Get(url)
 	if err != nil {
@@ -186,6 +190,11 @@ func NeedUpdateWindow() (bool, error) {
 	if cmp == 0 {
 		return false, nil
 	}
+	check := CheckRelease(version, fileName)
+	if check != nil {
+		logging.Debugf("NeedUpdateWindow:CheckRelease: %v", err)
+		return false, nil
+	}
 	u.Version = version
 	data, err = json.MarshalIndent(u, "", "    ")
 	if err != nil {
@@ -197,4 +206,18 @@ func NeedUpdateWindow() (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func CheckRelease(version, filename string) error {
+	url := ReleaseURL(globals.Name, version, filename)
+	client := http.Client{}
+	resp, err := client.Head(url)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("%s: %w", url, ErrNotFound)
+	}
+	defer resp.Body.Close()
+	return nil
 }

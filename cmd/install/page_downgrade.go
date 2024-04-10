@@ -47,7 +47,7 @@ func (p *PageDowngrade) Next(previousPage PageIndex) PageIndex {
 }
 
 func (p *PageDowngrade) Content() fyne.CanvasObject {
-	titleLabel := widget.NewLabel(fmt.Sprintf(globals.AppName+" %s version is already installed. Downgrade to %s?",
+	titleLabel := widget.NewLabel(fmt.Sprintf(globals.AppName+" %s version is already installed!\nDo you intend to downgrade to %s?",
 		p.wiz.installer.config.GetVersion(), globals.Version))
 
 	p.downgradeRadio = widget.NewRadioGroup([]string{abort, downgrade}, p.radioChanged)

@@ -8,7 +8,10 @@ Test updates
 */
 package update
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 const repo = "sandboxer"
 
@@ -26,6 +29,25 @@ func TestCheckUpdate(t *testing.T) {
 	})
 	if err != nil {
 		t.Error(err)
+	}
+}
+
+func TestCheckRelease(t *testing.T) {
+	version := "v100.100.100"
+	filename := "setup_darwin_arm64.zip"
+	err := CheckRelease(version, filename)
+	t.Logf("error: %v", err)
+	if err == nil {
+		t.Errorf("succeeded to download version %s", version)
+	}
+	if !errors.Is(err, ErrNotFound) {
+		t.Errorf("wrong error type: %v", err)
+	}
+	version = "v0.4.4"
+	err = CheckRelease(version, filename)
+	t.Logf("error: %v", err)
+	if err != nil {
+		t.Errorf("error checking existing version %s", version)
 	}
 
 }

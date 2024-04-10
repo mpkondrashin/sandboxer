@@ -37,7 +37,6 @@ func NewList() *TaskList {
 		Tasks:   make(map[ID]*Task),
 		changed: make(chan struct{}, 1000),
 	}
-	logging.Debugf("%p XXX List Lock (in New List)", l)
 	l.changed <- struct{}{}
 	return l
 }
