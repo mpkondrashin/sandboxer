@@ -33,7 +33,6 @@ type Installer struct {
 	appID     string
 	config    *config.Configuration
 	autostart bool
-	// uninstallScript *script.Script
 }
 
 func NewInstaller(appID string) (*Installer, error) {
@@ -51,26 +50,6 @@ func NewInstaller(appID string) (*Installer, error) {
 	}, nil
 }
 
-/*
-	func (i *Installer) __LoadConfig() (ModusOperandi, error) {
-		err := i.config.Load()
-		if err != nil {
-			if os.IsNotExist(err) {
-				return moInstall, nil
-			}
-			return moError, err
-		}
-		switch semver.Compare(globals.Version, i.config.GetVersion()) {
-		case -1:
-			return moDowngrade, nil
-		case 0:
-			return moReinstall, nil
-		case 1:
-			return moUpgrade, nil
-		}
-		return moError, errors.New("version error")
-	}
-*/
 func (i *Installer) SaveConfig() error {
 	logging.Debugf("Save config")
 	folder, err := i.ConfigFileFolder()
@@ -125,7 +104,6 @@ type InstallStage struct {
 
 func (i *Installer) Stages() []InstallStage {
 	return []InstallStage{
-		//{"Uninstall script", i.StageCreateUninstallScript},
 		{"Create folders", i.StageCreateFolders},
 		{"Generate config", i.StageCreateConfig},
 		{"Stop " + globals.AppName, i.StageStopProgram},
@@ -134,7 +112,6 @@ func (i *Installer) Stages() []InstallStage {
 		{"Extend Send To menu", i.StageExtendSendTo},
 		{"Add to Start menu", i.StageAddToStartMenu},
 		{"Install service", i.StageAutoStart},
-		//{"Stop Running " + globals.AppName, i.StageUninstall},
 	}
 }
 
@@ -184,23 +161,6 @@ func (i *Installer) UninstallStages() (stages []UninstallStage) {
 	return
 }
 
-//const uninstallScriptName = "uninstall"
-
-/*
-func (i *Installer) StageCreateUninstallScript() error {
-	logging.Debugf("Install: StageCreateUninstallScript")
-	scriptName := uninstallScriptName + script.Get().Extension()
-	logging.Debugf("Install: uninstall script name: %s", scriptName)
-	temp, err := os.MkdirTemp(os.TempDir(), globals.Name+"-uninstall-*")
-	if err != nil {
-		return fmt.Errorf("MkdirTemp: %w", err)
-	}
-	uninstallScriptPath := filepath.Join(temp, scriptName)
-	logging.Debugf("Install: uninstall script path: %s", uninstallScriptPath)
-	i.uninstallScript = script.New(uninstallScriptPath, script.Get().Comment("Uninstallation script"))
-	return nil
-}*/
-
 func (i *Installer) StageCreateFolders() error {
 	logging.Debugf("Install: StageCreateFolders")
 	logsFolder, err := globals.LogsFolder()
@@ -223,10 +183,6 @@ func (i *Installer) StageCreateFolders() error {
 		if err := os.MkdirAll(f, 0755); err != nil {
 			return err
 		}
-		/*err := i.uninstallScript.AddLine(script.Get().RemoveDir(f))
-		if err != nil {
-			return err
-		}*/
 	}
 	return nil
 }
@@ -241,11 +197,7 @@ func (i *Installer) StageCreateConfig() error {
 	if err := os.MkdirAll(folder, 0500); err != nil {
 		return fmt.Errorf("os.MkdirAll: %w", err)
 	}
-	//i.uninstallScript.AddLine(script.Get().RemoveDir(folder))
-	return i.config.Save() /*; err != nil {
-		return err
-	}
-	return i.uninstallScript.AddLine(script.Get().RemoveDir(i.config.GetFilePath()))*/
+	return i.config.Save()
 }
 
 func (i *Installer) StageStopProgram() error {
@@ -277,9 +229,6 @@ func (i *Installer) StageExtractFiles() error {
 	if err := extract.Untar(embedFS, targetPath, path); err != nil {
 		return err
 	}
-	//if err := i.uninstallScript.AddLine(script.Get().RemoveDir(targetPath)); err != nil {
-	//	return err
-	//}
 	logging.Debugf("Extracted: %s", targetPath)
 	return nil
 }
@@ -296,7 +245,6 @@ func (i *Installer) StageExtendSendTo() error {
 		return err
 	}
 	return err
-	//return i.uninstallScript.AddLine(script.Get().RemoveDir(path))
 }
 
 func (i *Installer) ExtendSendTo(dryRun bool) (string, error) {
@@ -326,24 +274,6 @@ func (i *Installer) StageAddToStartMenu() error {
 	}
 	_, err := i.AddToStartMenu(false)
 	return err
-	//if err != nil {
-	//	return err
-	//}
-	/*
-		appPath := filepath.Join(i.InstallFolder(), xplatform.ExecutableName(globals.Name))
-		_, err := xplatform.LinkToStartMenu(false, globals.AppName, globals.AppName, appPath, false)
-		if err != nil {
-			return err
-		}
-		scriptPath := i.Path(uninstallScriptName + script.Get().Extension())
-		path, err := xplatform.LinkToStartMenu(false, globals.AppName, "Uninstall", scriptPath, true)
-		if err != nil {
-			return err
-		}*/
-	//if err := i.uninstallScript.AddLine(script.Get().RemoveDir(path)); err != nil {
-	//	return err
-	//}
-	//return nil
 }
 
 func (i *Installer) AddToStartMenu(dryRun bool) (string, error) {
@@ -355,11 +285,6 @@ func (i *Installer) AddToStartMenu(dryRun bool) (string, error) {
 	if dryRun {
 		return filepath.Dir(path), nil
 	}
-	//scriptPath := i.Path(uninstallScriptName + script.Get().Extension())
-	//_, err = xplatform.LinkToStartMenu(false, globals.AppName, "Uninstall", scriptPath, true)
-	//if err != nil {
-	//		return "", err
-	//	}
 	return filepath.Dir(path), nil
 }
 
@@ -374,7 +299,6 @@ func (i *Installer) StageAutoStart() error {
 		return fmt.Errorf("AutoStart: %w", err)
 	}
 	return nil
-	//return i.uninstallScript.AddLine(script.Get().RemoveDir(path))
 }
 
 func (i *Installer) AutoStart(dryRun bool) (string, error) {
@@ -388,50 +312,3 @@ func (i *Installer) AutoStart(dryRun bool) (string, error) {
 	}
 	return path, err
 }
-
-/*func (i *Installer) StageUninstall() error {
-logging.Debugf("Install: Uninstall")
-pidPath, err := globals.PidFilePath()
-if err != nil {
-	return err
-}
-err = i.uninstallScript.AddLine(script.Get().RemoveDir(pidPath))
-if err != nil {
-	return err
-}
-if err := i.uninstallScript.AddLine(script.Get().StopProcess(pidPath)); err != nil {
-	return err
-}*/
-/*scriptName := uninstallScriptName + script.Get().Extension()
-var scriptPath string
-if xplatform.IsWindows() {
-	scriptPath = i.Path(scriptName)
-} else {
-	scriptPath, err = xplatform.ExecutablePath(xplatform.InstallFolder(), globals.AppName, scriptName)
-	if err != nil {
-		return err
-	}
-}
-/*if err := os.Rename(i.uninstallScript.FilePath, scriptPath); err != nil {
-	return err
-}*/
-// remove folder
-//return nil
-//}
-
-/*
-	func (m *Model) ConfigExists() (bool, error) {
-		path, err := m.configFilePath()
-		if err != nil {
-			return false, err
-		}
-		_, err = os.Stat(path)
-		if err == nil {
-			return true, nil
-		}
-		if os.IsNotExist(err) {
-			return false, nil
-		}
-		return false, err
-	}
-*/
