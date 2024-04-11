@@ -274,9 +274,10 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 	deleteTaskItem := fyne.NewMenuItem("This Task", func() {
 		s.DeleteTask(tsk)
 	})
-	deleteSameTasksItem := fyne.NewMenuItem("Same Tasks", func() {
+	deleteSameTasksItem := fyne.NewMenuItem("All "+tsk.RiskLevel.String()+" Tasks", func() {
 		s.DeleteSameTasks(tsk)
 	})
+	deleteSameTasksItem.Disabled = tsk.Channel != task.ChDone
 	deleteAllTasksItem := fyne.NewMenuItem("All Tasks", func() {
 		s.DeleteAllTasks()
 	})
