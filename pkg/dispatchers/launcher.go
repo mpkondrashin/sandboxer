@@ -73,7 +73,7 @@ func (l *Launcher) LoadTasks() {
 		logging.LogError(err)
 		return
 	}
-	logging.Debugf("LoadTasks %d", len(l.list.Tasks))
+	//logging.Debugf("LoadTasks %d", len(l.list.Tasks))
 	l.list.Process(func(ids []task.ID) {
 		for _, id := range ids {
 			err := l.list.Task(id, func(tsk *task.Task) error {

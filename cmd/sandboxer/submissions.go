@@ -271,27 +271,56 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 	recheckItem.Icon = theme.SearchReplaceIcon()
 
 	//recheckItem.Disabled = (tsk.RiskLevel != sandbox.RiskLevelError) && (tsk.RiskLevel != sandbox.RiskLevelUnsupported)
-	deleteTaskItem := fyne.NewMenuItem("Delete Task", func() {
+	deleteTaskItem := fyne.NewMenuItem("This Task", func() {
 		s.DeleteTask(tsk)
 	})
-	deleteTaskItem.Icon = theme.CancelIcon()
+	deleteSameTasksItem := fyne.NewMenuItem("Same Tasks", func() {
+		s.DeleteSameTasks(tsk)
+	})
+	deleteAllTasksItem := fyne.NewMenuItem("All Tasks", func() {
+		s.DeleteAllTasks()
+	})
+	deleteItem := fyne.NewMenuItem("Delete", nil)
+	deleteItem.Icon = theme.CancelIcon()
+	deleteItem.ChildMenu = fyne.NewMenu(globals.AppName,
+		deleteTaskItem,
+		deleteSameTasksItem,
+		deleteAllTasksItem,
+	)
+
 	return fyne.NewMenu(globals.AppName,
 		reportItem,
 		investigationItem,
 		recheckItem,
-		deleteTaskItem,
+		deleteItem,
 		deleteFileItem)
 }
 
 func (s *SubmissionsWindow) DeleteTask(tsk *task.Task) {
-	err := tsk.Delete()
+	err := s.list.DeleteTask(tsk)
 	if err != nil {
 		dialog.ShowError(err, s.win)
 		logging.LogError(err)
 		return
 	}
-	s.list.DelByID(tsk.Number)
-	//s.PopulateOnScreenTasks()
+}
+
+func (s *SubmissionsWindow) DeleteSameTasks(tsk *task.Task) {
+	err := s.list.DeleteSameTasks(tsk)
+	if err != nil {
+		dialog.ShowError(err, s.win)
+		logging.LogError(err)
+		return
+	}
+}
+
+func (s *SubmissionsWindow) DeleteAllTasks() {
+	err := s.list.DeleteAllTasks()
+	if err != nil {
+		dialog.ShowError(err, s.win)
+		logging.LogError(err)
+		return
+	}
 }
 
 func (s *SubmissionsWindow) RunOpen(path string) {

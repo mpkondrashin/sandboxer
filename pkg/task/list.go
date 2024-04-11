@@ -25,16 +25,18 @@ type TaskListInterface interface {
 	NewTask(path string) ID
 }
 
+//type TasksMap Map[ID, *Task]
+
 type TaskList struct {
 	mx         sync.RWMutex
 	changed    chan struct{}
-	Tasks      map[ID]*Task
+	Tasks      *Map[ID, *Task]
 	TasksCount ID
 }
 
 func NewList() *TaskList {
 	l := &TaskList{
-		Tasks:   make(map[ID]*Task),
+		Tasks:   new(Map[ID, *Task]),
 		changed: make(chan struct{}, 1000),
 	}
 	l.changed <- struct{}{}
@@ -50,7 +52,7 @@ func (l *TaskList) Updated() {
 }
 
 func (l *TaskList) Length() int {
-	return len(l.Tasks)
+	return l.Tasks.Length()
 }
 
 func (l *TaskList) Changes() chan struct{} {
@@ -69,39 +71,45 @@ func (l *TaskList) NewTask(taskType TaskType, path string) (ID, error) {
 	}
 	logging.Debugf("NewTask %d, %s", l.TasksCount, path)
 	tsk = NewTask(l.TasksCount, taskType, path)
-	l.Tasks[tsk.Number] = tsk
+	//l.Tasks[tsk.Number] = tsk
+	l.Tasks.Store(tsk.Number, tsk)
 	l.Updated()
 	l.TasksCount++
 	return tsk.Number, nil
 }
 
-func (l *TaskList) FindTask(path string) *Task {
+func (l *TaskList) FindTask(path string) (result *Task) {
 	// More sophisticated paths comparison algoritm could be used or
 	// os.SameFile function
-	for _, tsk := range l.Tasks {
+	l.Tasks.Range(func(id ID, tsk *Task) bool {
 		if path == tsk.Path {
-			return tsk
+			result = tsk
+			return false
 		}
-	}
-	return nil
+		return true
+	})
+	return
 }
 
 func (l *TaskList) DelByID(id ID) {
-	defer l.lockUnlock()() //mx.Lock()
-	logging.Debugf("DelByID, id = %d, len = %d", id, len(l.Tasks))
-	delete(l.Tasks, id)
+	//defer l.lockUnlock()() //mx.Lock()
+	//logging.Debugf("DelByID, id = %d, len = %d", id, len(l.Tasks))
+	l.Tasks.Delete(id)
 	l.Updated()
 }
 
 func (l *TaskList) Get(num ID) *Task {
-	defer l.lockUnlock()()
-	return l.Tasks[num]
+	//
+	// It was here:
+	//defer l.lockUnlock()()
+	tsk, _ := l.Tasks.Load(num)
+	return tsk
 }
 
 func (l *TaskList) Task(num ID, callback func(tsk *Task) error) error {
 	//defer l.lockUnlock()()
-	tsk := l.Tasks[num]
-	if tsk == nil {
+	tsk, ok := l.Tasks.Load(num)
+	if !ok {
 		return fmt.Errorf("missing task #%d", num)
 	}
 	//defer tsk.lockUnlock()()
@@ -118,39 +126,56 @@ func (l *TaskList) unlock() {
 	l.mx.Unlock()
 }
 
-func (l *TaskList) GetIDs() []ID {
-	keys := make([]ID, len(l.Tasks))
-	i := 0
-	for k := range l.Tasks {
-		keys[i] = k
-		i++
-	}
-	return keys
+func (l *TaskList) GetIDs() (keys []ID) {
+	l.Tasks.Range(func(id ID, _ *Task) bool {
+		keys = append(keys, id)
+		return true
+	})
+	return
 }
 
 func (l *TaskList) Process(callback func([]ID)) {
-	defer l.lockUnlock()()
+	//defer l.lockUnlock()()
 	keys := l.GetIDs()
 	sort.Slice(keys, func(i, j int) bool {
-		return l.Tasks[keys[i]].SubmitTime.After(l.Tasks[keys[j]].SubmitTime)
+		a, ok := l.Tasks.Load(keys[i])
+		if !ok {
+			return false
+		}
+		b, ok := l.Tasks.Load(keys[j])
+		if !ok {
+			return false
+		}
+		return a.SubmitTime.After(b.SubmitTime)
 	})
 	callback(keys)
 }
 
-func (l *TaskList) SortTasks() {
-	defer l.lockUnlock()()
-	keys := l.GetIDs()
-	sort.Slice(keys, func(i, j int) bool {
-		return l.Tasks[keys[i]].SubmitTime.After(l.Tasks[keys[j]].SubmitTime)
-	})
-}
+/*
+	func (l *TaskList) SortTasks() {
+		defer l.lockUnlock()()
+		keys := l.GetIDs()
+		sort.Slice(keys, func(i, j int) bool {
+			a, ok := l.Tasks.Load(keys[i])
+			if !ok {
+				return false
+			}
+			b, ok := l.Tasks.Load(keys[j])
+			if !ok {
+				return false
+			}
+			return a.SubmitTime.After(b.SubmitTime)
+		})
+	}
+*/
 
 func (l *TaskList) CountActiveTasks() (count int) {
-	for _, t := range l.Tasks {
-		if t.Channel != ChDone {
+	l.Tasks.Range(func(id ID, tsk *Task) bool {
+		if tsk.Channel != ChDone {
 			count++
 		}
-	}
+		return true
+	})
 	return
 }
 
@@ -181,7 +206,7 @@ func (l *TaskList) LoadTasks(keepDays int) error {
 		}
 		tsk.Number = l.TasksCount
 		l.TasksCount++
-		l.Tasks[tsk.Number] = tsk
+		l.Tasks.Store(tsk.Number, tsk)
 	}
 	return nil
 }
@@ -195,3 +220,42 @@ func (l *TaskList) Save(filePath string) error {
 	return os.WriteFile(filePath, data, 0644)
 }
 */
+
+func (l *TaskList) DeleteTask(tsk *Task) error {
+	err := tsk.Delete()
+	if err != nil {
+		return err
+	}
+	l.DelByID(tsk.Number)
+	return nil
+}
+
+func (l *TaskList) DeleteSameTasks(tsk *Task) (err error) {
+	l.Tasks.Range(func(id ID, t *Task) bool {
+		if t.Channel != tsk.Channel {
+			return true
+		}
+		if t.RiskLevel != tsk.RiskLevel {
+			return true
+		}
+		err = t.Delete()
+		if err != nil {
+			return false
+		}
+		l.DelByID(t.Number)
+		return true
+	})
+	return
+}
+
+func (l *TaskList) DeleteAllTasks() (err error) {
+	l.Tasks.Range(func(id ID, t *Task) bool {
+		err = t.Delete()
+		if err != nil {
+			return false
+		}
+		l.DelByID(t.Number)
+		return true
+	})
+	return
+}
