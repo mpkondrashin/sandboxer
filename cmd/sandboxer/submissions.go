@@ -270,7 +270,6 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 	recheckItem := fyne.NewMenuItem("Recheck File", recheckAction)
 	recheckItem.Icon = theme.SearchReplaceIcon()
 
-	//recheckItem.Disabled = (tsk.RiskLevel != sandbox.RiskLevelError) && (tsk.RiskLevel != sandbox.RiskLevelUnsupported)
 	deleteTaskItem := fyne.NewMenuItem("This Task", func() {
 		s.DeleteTask(tsk)
 	})
@@ -278,9 +277,8 @@ func (s *SubmissionsWindow) PopUpMenu(tsk *task.Task) *fyne.Menu {
 		s.DeleteSameTasks(tsk)
 	})
 	deleteSameTasksItem.Disabled = tsk.Channel != task.ChDone
-	deleteAllTasksItem := fyne.NewMenuItem("All Tasks", func() {
-		s.DeleteAllTasks()
-	})
+	deleteAllTasksItem := fyne.NewMenuItem("All Tasks", s.DeleteAllTasks)
+
 	deleteItem := fyne.NewMenuItem("Delete", nil)
 	deleteItem.Icon = theme.CancelIcon()
 	deleteItem.ChildMenu = fyne.NewMenu(globals.AppName,
