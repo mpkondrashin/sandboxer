@@ -131,7 +131,7 @@ func (s *OptionsWindow) VisionOneSettings() fyne.CanvasObject {
 }
 
 func (s *OptionsWindow) ProxySettings() fyne.CanvasObject {
-	labelTop := widget.NewLabel("Proxy settings")
+	labelTop := widget.NewLabel("Proxy Settings")
 
 	return container.NewVBox(labelTop, s.proxySettings.Widget())
 }
